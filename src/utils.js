@@ -76,4 +76,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {getFramesArray, fillArrayUniques, isFrameElement};
+module.exports = {getFramesArray, isFrameElement};

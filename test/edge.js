@@ -3,6 +3,23 @@ const setup = require('./index');
 describe('special cases', () => {
     beforeEach(setup);
 
+    it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin', async () => {
+        const result = await browser.executeAsync(function(debug, done) {
+            if (debug) debugger;
+            const ifr = document.createElement('iframe');
+            ifr.src = "https://x.com";
+            document.head.appendChild(ifr);
+            const zzz = ifr.contentWindow;
+            setTimeout(() => {
+                ifr.src = "about:blank";
+                setTimeout(() => {
+                    done(zzz.atob('R0xBWklFUl9JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c='));
+                }, 1000);
+            }, 1000);
+        }, false); // change to 'true' in order to break on the beginning of this test in the browser
+        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_GLAZIER');
+    });
+
     it('should fail to use atob of an iframe that was reattached to dom', async () => {
         const result = await browser.executeAsync(function(debug, done) {
             if (debug) debugger;

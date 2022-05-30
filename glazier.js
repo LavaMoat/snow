@@ -399,7 +399,6 @@ function fillArrayUniques(arr, items) {
 
 module.exports = {
   getFramesArray: getFramesArray,
-  fillArrayUniques: fillArrayUniques,
   isFrameElement: isFrameElement
 };
 
@@ -483,16 +482,12 @@ var natives = __webpack_require__(14)();
 
 var hook = __webpack_require__(228);
 
-var _require = __webpack_require__(648),
-    fillArrayUniques = _require.fillArrayUniques;
-
 var hookOpen = __webpack_require__(583);
 
 var hookLoadSetters = __webpack_require__(459);
 
 var hookDOMInserters = __webpack_require__(58);
 
-var wins = [];
 function onWin(cb) {
   var win = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window;
 
@@ -504,10 +499,6 @@ function onWin(cb) {
         onWin(cb, contentWindow);
       });
     });
-  }
-
-  if (!fillArrayUniques(wins, [win])) {
-    return;
   }
 
   hookOpen(win, hookWin);

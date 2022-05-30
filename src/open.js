@@ -1,4 +1,4 @@
-const natives = require('./natives')();
+const {getArguments} = require('./utils');
 
 // https://github.com/weizman/glazier/issues/2
 const ISSUE_2_SOLVED = false;
@@ -10,7 +10,7 @@ function hookOpen(win, cb) {
             return null;
         }
 
-        const args = natives['Array'].prototype.slice.call(arguments);
+        const args = getArguments(arguments);
         const opened = realOpen.apply(this, args);
         cb(opened);
         return opened;

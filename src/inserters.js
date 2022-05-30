@@ -1,6 +1,6 @@
-const natives = require('./natives')();
 const resetOnloadAttributes = require('./attributes');
-const {getFramesArray} = require('./utils');
+const {securely} = require('./securely');
+const {getFramesArray, getArguments} = require('./utils');
 const handleHTML = require('./html');
 const hook = require('./hook');
 
@@ -12,11 +12,11 @@ const map = {
 
 function getHook(win, native, cb) {
     return function() {
-        const args = natives['Array'].prototype.slice.call(arguments);
-        const element = natives['getParentElement'].call(this) || this;
+        const args = getArguments(arguments)
+        const element = securely(() => this.parentElementS || this);
         resetOnloadAttributes(win, args, cb);
         handleHTML(win, args);
-        const ret = native.apply(this, args);
+        const ret = securely(() => native.applyS(this, args));
         const frames = getFramesArray(element, false);
         hook(win, frames, cb);
         hook(win, args, cb);
@@ -29,11 +29,12 @@ function hookDOMInserters(win, cb) {
         const funcs = map[proto];
         for (let i = 0; i < funcs.length; i++) {
             const func = funcs[i];
-            const desc = natives['Object'].getOwnPropertyDescriptor(natives[proto].prototype, func);
-            const prop = desc.set ? 'set' : 'value';
-            const native = desc[prop];
-            desc[prop] = getHook(win, native, cb);
-            natives['Object'].defineProperty(win[proto].prototype, func, desc);
+            securely(() => {
+                const desc = ObjectS.getOwnPropertyDescriptor(win[proto].prototype, func);
+                const prop = desc.set ? 'set' : 'value';
+                desc[prop] = getHook(win, desc[prop], cb);
+                ObjectS.defineProperty(win[proto].prototype, func, desc);
+            });
         }
     }
 }

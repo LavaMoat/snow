@@ -1,45 +1,43 @@
-const natives = require('./natives')();
+const {securely} = require('./securely');
 
-function getNodeType(node) {
-    return natives['getNodeType'].call(node);
-}
-
-function getPrototypeAsString(node) {
-    return natives['toStringObject'].call(node);
+function getArguments(oldArgs) {
+    const args = [];
+    for (let i = 0; i < oldArgs.length; i++) {
+        args[i] = oldArgs[i];
+    }
+    return args;
 }
 
 function isTrustedHTML(node) {
-    return getPrototypeAsString(node) === '[object TrustedHTML]';
+    return securely(() => node.toStringS()) === '[object TrustedHTML]';
 }
 
 function getPrototype(node) {
-    switch (getPrototypeAsString(node)) {
+    switch (securely(() => node.toStringS())) {
         case '[object HTMLDocument]':
-            return natives['Document'];
+            return securely(() => window.Document);
         case '[object DocumentFragment]':
-            return natives['DocumentFragment'];
+            return securely(() => window.DocumentFragment);
         default:
-            return natives['Element'];
+            return securely(() => window.Element);
     }
 }
 
 function isFrameElement(element) {
-    const string = natives['toStringObject'].call(element);
-    return natives['Array'].prototype.includes.call([
+    return securely(() => [
         '[object HTMLIFrameElement]',
         '[object HTMLFrameElement]',
         '[object HTMLObjectElement]',
         '[object HTMLEmbedElement]',
-    ], string);
+    ].includesS(element.toStringS()));
 }
 
 function canNodeRunQuerySelector(node) {
-    const nodeType = getNodeType(node);
-    return natives['Array'].prototype.includes.call([
-        natives['Element'].prototype.ELEMENT_NODE,
-        natives['Element'].prototype.DOCUMENT_FRAGMENT_NODE,
-        natives['Element'].prototype.DOCUMENT_NODE,
-    ], nodeType);
+    return securely(() => [
+        ElementS.prototype.ELEMENT_NODE,
+        ElementS.prototype.DOCUMENT_FRAGMENT_NODE,
+        ElementS.prototype.DOCUMENT_NODE,
+    ].includesS(node.nodeTypeS));
 }
 
 function getFramesArray(element, includingParent) {
@@ -53,9 +51,9 @@ function getFramesArray(element, includingParent) {
         return frames;
     }
 
-    const list = getPrototype(element).prototype.querySelectorAll.call(element, 'iframe,frame,object,embed');
+    const list = securely(() => getPrototype(element).prototype.querySelectorAllS.call(element, 'iframe,frame,object,embed'));
 
-    fillArrayUniques(frames, natives['Array'].prototype.slice.call(list));
+    fillArrayUniques(frames, securely(() => Array.prototype.sliceS.call(list)));
     if (includingParent) {
         fillArrayUniques(frames, [element]);
     }
@@ -67,13 +65,15 @@ function fillArrayUniques(arr, items) {
     let isArrUpdated = false;
 
     for (let i = 0; i < items.length; i++) {
-        if (!natives['Array'].prototype.includes.call(arr, items[i])) {
-            natives['Array'].prototype.push.call(arr, items[i]);
-            isArrUpdated = true;
-        }
+        securely(() => {
+            if (!arr.includesS(items[i])) {
+                arr.pushS(items[i]);
+                isArrUpdated = true;
+            }
+        });
     }
 
     return isArrUpdated;
 }
 
-module.exports = {getFramesArray, isFrameElement};
+module.exports = {getArguments, getFramesArray, isFrameElement};

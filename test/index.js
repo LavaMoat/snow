@@ -4,7 +4,7 @@ const path = require('path');
 const glazier = fs.readFileSync(path.join(__dirname, '../glazier.prod.js')).toString();
 
 module.exports = async function setup(injectGLAZIER = true) {
-    await browser.url(`https://weizman.github.io/glazier-website/`);
+    await browser.url(`https://facebook.com/`);
 
     if (!injectGLAZIER) return;
 

@@ -1,11 +1,8 @@
 const natives = require('./natives')();
 const hook = require('./hook');
-const {fillArrayUniques} = require('./utils');
 const hookOpen = require('./open');
 const hookLoadSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
-
-const wins = [];
 
 export default function onWin(cb, win = window) {
     function hookWin(contentWindow) {
@@ -16,10 +13,6 @@ export default function onWin(cb, win = window) {
                 onWin(cb, contentWindow);
             });
         });
-    }
-
-    if (!fillArrayUniques(wins, [win])) {
-        return;
     }
 
     hookOpen(win, hookWin);

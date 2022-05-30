@@ -9,6 +9,15 @@ and manipulate that window as you like before anyone else in the page has the ch
 
 [Simple DEMO](https://weizman.github.io/glazier-website/) - You're challenged to pop an alert in this page 😉
 
+## *IMPORTANT NOTE*
+
+It has been discovered that [`open` API](https://developer.mozilla.org/en-US/docs/Web/API/Window/open) allows bypassing of Glazier in a way that is non trivial to patch.
+
+This is fully described in [issue #2](https://github.com/weizman/glazier/issues/2), and until this issue is resolved, `open` API
+is fully disabled by Glazier to prevent vulnerability. 
+
+If your web app depends on `open` API, you cannot use Glazier, until this issue is resolved and a solution is rolled out (if not, Glazier is still right for you)
+
 ## usage
 
 ```javascript

@@ -304,12 +304,19 @@ module.exports = getNatives;
 /***/ 583:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var natives = __webpack_require__(14)();
+var natives = __webpack_require__(14)(); // https://github.com/weizman/glazier/issues/2
+
+
+var ISSUE_2_SOLVED = false;
 
 function hookOpen(win, cb) {
   var realOpen = win.open;
 
   win.open = function () {
+    if (!ISSUE_2_SOLVED) {
+      return null;
+    }
+
     var args = natives['Array'].prototype.slice.call(arguments);
     var opened = realOpen.apply(this, args);
     cb(opened);

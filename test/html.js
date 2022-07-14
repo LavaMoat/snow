@@ -10,9 +10,9 @@ describe('test HTML injections', async () => {
             const div = document.createElement('div');
             div.innerHTML += '<iframe id="' + rnd + '"></iframe>';
             testdiv.appendChild(div);
-            return window[rnd].contentWindow.atob('R0xBWklFUl9JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
+            return window[rnd].contentWindow.atob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
-        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_GLAZIER');
+        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
     });
 
     it('should fail to use atob of an iframe created by outerHTML', async () => {
@@ -22,9 +22,9 @@ describe('test HTML injections', async () => {
             const div = document.createElement('div');
             testdiv.appendChild(div);
             div.outerHTML = '<div><iframe id="' + rnd + '"></iframe></div>';
-            return window[rnd].contentWindow.atob('R0xBWklFUl9JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
+            return window[rnd].contentWindow.atob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
-        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_GLAZIER');
+        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
     });
 
     it('should fail to use atob of an iframe created by insertAdjacentHTML', async () => {
@@ -34,9 +34,9 @@ describe('test HTML injections', async () => {
             const div = document.createElement('div');
             testdiv.appendChild(div);
             div.insertAdjacentHTML('beforebegin', '<div><iframe id="' + rnd + '"></iframe></div>');
-            return window[rnd].contentWindow.atob('R0xBWklFUl9JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
+            return window[rnd].contentWindow.atob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
-        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_GLAZIER');
+        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
     });
 
     it('should fail to use atob of a div\'s child iframe created by innerHTML', async () => {
@@ -46,9 +46,9 @@ describe('test HTML injections', async () => {
             const div = document.createElement('div');
             div.innerHTML += '<div><iframe id="' + rnd + '"></iframe></div>';
             testdiv.appendChild(div);
-            return window[rnd].contentWindow.atob('R0xBWklFUl9JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
+            return window[rnd].contentWindow.atob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
-        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_GLAZIER');
+        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
     });
 
     it('should fail to use atob of via js execution via innerHTML call', async () => {
@@ -57,8 +57,8 @@ describe('test HTML injections', async () => {
             const div = document.createElement('div');
             testdiv.appendChild(div);
             div.innerHTML += '<div><iframe onload="top.myatob = window[1].atob.bind(top)"></iframe></div>';
-            return (top.myatob || atob)('R0xBWklFUl9JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
+            return (top.myatob || atob)('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
-        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_GLAZIER');
+        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
     });
 });

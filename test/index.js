@@ -1,25 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 
-const glazier = fs.readFileSync(path.join(__dirname, '../glazier.prod.js')).toString();
+const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();
 
-module.exports = async function setup(injectGLAZIER = true) {
+module.exports = async function setup(injectSnow = true) {
     await browser.url(`https://facebook.com/`);
 
-    if (!injectGLAZIER) return;
+    if (!injectSnow) return;
 
-    // inject GLAZIER
+    // inject SNOW
     await browser.execute(function(js) {
         const script = document.createElement('script');
         script.textContent = js;
         document.head.appendChild(script);
-    }, glazier);
+    }, snow);
 
-    // use GLAZIER to disable atob
+    // use SNOW to disable atob
     await browser.execute(function() {
-        window.GLAZE((win) => {
+        window.SNOW((win) => {
             win.atob = function() {
-                return 'ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_GLAZIER';
+                return 'ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW';
             };
         }, window);
     });

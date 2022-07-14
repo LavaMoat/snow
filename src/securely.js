@@ -1,4 +1,4 @@
-const secure = require('../../natives-manager/src/index');
+const secure = require('@weizman/securely');
 
 const wins = [top];
 

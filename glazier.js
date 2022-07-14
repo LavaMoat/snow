@@ -134,7 +134,7 @@ var _require2 = __webpack_require__(648),
 
 var WARN_OF_ONLOAD_ATTRIBUTES = false; // DEBUG MODE ONLY!
 
-var WARN_OF_ONLOAD_ATTRIBUTES_MSG = 'WARN: Glazier: Removing html string iframe onload attribute:';
+var WARN_OF_ONLOAD_ATTRIBUTES_MSG = 'WARN: Snow: Removing html string iframe onload attribute:';
 
 function dropOnLoadAttributes(frames) {
   var _loop = function _loop(i) {
@@ -365,7 +365,7 @@ module.exports = hookLoadSetters;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var _require = __webpack_require__(648),
-    getArguments = _require.getArguments; // https://github.com/weizman/glazier/issues/2
+    getArguments = _require.getArguments; // https://github.com/weizman/snow/issues/2
 
 
 var ISSUE_2_SOLVED = false;
@@ -860,7 +860,7 @@ var __webpack_exports__ = {};
 
 
 (function (win) {
-  Object.defineProperty(win, 'GLAZE', {
+  Object.defineProperty(win, 'SNOW', {
     value: (_src_index__WEBPACK_IMPORTED_MODULE_0___default())
   });
 })(window);

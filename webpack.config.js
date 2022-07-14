@@ -6,7 +6,7 @@ module.exports = {
     mode: 'production',
     output: {
       path: `${__dirname}`,
-      filename: 'glazier.js',
+      filename: 'snow.js',
     },
     module: {
         rules: [

@@ -1,18 +1,21 @@
-# Let Glazier <img width=20 src="https://github.githubassets.com/images/icons/emoji/unicode/1fa9f.png"/> Install Your New Windows!
+# Snow ❄️
 
-### *register to the creation event of any newborn window in the webpage*
+> **S**ecuring **N**ested **O**wnership of **W**indows
 
-* *Read this on [github wiki](https://github.com/weizman/glazier/wiki/)* 📖 , *browse source code [repo](https://github.com/weizman/glazier)* 👨‍💻
+`Snow` aspires to standardize how to recursively own newborn windows within a browser webpage,
+from the context of the webpage itself.
 
-With `Glazier` you can for the first time manipulate any new window that comes to life
+* *Read this on [github wiki](https://github.com/weizman/snow/wiki/)* 📖 , *browse source code [repo](https://github.com/weizman/snow)* 👨‍💻
+
+With `Snow` you can for the first time manipulate any new window that comes to life
 within the webpage, and by that can determine how windows will be installed when created.
 
 Here's why this is important, and why this was never solved before:
 
 * [The Evolution of Code Execution in Websites](#the-evolution-of-code-execution-in-websites)
 * [The iFrames Headache](#the-iframes-headache)
-* [Glazier](#glazier)
-* [Why glazier solves a non trivial problem](#why-glazier-solves-a-non-trivial-problem)
+* [Snow](#snow)
+* [Why snow solves a non trivial problem](#why-snow-solves-a-non-trivial-problem)
    * [inserters](#inserters)
    * [listeners](#listeners)
    * [attributes](#attributes)
@@ -126,7 +129,7 @@ In order to do so, we'd have to successfully face a few challenges:
 Once we know how to do that, **we can start applying our monitoring fetch
 API hook on every new window in the webpage - and not just the top window.**
 
-## Glazier
+## Snow
 
 This problem is partly solved by some companies that implemented non-fully-hermetic solutions
 to meet their specific needs.
@@ -136,15 +139,15 @@ to serve as a standard solution to this problem, a solution that covers all poss
 scenarios and promises full control on every new window in the webpage.** (no private
 solution either in my opinion, but I can't commit to that statement)
 
-That's what `glazier` comes to solve - it is a simple js library with a very simple API
+That's what `snow` comes to solve - it is a simple js library with a very simple API
 that by giving a callback makes sure to execute it on every window that is initiated in the
 webpage before its creator gets to manipulate it.
 
-So considering again the example from above, with `glazier` you can protect fetch API
+So considering again the example from above, with `snow` you can protect fetch API
 once and for all:
 
 ```javascript
-window.GLAZE((win) => {
+window.SNOW((win) => {
   const realFetch = win.fetch;
   win.fetch = function(input, init) {
     console.log('attempt to use fetch API with the following arguments: ', input, init);
@@ -155,16 +158,16 @@ window.GLAZE((win) => {
 
 This will make sure to hook fetch API on every new window in the webpage!
 
-## Why glazier solves a non trivial problem
+## Why snow solves a non trivial problem
 
-implementing `glazier` is not a trivial thing to do mostly due to the necessity of the
+implementing `snow` is not a trivial thing to do mostly due to the necessity of the
 solution being hermetic.
 
 In order for it to fully work, all possible ways of creating new windows in the webpage
 must be hooked and taken care of, so there won't be any holes for attackers to exploit.
 
 Meaning, if there's even a single way for attackers to create a new window without going through
-`glazier`, then as said earlier - the whole idea is canceled.
+`snow`, then as said earlier - the whole idea is canceled.
 
 Either there's no way, or there's no solution.
 
@@ -183,7 +186,7 @@ iframeWindow.alert(iframeWindow !== window.top);
 ```
 
 handling inserters is rather simple, we simply overwrite the insertions APIs under the window
-to take care of a newborn window within it before passing it on to its creator (see [inserters.js](https://github.com/weizman/glazier/blob/main/src/inserters.js))
+to take care of a newborn window within it before passing it on to its creator (see [inserters.js](https://github.com/weizman/snow/blob/main/src/inserters.js))
 
 ### listeners
 
@@ -202,7 +205,7 @@ ifr.addEventListener('load', (e) => {
 document.head.appendChild(ifr);
 ```
 
-solution is similar as before, hook it as well (see [listeners.js](https://github.com/weizman/glazier/blob/main/src/listeners.js))
+solution is similar as before, hook it as well (see [listeners.js](https://github.com/weizman/snow/blob/main/src/listeners.js))
 
 ### attributes
 
@@ -231,7 +234,7 @@ document.head.appendChild(ifr);
 
 What we do here, is to strip down any load attributes and channel them through the
 mentioned above listeners hook, so we don't harm the original intention of attaching some
-load event listener to the element. (see [attributes.js](https://github.com/weizman/glazier/blob/main/src/attributes.js))
+load event listener to the element. (see [attributes.js](https://github.com/weizman/snow/blob/main/src/attributes.js))
 
 ### html
 
@@ -246,7 +249,7 @@ This is much harder to hook, because realizing there's a frame hidden in that
 string can be very tricky. The idea here is to turn that html string into an actual
 DOM tree, strip down any onload attributes that might be used to manipulate that frame,
 and then right after letting the real call modify the real DOM - take that newborn window
-and hook it as well (see [html.js](https://github.com/weizman/glazier/blob/main/src/html.js)).
+and hook it as well (see [html.js](https://github.com/weizman/snow/blob/main/src/html.js)).
 
 ### open
 
@@ -257,7 +260,7 @@ open("").alert.call(window, this.window !== window.top);
 ```
 
 Hooking that is very straight forward, simply handle the new window
-that is born out of this action before returning it (see [open.js](https://github.com/weizman/glazier/blob/main/src/open.js)).
+that is born out of this action before returning it (see [open.js](https://github.com/weizman/snow/blob/main/src/open.js)).
 
 ### natives
 
@@ -275,7 +278,7 @@ API, we must make sure the API we use cannot be hooked by an attacker, otherwise
 cancel our protection while its being executed.
 
 This is done by using a technique called `natives management` -
-learn more about it by seeing [natives.js](https://github.com/weizman/glazier/blob/main/src/natives.js).
+learn more about it by seeing [natives.js](https://github.com/weizman/snow/blob/main/src/natives.js).
 
 ## Contribute
 
@@ -284,7 +287,7 @@ hooked, however it is not yet production ready:
 
 ### Support
 
-Currently `glazier` is written to support chromium based browsers only, it was
+Currently `snow` is written to support chromium based browsers only, it was
 never tested on anything else.
 
 ### Performance
@@ -295,19 +298,19 @@ websites went smoothly while with some others it caused them some performance is
 ### Security
 
 Although this project takes the hermetic concept very seriously and massively tests for
-potential flaws, `glazier` might potentially still have flaws which might enable attackers
+potential flaws, `snow` might potentially still have flaws which might enable attackers
 to bypass its hooks.
 
-Bottom line - `glazier` might have security vulnerabilities!
+Bottom line - `snow` might have security vulnerabilities!
 
 ### Tests
 
-In order to assure security, there are many tests that verify that `glazier`
-is fully hermetic as promised - everything that `glazier` supports is fully tested.
+In order to assure security, there are many tests that verify that `snow`
+is fully hermetic as promised - everything that `snow` supports is fully tested.
 
-The tests mainly try to bypass `glazier` in any possible way.
+The tests mainly try to bypass `snow` in any possible way.
 
-If you found a vulnerability in `glazier`, open a PR with a test that demonstrates it.
+If you found a vulnerability in `snow`, open a PR with a test that demonstrates it.
 
 ### Help
 

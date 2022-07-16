@@ -5,8 +5,6 @@
 `Snow` aspires to standardize how to recursively own newborn windows within a browser webpage,
 from the context of the webpage itself.
 
-* *Read this on [github wiki](https://github.com/weizman/snow/wiki/)* 📖 , *browse source code [repo](https://github.com/weizman/snow)* 👨‍💻
-
 With `Snow` you can for the first time manipulate any new window that comes to life
 within the webpage, and by that can determine how windows will be installed when created.
 

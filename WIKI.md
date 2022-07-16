@@ -20,12 +20,8 @@ Here's why this is important, and why this was never solved before:
    * [html](#html)
    * [open](#open)
    * [natives](#natives)
-* [Contribute](#contribute)
-   * [Support](#support)
-   * [Performance](#performance)
-   * [Security](#security)
-   * [Tests](#tests)
-   * [Help](#help)
+* [Is it production ready?](#Is-it-production-ready?)
+   * [Reach out!](#Reach-out!)
 
 ## The Evolution of Code Execution in Websites
 

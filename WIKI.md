@@ -280,39 +280,27 @@ cancel our protection while its being executed.
 This is done by using a technique called `natives management` -
 learn more about it by seeing [natives.js](https://github.com/weizman/snow/blob/main/src/natives.js).
 
-## Contribute
+## Is it production ready?
 
-This project is an important POC aspiring to standardize how windows should be hermetically
-hooked, however it is not yet production ready:
+Even though the hard part of proving this is fully possible and fully secure is done, There
+are still some reasons why `Snow` is not production ready:
 
-### Support
+1. Browsers Support - All efforts went toward making sure `Snow` works smoothly with no errors on Chromium
+based browsers, it was not tested on Firefox/Safari. Help with applying support in these to this
+project is needed.
+2. Performance - Currently, in order for 
+Snow to remain fully secure, it harms the performance significantly. This is something
+that the Snow project can use a lot of help with, but until then, Snow harms the 
+performance in some websites (there will be however a version of `Snow` for extensions 
+that will cut performance almost entirely, but it will serve extension products only)
+3. Security - `Snow` is worthless if it's not fully secure. What mainly lead this project was to make sure
+it is hermetically secured, so it is very safe to use. 
+However, this project is new and any help on the security side will be much appreciated!
 
-Currently `snow` is written to support chromium based browsers only, it was
-never tested on anything else.
+### Reach out!
 
-### Performance
+Can you help with any of the above? Do you have any insights on possible solutions? 
+Want me to focus on specific aspects of this project? feel free to reach out in any way.
+Feedback or any help are highly appreciated!
 
-Achieving an hermetic solution costs in performance. Injecting this script into some major
-websites went smoothly while with some others it caused them some performance issues.
-
-### Security
-
-Although this project takes the hermetic concept very seriously and massively tests for
-potential flaws, `snow` might potentially still have flaws which might enable attackers
-to bypass its hooks.
-
-Bottom line - `snow` might have security vulnerabilities!
-
-### Tests
-
-In order to assure security, there are many tests that verify that `snow`
-is fully hermetic as promised - everything that `snow` supports is fully tested.
-
-The tests mainly try to bypass `snow` in any possible way.
-
-If you found a vulnerability in `snow`, open a PR with a test that demonstrates it.
-
-### Help
-
-Help with promoting any of the topics above is very much appreciated in order for this project
-to become production ready and reshape how hermetic window hooking should look like!
+I hope you'd find `Snow` as exciting as I do :)

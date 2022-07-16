@@ -25,7 +25,7 @@ is fully disabled by Snow to prevent vulnerability.
 
 If your web app depends on `open` API, you cannot use Snow, until this issue is resolved and a solution is rolled out (if not, Snow is still right for you)
 
-## usage
+## Usage
 
 ```javascript
 // API
@@ -40,7 +40,7 @@ window.SNOW((win) => {
 });
 ```
 
-## install
+## Install
 
 The latest `snow` [production version](https://raw.githubusercontent.com/weizman/snow/main/snow.prod.js) is included in the official repo
 and also in [upkg cdn](https://unpkg.com/@weizman/snow/snow.prod.js), so in order to
@@ -66,6 +66,15 @@ in order for it to play its role securely.
    `snow` may contain flaws that attackers might use to cancel its effect (for further
    explanation see [natives](https://weizman.github.io/snow-website#natives) section below)
 
+`SNOW` API can also be required as part of a bundle instead of a script tag:
+
+```
+yarn add @weizman/snow
+```
+
+```javascript
+const snow = require('@weizman/snow');
+```
 
 ## Contribute
 

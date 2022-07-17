@@ -1,6 +1,6 @@
 {
   "name": "snow",
-  "version": "1.0.6",
+  "version": "1.0.0",
   "description": "register to the creation event of any newborn window in the webpage",
   "main": "src/index.js",
   "devDependencies": {
@@ -29,12 +29,13 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/weizman/snow/issues"
   },
-  "homepage": "https://weizman.github.io/snow-website/",
+  "homepage": "https://weizman.github.io/snow/",
   "dependencies": {
-    "is-cross-origin": "^1.0.1"
+    "is-cross-origin": "^1.0.1",
+    "@weizman/securely": "^1.0.0"
   }
 }

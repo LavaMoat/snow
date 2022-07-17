@@ -59,10 +59,10 @@ in order for it to play its role securely.
 1. **It has to run as the first piece of javascript
    that runs in the webpage** - otherwise any other javascript code will have the ability to
    bypass `snow` and cancel its purpose completely (that's why `snow` can never overpower
-   extensions). In order to achieve that, script tag must load script 
+   extensions). In order to achieve that, when loading via a script tag it must load script 
    synchronously (do not use `async=true`!).
 
-2. **It must be served as-is** - If it goes through any bundlers that might change it,
+2. **It's better to be served as-is** - If it goes through any bundlers that might change it,
    `snow` may contain flaws that attackers might use to cancel its effect (for further
    explanation see [natives](https://weizman.github.io/snow-website#natives) section below)
 

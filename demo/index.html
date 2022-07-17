@@ -1,0 +1,86 @@
+<html>
+    <head>
+        <title> Snow ❄️ </title>
+        <script src="../snow.js"></script>
+    </head>
+    <body>
+        <h1> Snow ❄️ </h1>
+        <blockquote>
+            Snow aspires to standardize how to recursively own newborn windows within a browser webpage, from the context of the webpage itself.
+            <p>
+                <a href="https://github.com/weizman/snow">📖 Technical explanation</a>
+                <br>
+                <a href="https://github.com/weizman/snow">⚙️ Installation and usage</a>
+                <br>
+                <a href="https://github.com/weizman/snow">👩🏽‍💻 Source Code </a>
+                <br>
+                <a href="https://github.com/weizman/snow">💪🏻 Motivation behind this project </a>
+            </p>
+        </blockquote>
+
+        <h1> Demo 🧐 </h1>
+        <blockquote>
+            <h3><i>~ Can you bypass Snow?</i></h3>
+            <li>This website uses Snow to disable <code>alert</code> API completely</li>
+
+            <li>Use the textarea to run JS code that successfully shows an alert message</li>
+
+            <li>Try to do anything in your power to successfully do so</li>
+
+            <li>Click the button to execute your code (<code>⌘ + ↵</code> / <code>^ + ↵</code> will work too)</li>
+
+            <li>If you succeed - Congratz! You bypassed Snow (please, <a href="https://github.com/weizman/snow/issues/new?title=Snow+can+be+bypassed+with+...&body=Reproduce+by+running+<ENTER_POC_CODE_HERE>"> open an issue</a>, we'd love to improve its security)</li>
+            <br>
+            <button id="bt"> Run (<code>⌘ + ↵</code> / <code>^ + ↵</code>)</button>
+        </blockquote>
+
+
+        <br><br>
+
+        <textarea id="ta" style="width: 700px; height: 30%"></textarea>
+
+        <br><br>
+
+        <blockquote>
+            Funded by <a href="https://github.com/consensys">Consensys 💙</a>
+            <br>
+            Maintained and developed by <a href="https://github.com/MetaMask">MetaMask 🦊</a>
+            <br>
+            Invented and developed by <a href="https://weizman.github.io/">Gal Weizman 👋🏻</a>
+            <br>
+            Runs on <a href="https://weizman.github.io/">Securely 🔒️</a>
+        </blockquote>
+
+        <script>
+            function run(js) {
+                const script = document.createElement('script');
+                script.textContent = js;
+                document.head.appendChild(script);
+            }
+
+            SNOW((win) => {
+                win.alert = (msg) => {
+                    console.log('Snow: ', 'alert API is disabled, message is printed to console instead: ', msg);
+                }
+            });
+
+            ta.value = JSON.parse(localStorage.code || '""') ||
+                `
+            // attempt to bypass Snow and call "alert" native API (with no success!)
+
+            alert('THIS BYPASSES SNOW!');
+        `;
+
+            bt.addEventListener('click', () => {
+                localStorage.code = JSON.stringify(ta.value);
+                run(ta.value);
+            });
+
+            window.addEventListener('keydown', (event) => {
+                if ((event.ctrlKey || event.metaKey) && event.code === 'Enter') {
+                    bt.click();
+                }
+            })
+        </script>
+    </body>
+</html>

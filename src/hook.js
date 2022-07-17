@@ -1,11 +1,12 @@
+const {securely} = require('./securely');
 const isCrossOrigin = require('is-cross-origin');
-const natives = require('./natives')();
 const workaroundChromiumBug = require('./chromium_bug_workaround');
 
 function findWin(win, frameElement) {
     let frame = null, i = -1;
     while (win[++i]) {
-        if (!isCrossOrigin(win[i], win, natives['Object'])) {
+        const cross = securely(() => isCrossOrigin(win[i], win, win.ObjectS));
+        if (!cross) {
             if (win[i].frameElement === frameElement) {
                 frame = win[i];
                 break;

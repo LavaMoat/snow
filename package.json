@@ -1,5 +1,5 @@
 {
-  "name": "glazier",
+  "name": "snow",
   "version": "1.0.6",
   "description": "register to the creation event of any newborn window in the webpage",
   "main": "src/index.js",
@@ -25,15 +25,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/weizman/glazier.git"
+    "url": "git+https://github.com/weizman/snow.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/weizman/glazier/issues"
+    "url": "https://github.com/weizman/snow/issues"
   },
-  "homepage": "https://weizman.github.io/glazier-website/",
+  "homepage": "https://weizman.github.io/snow-website/",
   "dependencies": {
     "is-cross-origin": "^1.0.1"
   }

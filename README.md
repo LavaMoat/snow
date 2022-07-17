@@ -139,3 +139,11 @@ If it does, rebuild Snow with `WARN_OF_ONLOAD_ATTRIBUTES=true`, and reload the w
 If logs of found onload attributes appear, Snow might
 interrupt your website flow. If so, open an issue at:
 [https://github.com/weizman/snow/issues/new](https://github.com/weizman/snow/issues/new?title=Snow+disrupts+website+flow+when+removing+html+string+iframes+onload+attributes&body=Reproduce+by+running+snow+on+%3CWEBSITE_URL%3E)
+
+## Supporters
+
+Funded by [Consensys 💙](https://github.com/consensys)
+
+Maintained and developed by [MetaMask 🦊](https://github.com/MetaMask)
+
+Invented and developed by [Gal Weizman 👋🏻](https://weizman.github.io/)

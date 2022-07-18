@@ -12,7 +12,7 @@ This ability exists for extensions (with the `all_frames: true` property), but `
 to non extension javascript with the same privileges as the website.
 
 * [Test](https://weizman.github.io/snow/demo/) `Snow` for yourself with this live demo!
-* [Learn](https://github.com/weizman/snow/wiki) more about the motivation behind `Snow`
+* [Learn](https://github.com/weizman/snow/wiki/Introducing-Snow) more about the motivation behind `Snow`
 * `Snow` is still experimental ⚠️ - your [help](#Contribute) is highly appreciated!
 
 
@@ -64,7 +64,7 @@ in order for it to play its role securely.
 
 2. **It's better to be served as-is** - If it goes through any bundlers that might change it,
    `snow` may contain flaws that attackers might use to cancel its effect (for further
-   explanation see [natives](https://weizman.github.io/snow/wiki/#natives) section below)
+   explanation see [natives](https://github.com/weizman/snow/wiki/Introducing-Snow#natives) section)
 
 `SNOW` API can also be required as part of a bundle instead of a script tag:
 

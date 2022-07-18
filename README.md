@@ -13,7 +13,7 @@ to non extension javascript with the same privileges as the website.
 
 * [Test](https://weizman.github.io/snow/demo/) `Snow` for yourself with this live demo!
 * [Learn](https://github.com/weizman/snow/wiki/Introducing-Snow) more about the motivation behind `Snow`
-* `Snow` is still experimental ⚠️ - your [help](#Contribute) is highly appreciated!
+* `Snow` is still experimental ⚠️ - your [help](#contribute) is highly appreciated!
 
 
 ## *IMPORTANT NOTE*

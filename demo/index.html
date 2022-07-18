@@ -1,6 +1,7 @@
 <html>
     <head>
-        <title> Snow ❄️ </title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❄️</text></svg>">
+        <title> Snow </title>
         <script src="../snow.js"></script>
     </head>
     <body>
@@ -64,7 +65,7 @@
                 }
             });
 
-            ta.value = JSON.parse(localStorage.code || '""') ||
+            ta.value = JSON.parse(localStorage.code_snow || '""') ||
                 `
             // attempt to bypass Snow and call "alert" native API (with no success!)
 
@@ -72,7 +73,7 @@
         `;
 
             bt.addEventListener('click', () => {
-                localStorage.code = JSON.stringify(ta.value);
+                localStorage.code_snow = JSON.stringify(ta.value);
                 run(ta.value);
             });
 

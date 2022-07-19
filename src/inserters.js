@@ -16,7 +16,7 @@ function getHook(win, native, cb) {
         const element = securely(() => this.parentElementS || this);
         resetOnloadAttributes(win, args, cb);
         handleHTML(win, args);
-        const ret = securely(() => native.applyS(this, args));
+        const ret = securely(() => FunctionS.prototype.apply).call(native, this, args);
         const frames = getFramesArray(element, false);
         hook(win, frames, cb);
         hook(win, args, cb);

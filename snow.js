@@ -457,8 +457,8 @@ function getHook(win, native, cb) {
     resetOnloadAttributes(win, args, cb);
     handleHTML(win, args);
     var ret = securely(function () {
-      return native.applyS(_this, args);
-    });
+      return FunctionS.prototype.apply;
+    }).call(native, this, args);
     var frames = getFramesArray(element, false);
     hook(win, frames, cb);
     hook(win, args, cb);
@@ -689,10 +689,10 @@ function getFramesArray(element, includingParent) {
   }
 
   var list = securely(function () {
-    return getPrototype(element).prototype.querySelectorAllS.call(element, 'iframe,frame,object,embed');
+    return getPrototype(element).prototype.querySelectorAllS.callS(element, 'iframe,frame,object,embed');
   });
   fillArrayUniques(frames, securely(function () {
-    return Array.prototype.sliceS.call(list);
+    return Array.prototype.sliceS.callS(list);
   }));
 
   if (includingParent) {

@@ -51,9 +51,11 @@ function getFramesArray(element, includingParent) {
         return frames;
     }
 
-    const list = securely(() => getPrototype(element).prototype.querySelectorAllS.call(element, 'iframe,frame,object,embed'));
+    const list = securely(() => {
+        return getPrototype(element).prototype.querySelectorAllS.callS(element, 'iframe,frame,object,embed');
+    });
 
-    fillArrayUniques(frames, securely(() => Array.prototype.sliceS.call(list)));
+    fillArrayUniques(frames, securely(() => Array.prototype.sliceS.callS(list)));
     if (includingParent) {
         fillArrayUniques(frames, [element]);
     }

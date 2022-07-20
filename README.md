@@ -11,8 +11,8 @@ injected to DOM, before its creator gets a hold on it.
 This ability exists for extensions (with the `all_frames: true` property), but `Snow` brings it
 to non extension javascript with the same privileges as the website.
 
-* [Test](https://weizman.github.io/snow/demo/) `Snow` for yourself with this live demo!
-* [Learn](https://github.com/weizman/snow/wiki/Introducing-Snow) more about the motivation behind `Snow`
+* [Test](https://lavamoat.github.io/snow/demo/) `Snow` for yourself with this live demo!
+* [Learn](https://github.com/lavamoat/snow/wiki/Introducing-Snow) more about the motivation behind `Snow`
 * `Snow` is still experimental ⚠️ - your [help](#contribute) is highly appreciated!
 
 
@@ -20,7 +20,7 @@ to non extension javascript with the same privileges as the website.
 
 It has been discovered that [`open` API](https://developer.mozilla.org/en-US/docs/Web/API/Window/open) allows bypassing of Snow in a way that is non-trivial to patch.
 
-This is fully described in [issue #2](https://github.com/weizman/snow/issues/2), and until this issue is resolved, `open` API
+This is fully described in [issue #2](https://github.com/lavamoat/snow/issues/2), and until this issue is resolved, `open` API
 is fully disabled by Snow to prevent vulnerability. 
 
 If your web app depends on `open` API, you cannot use Snow, until this issue is resolved and a solution is rolled out (if not, Snow is still right for you)
@@ -42,7 +42,7 @@ window.SNOW((win) => {
 
 ## Install
 
-The latest `snow` [production version](https://raw.githubusercontent.com/weizman/snow/main/snow.prod.js) is included in the official repo
+The latest `snow` [production version](https://raw.githubusercontent.com/lavamoat/snow/main/snow.prod.js) is included in the official repo
 and also in [upkg cdn](https://unpkg.com/@weizman/snow/snow.prod.js), so in order to
 install `snow` in the website, simply place it wherever and serve it to the website as-is:
 
@@ -64,7 +64,7 @@ in order for it to play its role securely.
 
 2. **It's better to be served as-is** - If it goes through any bundlers that might change it,
    `snow` may contain flaws that attackers might use to cancel its effect (for further
-   explanation see [natives](https://github.com/weizman/snow/wiki/Introducing-Snow#natives) section)
+   explanation see [natives](https://github.com/lavamoat/snow/wiki/Introducing-Snow#natives) section)
 
 `SNOW` API can also be required as part of a bundle instead of a script tag:
 
@@ -138,7 +138,7 @@ If it does, rebuild Snow with `WARN_OF_ONLOAD_ATTRIBUTES=true`, and reload the w
 
 If logs of found onload attributes appear, Snow might
 interrupt your website flow. If so, open an issue at:
-[https://github.com/weizman/snow/issues/new](https://github.com/weizman/snow/issues/new?title=Snow+disrupts+website+flow+when+removing+html+string+iframes+onload+attributes&body=Reproduce+by+running+snow+on+%3CWEBSITE_URL%3E)
+[https://github.com/lavamoat/snow/issues/new](https://github.com/lavamoat/snow/issues/new?title=Snow+disrupts+website+flow+when+removing+html+string+iframes+onload+attributes&body=Reproduce+by+running+snow+on+%3CWEBSITE_URL%3E)
 
 ## Supporters
 
@@ -148,4 +148,4 @@ Maintained and developed by [MetaMask 🦊](https://github.com/MetaMask)
 
 Invented and developed by [Gal Weizman 👋🏻](https://weizman.github.io/)
 
-Runs on [Securely 🔒](https://github.com/weizman/securely)
+Runs on [Securely 🔒](https://github.com/lavamoat/securely)

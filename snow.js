@@ -551,7 +551,7 @@ module.exports = hookLoadSetters;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var _require = __webpack_require__(648),
-    getArguments = _require.getArguments; // https://github.com/weizman/snow/issues/2
+    getArguments = _require.getArguments; // https://github.com/lavamoat/snow/issues/2
 
 
 var ISSUE_2_SOLVED = false;

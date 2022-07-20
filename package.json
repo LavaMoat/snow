@@ -25,15 +25,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/weizman/snow.git"
+    "url": "git+https://github.com/lavamoat/snow.git"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/weizman/snow/issues"
+    "url": "https://github.com/lavamoat/snow/issues"
   },
-  "homepage": "https://weizman.github.io/snow/",
+  "homepage": "https://lavamoat.github.io/snow/",
   "dependencies": {
     "is-cross-origin": "^1.0.1",
     "@weizman/securely": "^1.0.0"

@@ -1,6 +1,6 @@
 {
   "name": "@weizman/snow",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "register to the creation event of any newborn window in the webpage",
   "main": "src/index.js",
   "devDependencies": {

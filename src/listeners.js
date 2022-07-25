@@ -13,22 +13,24 @@ function callOnload(that, onload, args) {
     }
 }
 
-function getHook(win, addEventListener, cb) {
-    return function() {
-        const args = getArguments(arguments);
-        const index = typeof args[0] === 'function' ? 0 : 1;
-        const onload = args[index];
-        args[index] = function listener() {
-            hook(win, [this], cb);
-            const args = getArguments(arguments);
-            callOnload(this, onload, args);
-        };
-        return securely(() => this.addEventListenerS(args[0], args[1], args[2], args[3]));
+function getHook(win, cb) {
+    return function(type, listener, options) {
+        let onload = listener;
+        if (type === 'load') {
+            onload = function () {
+                hook(win, [this], cb);
+                const args = getArguments(arguments);
+                callOnload(this, listener, args);
+            };
+        }
+        return securely(() => this.addEventListenerS(type, onload, options));
     }
 }
 
 function hookLoadSetters(win, cb) {
-    securely(() => ObjectS.defineProperty(win.EventTarget.prototype, 'addEventListener', {value: getHook(win, addEventListener, cb)}));
+    securely(() => {
+        ObjectS.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getHook(win, cb) });
+    });
 }
 
 module.exports = hookLoadSetters;

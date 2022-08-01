@@ -1,4 +1,5 @@
 const {securely} = require('./securely');
+const {toString, nodeType} = require('./natives');
 
 function getArguments(oldArgs) {
     const args = [];
@@ -9,20 +10,18 @@ function getArguments(oldArgs) {
 }
 
 function isTrustedHTML(node) {
-    return securely(() => node.toStringS()) === '[object TrustedHTML]';
+    return toString(node) === '[object TrustedHTML]';
 }
 
 function getPrototype(node) {
-    return securely(() => {
-        switch (node.toStringS()) {
-            case '[object HTMLDocument]':
-                return DocumentS;
-            case '[object DocumentFragment]':
-                return DocumentFragmentS;
-            default:
-                return ElementS;
-        }
-    });
+    switch (toString(node)) {
+        case '[object HTMLDocument]':
+            return DocumentS;
+        case '[object DocumentFragment]':
+            return DocumentFragmentS;
+        default:
+            return ElementS;
+    }
 }
 
 function isFrameElement(element) {
@@ -31,7 +30,7 @@ function isFrameElement(element) {
         '[object HTMLFrameElement]',
         '[object HTMLObjectElement]',
         '[object HTMLEmbedElement]',
-    ].includesS(element.toStringS()));
+    ].includesS(toString(element)));
 }
 
 function canNodeRunQuerySelector(node) {
@@ -39,7 +38,7 @@ function canNodeRunQuerySelector(node) {
         ElementS.prototype.ELEMENT_NODE,
         ElementS.prototype.DOCUMENT_FRAGMENT_NODE,
         ElementS.prototype.DOCUMENT_NODE,
-    ].includesS(node.nodeTypeS));
+    ].includesS(nodeType(node)));
 }
 
 function getFramesArray(element, includingParent) {
@@ -57,7 +56,7 @@ function getFramesArray(element, includingParent) {
         return getPrototype(element).prototype.querySelectorAll.call(element, 'iframe,frame,object,embed');
     });
 
-    fillArrayUniques(frames, securely(() => Array.prototype.sliceS.callS(list)));
+    fillArrayUniques(frames, securely(() => ArrayS.prototype.slice.call(list)));
     if (includingParent) {
         fillArrayUniques(frames, [element]);
     }

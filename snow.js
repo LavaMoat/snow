@@ -91,7 +91,7 @@ module.exports = function objects(win, nativeWin, shouldAllowNativesAccess, obje
 /***/ 311:
 /***/ ((module) => {
 
-function zzz(func, shouldAllowNativesAccess) {
+function method(func, shouldAllowNativesAccess) {
     return function(a, b, c, d, e) {
         if (!shouldAllowNativesAccess()) {
             return;
@@ -101,7 +101,7 @@ function zzz(func, shouldAllowNativesAccess) {
     };
 }
 
-function xxx(nativeWin, desc, shouldAllowNativesAccess) {
+function descriptor(nativeWin, desc, shouldAllowNativesAccess) {
     const value = desc.value;
     const set = desc.set || (() => {});
     const get = desc.get || (() => value);
@@ -114,13 +114,13 @@ function xxx(nativeWin, desc, shouldAllowNativesAccess) {
     const getter = nativeWin['Function'].prototype.call.bind(get);
     const setter = nativeWin['Function'].prototype.call.bind(set);
 
-    desc.get = zzz(getter, shouldAllowNativesAccess);
-    desc.set = zzz(setter, shouldAllowNativesAccess);
+    desc.get = method(getter, shouldAllowNativesAccess);
+    desc.set = method(setter, shouldAllowNativesAccess);
 
     return desc;
 }
 
-function yyy(win, nativeWin, done, shouldAllowNativesAccess, prototype, property) {
+function prototype(win, nativeWin, done, shouldAllowNativesAccess, prototype, property) {
     let proto = win[prototype];
     const arr = [];
     while (true) {
@@ -135,7 +135,7 @@ function yyy(win, nativeWin, done, shouldAllowNativesAccess, prototype, property
     while (arr.length) {
         const proto = nativeWin['Array'].prototype.pop.call(arr);
         if (!done[proto.constructor.name] || !nativeWin['Array'].prototype.includes.call(done[proto.constructor.name], property)) {
-            nativeWin['Object'].defineProperty(proto, property + 'S', xxx(nativeWin, desc, shouldAllowNativesAccess));
+            nativeWin['Object'].defineProperty(proto, property + 'S', descriptor(nativeWin, desc, shouldAllowNativesAccess));
             done[proto.constructor.name] = done[proto.constructor.name] || [];
             nativeWin['Array'].prototype.push.call(done[proto.constructor.name], property);
         }
@@ -144,9 +144,9 @@ function yyy(win, nativeWin, done, shouldAllowNativesAccess, prototype, property
 
 module.exports = function prototypes(win, nativeWin, shouldAllowNativesAccess, prototypes) {
     const done = new nativeWin.Object();
-    for (const prototype in prototypes) {
-        const native = nativeWin[prototype];
-        nativeWin['Object'].defineProperty(win, prototype + 'S', {
+    for (const proto in prototypes) {
+        const native = nativeWin[proto];
+        nativeWin['Object'].defineProperty(win, proto + 'S', {
             configurable: false,
             get: function() {
                 if (!shouldAllowNativesAccess()) {
@@ -156,12 +156,12 @@ module.exports = function prototypes(win, nativeWin, shouldAllowNativesAccess, p
                 return native;
             }
         });
-        done[prototype] = done[prototype] || [];
-        const properties = prototypes[prototype];
+        done[proto] = done[proto] || [];
+        const properties = prototypes[proto];
         for (let i = 0; i < properties.length; i++) {
             const property = properties[i];
-            yyy(win, nativeWin, done, shouldAllowNativesAccess, prototype, property);
-            yyy(win, nativeWin, done, shouldAllowNativesAccess, prototype + 'S', property);
+            prototype(win, nativeWin, done, shouldAllowNativesAccess, proto, property);
+            prototype(win, nativeWin, done, shouldAllowNativesAccess, proto + 'S', property);
         }
     }
 }
@@ -190,10 +190,6 @@ module.exports = function specifics(win, nativeWin, shouldAllowNativesAccess) {
 /***/ 586:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const {
-  securely
-} = __webpack_require__(733);
-
 const hook = __webpack_require__(228);
 
 const {
@@ -201,23 +197,28 @@ const {
   isFrameElement
 } = __webpack_require__(648);
 
+const {
+  getOnload,
+  setOnload,
+  removeAttribute,
+  addEventListener
+} = __webpack_require__(14);
+
 function resetOnloadAttribute(win, frame, cb) {
   if (!isFrameElement(frame)) {
     return;
   }
 
-  securely(() => {
-    const onload = frame.onloadS;
+  const onload = getOnload(frame);
 
-    if (onload) {
-      frame.onloadS = null;
-      frame.removeAttributeS('onload');
-      frame.addEventListenerS('load', function () {
-        hook(win, [this], cb);
-      });
-      frame.onloadS = onload;
-    }
-  });
+  if (onload) {
+    setOnload(frame, null);
+    removeAttribute(frame, 'onload');
+    addEventListener(frame, 'load', function () {
+      hook(win, [this], cb);
+    });
+    setOnload(frame, onload);
+  }
 }
 
 function resetOnloadAttributes(win, args, cb) {
@@ -321,6 +322,11 @@ const {
   getFramesArray
 } = __webpack_require__(648);
 
+const {
+  removeAttribute,
+  getAttribute
+} = __webpack_require__(14);
+
 const WARN_OF_ONLOAD_ATTRIBUTES = false; // DEBUG MODE ONLY!
 
 const WARN_OF_ONLOAD_ATTRIBUTES_MSG = 'WARN: Snow: Removing html string iframe onload attribute:';
@@ -330,14 +336,14 @@ function dropOnLoadAttributes(frames) {
     const frame = frames[i];
 
     if (WARN_OF_ONLOAD_ATTRIBUTES) {
-      const onload = frame.getAttributeS('onload');
+      const onload = getAttribute(frame, 'onload');
 
       if (onload) {
         console.warn(WARN_OF_ONLOAD_ATTRIBUTES_MSG, frame, onload);
       }
     }
 
-    frame.removeAttributeS('onload');
+    removeAttribute(frame, 'onload');
   }
 }
 
@@ -379,6 +385,10 @@ const hookLoadSetters = __webpack_require__(459);
 
 const hookDOMInserters = __webpack_require__(58);
 
+const {
+  addEventListener
+} = __webpack_require__(14);
+
 let callback;
 
 module.exports = function onWin(cb) {
@@ -386,11 +396,9 @@ module.exports = function onWin(cb) {
 
   function hookWin(contentWindow) {
     onWin(cb, contentWindow);
-    securely(() => {
-      contentWindow.frameElement.addEventListenerS('load', function () {
-        hook(win, [this], function () {
-          onWin(cb, contentWindow);
-        });
+    addEventListener(contentWindow.frameElement, 'load', function () {
+      hook(win, [this], function () {
+        onWin(cb, contentWindow);
       });
     });
   }
@@ -481,6 +489,10 @@ const {
   getArguments
 } = __webpack_require__(648);
 
+const {
+  addEventListener
+} = __webpack_require__(14);
+
 function callOnload(that, onload, args) {
   if (onload) {
     if (onload.handleEvent) {
@@ -503,7 +515,7 @@ function getHook(win, cb) {
       };
     }
 
-    return securely(() => this.addEventListenerS(type, onload, options));
+    return addEventListener(this, type, onload, options);
   };
 }
 
@@ -516,6 +528,62 @@ function hookLoadSetters(win, cb) {
 }
 
 module.exports = hookLoadSetters;
+
+/***/ }),
+
+/***/ 14:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const {
+  securely
+} = __webpack_require__(733);
+
+function nodeType(node) {
+  return natives.nodeType.call(node);
+}
+
+function toString(object) {
+  return natives.toString.call(object);
+}
+
+function getOnload(element) {
+  return natives.getOnload.call(element);
+}
+
+function setOnload(element, onload) {
+  return natives.setOnload.call(element, onload);
+}
+
+function removeAttribute(element, attribute) {
+  return natives.removeAttribute.call(element, attribute);
+}
+
+function getAttribute(element) {
+  return natives.getAttribute.call(element);
+}
+
+function addEventListener(element, event, listener, options) {
+  return natives.addEventListener.call(element, event, listener, options);
+}
+
+const natives = securely(() => ({
+  nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
+  toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
+  getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
+  setOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').set,
+  getAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'getAttribute').value,
+  removeAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'removeAttribute').value,
+  addEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'addEventListener').value
+}));
+module.exports = {
+  nodeType,
+  toString,
+  getOnload,
+  setOnload,
+  removeAttribute,
+  getAttribute,
+  addEventListener
+};
 
 /***/ }),
 
@@ -601,6 +669,11 @@ const {
   securely
 } = __webpack_require__(733);
 
+const {
+  toString,
+  nodeType
+} = __webpack_require__(14);
+
 function getArguments(oldArgs) {
   const args = [];
 
@@ -612,30 +685,28 @@ function getArguments(oldArgs) {
 }
 
 function isTrustedHTML(node) {
-  return securely(() => node.toStringS()) === '[object TrustedHTML]';
+  return toString(node) === '[object TrustedHTML]';
 }
 
 function getPrototype(node) {
-  return securely(() => {
-    switch (node.toStringS()) {
-      case '[object HTMLDocument]':
-        return DocumentS;
+  switch (toString(node)) {
+    case '[object HTMLDocument]':
+      return DocumentS;
 
-      case '[object DocumentFragment]':
-        return DocumentFragmentS;
+    case '[object DocumentFragment]':
+      return DocumentFragmentS;
 
-      default:
-        return ElementS;
-    }
-  });
+    default:
+      return ElementS;
+  }
 }
 
 function isFrameElement(element) {
-  return securely(() => ['[object HTMLIFrameElement]', '[object HTMLFrameElement]', '[object HTMLObjectElement]', '[object HTMLEmbedElement]'].includesS(element.toStringS()));
+  return securely(() => ['[object HTMLIFrameElement]', '[object HTMLFrameElement]', '[object HTMLObjectElement]', '[object HTMLEmbedElement]'].includesS(toString(element)));
 }
 
 function canNodeRunQuerySelector(node) {
-  return securely(() => [ElementS.prototype.ELEMENT_NODE, ElementS.prototype.DOCUMENT_FRAGMENT_NODE, ElementS.prototype.DOCUMENT_NODE].includesS(node.nodeTypeS));
+  return securely(() => [ElementS.prototype.ELEMENT_NODE, ElementS.prototype.DOCUMENT_FRAGMENT_NODE, ElementS.prototype.DOCUMENT_NODE].includesS(nodeType(node)));
 }
 
 function getFramesArray(element, includingParent) {
@@ -652,7 +723,7 @@ function getFramesArray(element, includingParent) {
   const list = securely(() => {
     return getPrototype(element).prototype.querySelectorAll.call(element, 'iframe,frame,object,embed');
   });
-  fillArrayUniques(frames, securely(() => Array.prototype.sliceS.callS(list)));
+  fillArrayUniques(frames, securely(() => ArrayS.prototype.slice.call(list)));
 
   if (includingParent) {
     fillArrayUniques(frames, [element]);

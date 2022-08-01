@@ -1,6 +1,7 @@
 const hook = require('./hook');
 const {securely} = require('./securely');
 const {getArguments} = require('./utils');
+const {addEventListener} = require('./natives');
 
 function callOnload(that, onload, args) {
     if (onload) {
@@ -23,7 +24,7 @@ function getHook(win, cb) {
                 callOnload(this, listener, args);
             };
         }
-        return securely(() => this.addEventListenerS(type, onload, options));
+        return addEventListener(this, type, onload, options);
     }
 }
 

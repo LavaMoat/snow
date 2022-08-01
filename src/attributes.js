@@ -1,23 +1,21 @@
-const {securely} = require('./securely');
 const hook = require('./hook');
 const {getFramesArray, isFrameElement} = require('./utils');
+const {getOnload, setOnload, removeAttribute, addEventListener} = require('./natives');
 
 function resetOnloadAttribute(win, frame, cb) {
     if (!isFrameElement(frame)) {
         return;
     }
 
-    securely(() => {
-        const onload = frame.onloadS;
-        if (onload) {
-            frame.onloadS = null;
-            frame.removeAttributeS('onload');
-            frame.addEventListenerS('load', function() {
-                hook(win, [this], cb);
-            });
-            frame.onloadS = onload;
-        }
-    });
+    const onload = getOnload(frame);
+    if (onload) {
+        setOnload(frame, null);
+        removeAttribute(frame, 'onload');
+        addEventListener(frame, 'load', function() {
+            hook(win, [this], cb);
+        });
+        setOnload(frame, onload);
+    }
 }
 
 function resetOnloadAttributes(win, args, cb) {

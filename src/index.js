@@ -3,17 +3,16 @@ const hook = require('./hook');
 const hookOpen = require('./open');
 const hookLoadSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
+const {addEventListener} = require('./natives');
 
 let callback;
 
 module.exports = function onWin(cb, win = window) {
     function hookWin(contentWindow) {
         onWin(cb, contentWindow);
-        securely(() => {
-            contentWindow.frameElement.addEventListenerS('load', function() {
-                hook(win, [this], function() {
-                    onWin(cb, contentWindow);
-                });
+        addEventListener(contentWindow.frameElement, 'load', function() {
+            hook(win, [this], function() {
+                onWin(cb, contentWindow);
             });
         });
     }

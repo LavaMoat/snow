@@ -7,7 +7,7 @@ describe('test DOM attributes', async () => {
         const result = await browser.execute(function(debug) {
             if (debug) debugger;
             const ifr = document.createElement('iframe');
-            ifr.setAttribute('onload', 'top.myatob = window[1].atob.bind(top);');
+            ifr.setAttribute('onload', 'top.myatob = this.contentWindow.atob.bind(top);');
             testdiv.appendChild(ifr);
             return top.myatob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
@@ -18,7 +18,7 @@ describe('test DOM attributes', async () => {
         const result = await browser.execute(function(debug) {
             if (debug) debugger;
             const ifr = document.createElement('iframe');
-            ifr.setAttributeNS('', 'onload', 'top.myatob = window[1].atob.bind(top);');
+            ifr.setAttributeNS('', 'onload', 'top.myatob = this.contentWindow.atob.bind(top);');
             testdiv.appendChild(ifr);
             return top.myatob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
@@ -29,7 +29,7 @@ describe('test DOM attributes', async () => {
         const result = await browser.execute(function(debug) {
             if (debug) debugger;
             const ifr = document.createElement('iframe');
-            document.body.setAttributeNS('', 'onload', 'top.myatob = window[1].atob.bind(top);');
+            document.body.setAttributeNS('', 'onload', 'top.myatob = this.contentWindow.atob.bind(top);');
             ifr.setAttributeNode(document.body.getAttributeNode('onload').cloneNode())
             testdiv.appendChild(ifr);
             return top.myatob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
@@ -41,7 +41,7 @@ describe('test DOM attributes', async () => {
         const result = await browser.execute(function(debug) {
             if (debug) debugger;
             const ifr = document.createElement('iframe');
-            document.body.setAttributeNS('', 'onload', 'top.myatob = window[1].atob.bind(top);');
+            document.body.setAttributeNS('', 'onload', 'top.myatob = this.contentWindow.atob.bind(top);');
             ifr.setAttributeNodeNS(document.body.getAttributeNode('onload').cloneNode())
             testdiv.appendChild(ifr);
             return top.myatob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
@@ -53,7 +53,7 @@ describe('test DOM attributes', async () => {
         const result = await browser.execute(function(debug) {
             if (debug) debugger;
             const ifr = document.createElement('iframe');
-            document.body.setAttributeNS('', 'onload', 'top.myatob = window[1].atob.bind(top);');
+            document.body.setAttributeNS('', 'onload', 'top.myatob = this.contentWindow.atob.bind(top);');
             ifr.attributes.setNamedItem(document.body.getAttributeNode('onload').cloneNode())
             testdiv.appendChild(ifr);
             return top.myatob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
@@ -65,7 +65,7 @@ describe('test DOM attributes', async () => {
         const result = await browser.execute(function(debug) {
             if (debug) debugger;
             const ifr = document.createElement('iframe');
-            document.body.setAttributeNS('', 'onload', 'top.myatob = window[1].atob.bind(top);');
+            document.body.setAttributeNS('', 'onload', 'top.myatob = this.contentWindow.atob.bind(top);');
             ifr.attributes.setNamedItemNS(document.body.getAttributeNode('onload').cloneNode())
             testdiv.appendChild(ifr);
             return top.myatob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');

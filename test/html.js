@@ -56,7 +56,7 @@ describe('test HTML injections', async () => {
             if (debug) debugger;
             const div = document.createElement('div');
             testdiv.appendChild(div);
-            div.innerHTML += '<div><iframe onload="top.myatob = window[1].atob.bind(top)"></iframe></div>';
+            div.innerHTML += '<div><iframe onload="top.myatob = this.contentWindow.atob.bind(top)"></iframe></div>';
             return (top.myatob || atob)('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
         expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');

@@ -27,8 +27,8 @@ function handleHTML(win, args) {
             const template = document.createElementS('template');
             template.innerHTMLS = html;
             const frames = getFramesArray(template.contentS, false);
-            args[i] = template.innerHTMLS;
             dropOnLoadAttributes(frames);
+            args[i] = template.innerHTMLS;
         });
     }
 }

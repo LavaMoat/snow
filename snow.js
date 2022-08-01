@@ -91,7 +91,7 @@ module.exports = function objects(win, nativeWin, shouldAllowNativesAccess, obje
 /***/ 311:
 /***/ ((module) => {
 
-function zzz(func, shouldAllowNativesAccess) {
+function method(func, shouldAllowNativesAccess) {
     return function(a, b, c, d, e) {
         if (!shouldAllowNativesAccess()) {
             return;
@@ -101,7 +101,7 @@ function zzz(func, shouldAllowNativesAccess) {
     };
 }
 
-function xxx(nativeWin, desc, shouldAllowNativesAccess) {
+function descriptor(nativeWin, desc, shouldAllowNativesAccess) {
     const value = desc.value;
     const set = desc.set || (() => {});
     const get = desc.get || (() => value);
@@ -114,13 +114,13 @@ function xxx(nativeWin, desc, shouldAllowNativesAccess) {
     const getter = nativeWin['Function'].prototype.call.bind(get);
     const setter = nativeWin['Function'].prototype.call.bind(set);
 
-    desc.get = zzz(getter, shouldAllowNativesAccess);
-    desc.set = zzz(setter, shouldAllowNativesAccess);
+    desc.get = method(getter, shouldAllowNativesAccess);
+    desc.set = method(setter, shouldAllowNativesAccess);
 
     return desc;
 }
 
-function yyy(win, nativeWin, done, shouldAllowNativesAccess, prototype, property) {
+function prototype(win, nativeWin, done, shouldAllowNativesAccess, prototype, property) {
     let proto = win[prototype];
     const arr = [];
     while (true) {
@@ -135,7 +135,7 @@ function yyy(win, nativeWin, done, shouldAllowNativesAccess, prototype, property
     while (arr.length) {
         const proto = nativeWin['Array'].prototype.pop.call(arr);
         if (!done[proto.constructor.name] || !nativeWin['Array'].prototype.includes.call(done[proto.constructor.name], property)) {
-            nativeWin['Object'].defineProperty(proto, property + 'S', xxx(nativeWin, desc, shouldAllowNativesAccess));
+            nativeWin['Object'].defineProperty(proto, property + 'S', descriptor(nativeWin, desc, shouldAllowNativesAccess));
             done[proto.constructor.name] = done[proto.constructor.name] || [];
             nativeWin['Array'].prototype.push.call(done[proto.constructor.name], property);
         }
@@ -144,9 +144,9 @@ function yyy(win, nativeWin, done, shouldAllowNativesAccess, prototype, property
 
 module.exports = function prototypes(win, nativeWin, shouldAllowNativesAccess, prototypes) {
     const done = new nativeWin.Object();
-    for (const prototype in prototypes) {
-        const native = nativeWin[prototype];
-        nativeWin['Object'].defineProperty(win, prototype + 'S', {
+    for (const proto in prototypes) {
+        const native = nativeWin[proto];
+        nativeWin['Object'].defineProperty(win, proto + 'S', {
             configurable: false,
             get: function() {
                 if (!shouldAllowNativesAccess()) {
@@ -156,12 +156,12 @@ module.exports = function prototypes(win, nativeWin, shouldAllowNativesAccess, p
                 return native;
             }
         });
-        done[prototype] = done[prototype] || [];
-        const properties = prototypes[prototype];
+        done[proto] = done[proto] || [];
+        const properties = prototypes[proto];
         for (let i = 0; i < properties.length; i++) {
             const property = properties[i];
-            yyy(win, nativeWin, done, shouldAllowNativesAccess, prototype, property);
-            yyy(win, nativeWin, done, shouldAllowNativesAccess, prototype + 'S', property);
+            prototype(win, nativeWin, done, shouldAllowNativesAccess, proto, property);
+            prototype(win, nativeWin, done, shouldAllowNativesAccess, proto + 'S', property);
         }
     }
 }

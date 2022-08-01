@@ -1,6 +1,6 @@
 {
   "name": "@weizman/snow",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "register to the creation event of any newborn window in the webpage",
   "main": "src/index.js",
   "devDependencies": {
@@ -36,6 +36,6 @@
   "homepage": "https://lavamoat.github.io/snow/",
   "dependencies": {
     "is-cross-origin": "^1.0.1",
-    "@weizman/securely": "^1.0.0"
+    "@weizman/securely": "^1.0.1"
   }
 }

@@ -13,14 +13,16 @@ function isTrustedHTML(node) {
 }
 
 function getPrototype(node) {
-    switch (securely(() => node.toStringS())) {
-        case '[object HTMLDocument]':
-            return securely(() => window.Document);
-        case '[object DocumentFragment]':
-            return securely(() => window.DocumentFragment);
-        default:
-            return securely(() => window.Element);
-    }
+    return securely(() => {
+        switch (node.toStringS()) {
+            case '[object HTMLDocument]':
+                return DocumentS;
+            case '[object DocumentFragment]':
+                return DocumentFragmentS;
+            default:
+                return ElementS;
+        }
+    });
 }
 
 function isFrameElement(element) {
@@ -52,7 +54,7 @@ function getFramesArray(element, includingParent) {
     }
 
     const list = securely(() => {
-        return getPrototype(element).prototype.querySelectorAllS.callS(element, 'iframe,frame,object,embed');
+        return getPrototype(element).prototype.querySelectorAll.call(element, 'iframe,frame,object,embed');
     });
 
     fillArrayUniques(frames, securely(() => Array.prototype.sliceS.callS(list)));
@@ -66,14 +68,15 @@ function getFramesArray(element, includingParent) {
 function fillArrayUniques(arr, items) {
     let isArrUpdated = false;
 
-    for (let i = 0; i < items.length; i++) {
-        securely(() => {
+    securely(() => {
+        for (let i = 0; i < items.length; i++) {
             if (!arr.includesS(items[i])) {
                 arr.pushS(items[i]);
                 isArrUpdated = true;
             }
-        });
-    }
+
+        }
+    });
 
     return isArrUpdated;
 }

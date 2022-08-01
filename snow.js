@@ -330,14 +330,14 @@ function dropOnLoadAttributes(frames) {
     const frame = frames[i];
 
     if (WARN_OF_ONLOAD_ATTRIBUTES) {
-      const onload = securely(() => frame.getAttributeS('onload'));
+      const onload = frame.getAttributeS('onload');
 
       if (onload) {
         console.warn(WARN_OF_ONLOAD_ATTRIBUTES_MSG, frame, onload);
       }
     }
 
-    securely(() => frame.removeAttributeS('onload'));
+    frame.removeAttributeS('onload');
   }
 }
 
@@ -349,11 +349,13 @@ function handleHTML(win, args) {
       continue;
     }
 
-    const template = securely(() => document.createElementS('template'));
-    securely(() => template.innerHTMLS = html);
-    const frames = getFramesArray(template.content, false);
-    dropOnLoadAttributes(frames);
-    args[i] = securely(() => template.innerHTMLS);
+    securely(() => {
+      const template = document.createElementS('template');
+      template.innerHTMLS = html;
+      const frames = getFramesArray(template.contentS, false);
+      args[i] = template.innerHTMLS;
+      dropOnLoadAttributes(frames);
+    });
   }
 }
 
@@ -506,9 +508,11 @@ function getHook(win, cb) {
 }
 
 function hookLoadSetters(win, cb) {
-  securely(() => ObjectS.defineProperty(win.EventTarget.prototype, 'addEventListener', {
-    value: getHook(win, cb)
-  }));
+  securely(() => {
+    ObjectS.defineProperty(win.EventTarget.prototype, 'addEventListener', {
+      value: getHook(win, cb)
+    });
+  });
 }
 
 module.exports = hookLoadSetters;
@@ -568,6 +572,7 @@ const config = {
     'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
     'HTMLElement': ['onload', 'toString'],
     'HTMLScriptElement': ['src'],
+    'HTMLTemplateElement': ['content'],
     'EventTarget': ['addEventListener']
   }
 };

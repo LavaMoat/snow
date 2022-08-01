@@ -20,6 +20,7 @@ const config = {
         'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
         'HTMLElement': ['onload', 'toString'],
         'HTMLScriptElement': ['src'],
+        'HTMLTemplateElement': ['content'],
         'EventTarget': ['addEventListener'],
     }
 };

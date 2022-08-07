@@ -67,9 +67,30 @@
 
             ta.value = JSON.parse(localStorage.code_snow || '""') ||
                 `
-            // attempt to bypass Snow and call "alert" native API (with no success!)
+(function(){
+    const ifr = document.createElement('iframe');
+    document.head.appendChild(ifr);
+    ifr.contentWindow.alert.call(top, 'alert bypass using insertion')
+}());
 
-            alert('THIS BYPASSES SNOW!');
+(function(){
+    const a = document.createElement('a');
+    a.innerHTML = '<iframe></iframe>';
+    document.head.appendChild(a);
+    a.firstChild.contentWindow.alert.call(top, 'alert bypass using innerHTML')
+}());
+
+(function(){
+    const ifr = document.createElement('iframe');
+    ifr.onload = () => ifr.contentWindow.alert.call(top, 'alert bypass using onload attribute')
+    document.head.appendChild(ifr);
+}());
+
+(function(){
+    const ifr = document.createElement('iframe');
+    ifr.addEventListener('load', () => ifr.contentWindow.alert.call(top, 'alert bypass using onload listener'))
+    document.head.appendChild(ifr);
+}());
         `;
 
             bt.addEventListener('click', () => {

@@ -128,17 +128,14 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
     });
 
-    it.only('should fail to use atob of an iframe that was under sabotage attempt via arguments.prototype override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via arguments.prototype override attempt', async () => {
         // reference: https://github.com/LavaMoat/snow/issues/8
         const result = await browser.execute(function(debug) {
             if (debug) debugger;
             (function() {
                 Object.defineProperty(arguments.__proto__, '0', {
                     get() {
-                        if (this?.payload?.tagName === 'IFRAME') {
-                            this.payload.count = (this?.payload.count || 0)+1;
-                        }
-                        if (this?.payload?.count > 4) {
+                        if (this?.payload?.isConnected) {
                             this.length = 0; // empty frames array
                             return undefined;
                         }

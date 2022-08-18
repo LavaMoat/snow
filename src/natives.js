@@ -1,5 +1,9 @@
 const {securely} = require('./securely');
 
+function slice(arr, start, end) {
+    return natives.slice.call(arr, start, end);
+}
+
 function nodeType(node) {
     return natives.nodeType.call(node);
 }
@@ -29,6 +33,7 @@ function addEventListener(element, event, listener, options) {
 }
 
 const natives = securely(() => ({
+    slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
     nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
     toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
     getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
@@ -39,6 +44,7 @@ const natives = securely(() => ({
 }));
 
 module.exports = {
+    slice,
     nodeType, toString,
     getOnload, setOnload,
     removeAttribute, getAttribute,

@@ -1,9 +1,8 @@
 const {securely} = require('./securely');
-const {toString, nodeType} = require('./natives');
+const {toString, nodeType, slice} = require('./natives');
 
-const slice = securely(() => ArrayS.prototype.slice);
 function getArguments(args) {
-    return slice.call(args);
+    return slice(args);
 }
 
 function isTrustedHTML(node) {
@@ -53,7 +52,7 @@ function getFramesArray(element, includingParent) {
         return getPrototype(element).prototype.querySelectorAll.call(element, 'iframe,frame,object,embed');
     });
 
-    fillArrayUniques(frames, slice.call(list));
+    fillArrayUniques(frames, slice(list));
     if (includingParent) {
         fillArrayUniques(frames, [element]);
     }

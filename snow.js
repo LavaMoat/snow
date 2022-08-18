@@ -547,6 +547,10 @@ module.exports = hookLoadSetters;
 var _require = __webpack_require__(733),
     securely = _require.securely;
 
+function slice(arr, start, end) {
+  return natives.slice.call(arr, start, end);
+}
+
 function nodeType(node) {
   return natives.nodeType.call(node);
 }
@@ -577,6 +581,7 @@ function addEventListener(element, event, listener, options) {
 
 var natives = securely(function () {
   return {
+    slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
     nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
     toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
     getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
@@ -587,6 +592,7 @@ var natives = securely(function () {
   };
 });
 module.exports = {
+  slice: slice,
   nodeType: nodeType,
   toString: toString,
   getOnload: getOnload,
@@ -684,14 +690,11 @@ var _require = __webpack_require__(733),
 
 var _require2 = __webpack_require__(14),
     toString = _require2.toString,
-    nodeType = _require2.nodeType;
-
-var slice = securely(function () {
-  return ArrayS.prototype.slice;
-});
+    nodeType = _require2.nodeType,
+    slice = _require2.slice;
 
 function getArguments(args) {
-  return slice.call(args);
+  return slice(args);
 }
 
 function isTrustedHTML(node) {
@@ -739,7 +742,7 @@ function getFramesArray(element, includingParent) {
   var list = securely(function () {
     return getPrototype(element).prototype.querySelectorAll.call(element, 'iframe,frame,object,embed');
   });
-  fillArrayUniques(frames, slice.call(list));
+  fillArrayUniques(frames, slice(list));
 
   if (includingParent) {
     fillArrayUniques(frames, [element]);

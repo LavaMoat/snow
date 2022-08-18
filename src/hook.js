@@ -1,6 +1,7 @@
 const {securely} = require('./securely');
 const isCrossOrigin = require('is-cross-origin');
 const workaroundChromiumBug = require('./chromium_bug_workaround');
+const {iterate} = require('./utils');
 
 function findWin(win, frameElement) {
     let frame = null, i = -1;
@@ -17,14 +18,13 @@ function findWin(win, frameElement) {
 }
 
 function hook(win, frames, cb) {
-    for (let i = 0; i < frames.length; i++) {
-        const frame = frames[i];
+    iterate(frames, frame => {
         workaroundChromiumBug(frame);
         const contentWindow = findWin(win, frame);
         if (contentWindow) {
             cb(contentWindow);
         }
-    }
+    });
 }
 
 module.exports = hook;

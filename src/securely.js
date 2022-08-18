@@ -1,6 +1,6 @@
 const secure = require('@weizman/securely');
 
-const wins = [top];
+let wins;
 
 const config = {
     objects: {
@@ -16,7 +16,7 @@ const config = {
         'Document': ['querySelectorAll'],
         'DocumentFragment': ['querySelectorAll', 'toString'],
         'Object': ['toString'],
-        'Array': ['includes', 'push', 'slice'],
+        'Array': ['includes', 'push', 'slice', 'map'],
         'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
         'HTMLElement': ['onload', 'toString'],
         'HTMLScriptElement': ['src'],
@@ -28,12 +28,14 @@ const config = {
 const securely = secure(top, config);
 
 function secureNewWin(win) {
-    securely(() => {
-        if (!wins.includesS(win)) {
-            wins.pushS(win);
-            secure(win, config);
-        }
-    });
+    if (!wins) {
+        wins = securely(() => new ArrayS());
+        wins.push(top);
+    }
+    if (!wins.includes(win)) {
+        wins.push(win);
+        secure(win, config);
+    }
 }
 
 module.exports = {securely, secureNewWin};

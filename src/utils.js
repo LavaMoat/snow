@@ -1,12 +1,14 @@
 const {securely} = require('./securely');
 const {toString, nodeType} = require('./natives');
 
-function getArguments(oldArgs) {
-    const args = [];
-    for (let i = 0; i < oldArgs.length; i++) {
-        args[i] = oldArgs[i];
-    }
-    return args;
+const map = securely(() => ArrayS.prototype.map);
+function iterate(arr, cb) {
+    map.call(arr, cb);
+}
+
+const slice = securely(() => ArrayS.prototype.slice);
+function getArguments(args) {
+    return slice.call(args);
 }
 
 function isTrustedHTML(node) {
@@ -42,7 +44,7 @@ function canNodeRunQuerySelector(node) {
 }
 
 function getFramesArray(element, includingParent) {
-    const frames = [];
+    const frames = securely(() => new ArrayS());
 
     if (null === element || typeof element !== 'object') {
         return frames;
@@ -56,7 +58,7 @@ function getFramesArray(element, includingParent) {
         return getPrototype(element).prototype.querySelectorAll.call(element, 'iframe,frame,object,embed');
     });
 
-    fillArrayUniques(frames, securely(() => ArrayS.prototype.slice.call(list)));
+    fillArrayUniques(frames, slice.call(list));
     if (includingParent) {
         fillArrayUniques(frames, [element]);
     }
@@ -67,17 +69,14 @@ function getFramesArray(element, includingParent) {
 function fillArrayUniques(arr, items) {
     let isArrUpdated = false;
 
-    securely(() => {
-        for (let i = 0; i < items.length; i++) {
-            if (!arr.includesS(items[i])) {
-                arr.pushS(items[i]);
-                isArrUpdated = true;
-            }
-
+    iterate(items, item => {
+        if (!arr.includes(item)) {
+            arr.push(item);
+            isArrUpdated = true;
         }
     });
 
     return isArrUpdated;
 }
 
-module.exports = {getArguments, getFramesArray, isFrameElement};
+module.exports = {getArguments, getFramesArray, isFrameElement, iterate};

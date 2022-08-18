@@ -1,6 +1,6 @@
 const resetOnloadAttributes = require('./attributes');
 const {securely} = require('./securely');
-const {getFramesArray, getArguments} = require('./utils');
+const {getFramesArray, getArguments, iterate} = require('./utils');
 const handleHTML = require('./html');
 const hook = require('./hook');
 
@@ -27,15 +27,14 @@ function getHook(win, native, cb) {
 function hookDOMInserters(win, cb) {
     for (const proto in map) {
         const funcs = map[proto];
-        for (let i = 0; i < funcs.length; i++) {
-            const func = funcs[i];
+        iterate(funcs, func => {
             securely(() => {
                 const desc = ObjectS.getOwnPropertyDescriptor(win[proto].prototype, func);
                 const prop = desc.set ? 'set' : 'value';
                 desc[prop] = getHook(win, desc[prop], cb);
                 ObjectS.defineProperty(win[proto].prototype, func, desc);
             });
-        }
+        });
     }
 }
 

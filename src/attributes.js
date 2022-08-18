@@ -1,5 +1,5 @@
 const hook = require('./hook');
-const {getFramesArray, isFrameElement} = require('./utils');
+const {getFramesArray, isFrameElement, iterate} = require('./utils');
 const {getOnload, setOnload, removeAttribute, addEventListener} = require('./natives');
 
 function resetOnloadAttribute(win, frame, cb) {
@@ -19,14 +19,12 @@ function resetOnloadAttribute(win, frame, cb) {
 }
 
 function resetOnloadAttributes(win, args, cb) {
-    for (let i = 0; i < args.length; i++) {
-        const element = args[i];
+    iterate(args, element => {
         const frames = getFramesArray(element, true);
-        for (let i = 0; i < frames.length; i++) {
-            const frame = frames[i];
+        iterate(frames, frame => {
             resetOnloadAttribute(win, frame, cb);
-        }
-    }
+        });
+    });
 }
 
 module.exports = resetOnloadAttributes;

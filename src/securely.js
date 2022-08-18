@@ -1,7 +1,5 @@
 const secure = require('@weizman/securely');
 
-const wins = [top];
-
 const config = {
     objects: {
         'document': ['createElement'],
@@ -27,13 +25,17 @@ const config = {
 
 const securely = secure(top, config);
 
+const wins = securely(() => {
+   const arr = new ArrayS();
+   arr.push(top);
+   return arr;
+});
+
 function secureNewWin(win) {
-    securely(() => {
-        if (!wins.includesS(win)) {
-            wins.pushS(win);
-            secure(win, config);
-        }
-    });
+    if (!wins.includes(win)) {
+        wins.push(win);
+        secure(win, config);
+    }
 }
 
 module.exports = {securely, secureNewWin};

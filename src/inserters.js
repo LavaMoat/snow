@@ -1,6 +1,7 @@
 const resetOnloadAttributes = require('./attributes');
 const {securely} = require('./securely');
-const {getFramesArray, getArguments} = require('./utils');
+const {getFramesArray} = require('./utils');
+const {slice} = require('./natives');
 const handleHTML = require('./html');
 const hook = require('./hook');
 
@@ -12,7 +13,7 @@ const map = {
 
 function getHook(win, native, cb) {
     return function() {
-        const args = getArguments(arguments)
+        const args = slice(arguments)
         const element = securely(() => this.parentElementS || this);
         resetOnloadAttributes(win, args, cb);
         handleHTML(win, args);

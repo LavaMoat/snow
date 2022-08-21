@@ -1,7 +1,7 @@
 const {securely} = require('./securely');
 
 function Array() {
-    return natives.Array();
+    return natives.Array.apply(null, slice(arguments));
 }
 
 function slice(arr, start, end) {

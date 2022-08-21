@@ -1,10 +1,6 @@
 const {securely} = require('./securely');
 const {toString, nodeType, slice, Array} = require('./natives');
 
-function getArguments(args) {
-    return slice(args);
-}
-
 function isTrustedHTML(node) {
     return toString(node) === '[object TrustedHTML]';
 }
@@ -73,4 +69,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {getArguments, getFramesArray, isFrameElement};
+module.exports = {getFramesArray, isFrameElement};

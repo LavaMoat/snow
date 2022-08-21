@@ -428,8 +428,10 @@ var _require = __webpack_require__(733),
     securely = _require.securely;
 
 var _require2 = __webpack_require__(648),
-    getFramesArray = _require2.getFramesArray,
-    getArguments = _require2.getArguments;
+    getFramesArray = _require2.getFramesArray;
+
+var _require3 = __webpack_require__(14),
+    slice = _require3.slice;
 
 var handleHTML = __webpack_require__(328);
 
@@ -445,7 +447,7 @@ function getHook(win, native, cb) {
   return function () {
     var _this = this;
 
-    var args = getArguments(arguments);
+    var args = slice(arguments);
     var element = securely(function () {
       return _this.parentElementS || _this;
     });
@@ -497,11 +499,9 @@ var hook = __webpack_require__(228);
 var _require = __webpack_require__(733),
     securely = _require.securely;
 
-var _require2 = __webpack_require__(648),
-    getArguments = _require2.getArguments;
-
-var _require3 = __webpack_require__(14),
-    addEventListener = _require3.addEventListener;
+var _require2 = __webpack_require__(14),
+    addEventListener = _require2.addEventListener,
+    slice = _require2.slice;
 
 function callOnload(that, onload, args) {
   if (onload) {
@@ -520,7 +520,7 @@ function getHook(win, cb) {
     if (type === 'load') {
       onload = function onload() {
         hook(win, [this], cb);
-        var args = getArguments(arguments);
+        var args = slice(arguments);
         callOnload(this, listener, args);
       };
     }
@@ -548,7 +548,7 @@ var _require = __webpack_require__(733),
     securely = _require.securely;
 
 function Array() {
-  return natives.Array();
+  return natives.Array.apply(null, slice(arguments));
 }
 
 function slice(arr, start, end) {
@@ -613,8 +613,8 @@ module.exports = {
 /***/ 583:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var _require = __webpack_require__(648),
-    getArguments = _require.getArguments; // https://github.com/lavamoat/snow/issues/2
+var _require = __webpack_require__(14),
+    slice = _require.slice; // https://github.com/lavamoat/snow/issues/2
 
 
 var ISSUE_2_SOLVED = false;
@@ -627,7 +627,7 @@ function hookOpen(win, cb) {
       return null;
     }
 
-    var args = getArguments(arguments);
+    var args = slice(arguments);
     var opened = realOpen.apply(this, args);
     cb(opened);
     return opened;
@@ -700,10 +700,6 @@ var _require2 = __webpack_require__(14),
     slice = _require2.slice,
     Array = _require2.Array;
 
-function getArguments(args) {
-  return slice(args);
-}
-
 function isTrustedHTML(node) {
   return toString(node) === '[object TrustedHTML]';
 }
@@ -770,7 +766,6 @@ function fillArrayUniques(arr, items) {
 }
 
 module.exports = {
-  getArguments: getArguments,
   getFramesArray: getFramesArray,
   isFrameElement: isFrameElement
 };

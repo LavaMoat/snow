@@ -1,5 +1,5 @@
 const {securely} = require('./securely');
-const {toString, nodeType, slice} = require('./natives');
+const {toString, nodeType, slice, Array} = require('./natives');
 
 function getArguments(args) {
     return slice(args);
@@ -38,7 +38,7 @@ function canNodeRunQuerySelector(node) {
 }
 
 function getFramesArray(element, includingParent) {
-    const frames = securely(() => new ArrayS());
+    const frames = new Array();
 
     if (null === element || typeof element !== 'object') {
         return frames;

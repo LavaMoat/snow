@@ -547,6 +547,10 @@ module.exports = hookLoadSetters;
 var _require = __webpack_require__(733),
     securely = _require.securely;
 
+function Array() {
+  return natives.Array();
+}
+
 function slice(arr, start, end) {
   return natives.slice.call(arr, start, end);
 }
@@ -581,6 +585,7 @@ function addEventListener(element, event, listener, options) {
 
 var natives = securely(function () {
   return {
+    Array: ArrayS,
     slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
     nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
     toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
@@ -593,6 +598,7 @@ var natives = securely(function () {
 });
 module.exports = {
   slice: slice,
+  Array: Array,
   nodeType: nodeType,
   toString: toString,
   getOnload: getOnload,
@@ -691,7 +697,8 @@ var _require = __webpack_require__(733),
 var _require2 = __webpack_require__(14),
     toString = _require2.toString,
     nodeType = _require2.nodeType,
-    slice = _require2.slice;
+    slice = _require2.slice,
+    Array = _require2.Array;
 
 function getArguments(args) {
   return slice(args);
@@ -727,9 +734,7 @@ function canNodeRunQuerySelector(node) {
 }
 
 function getFramesArray(element, includingParent) {
-  var frames = securely(function () {
-    return new ArrayS();
-  });
+  var frames = new Array();
 
   if (null === element || _typeof(element) !== 'object') {
     return frames;

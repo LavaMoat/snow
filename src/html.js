@@ -21,15 +21,14 @@ function dropOnLoadAttributes(frames) {
 function handleHTML(win, args) {
     for (let i = 0; i < args.length; i++) {
         const html = args[i];
-        if (typeof html !== 'string') {
-            continue;
-        }
         securely(() => {
             const template = document.createElementS('template');
             template.innerHTMLS = html;
             const frames = getFramesArray(template.contentS, false);
-            dropOnLoadAttributes(frames);
-            args[i] = template.innerHTMLS;
+            if (frames.length) {
+                dropOnLoadAttributes(frames);
+                args[i] = template.innerHTMLS;
+            }
         });
     }
 }

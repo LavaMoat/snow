@@ -347,24 +347,20 @@ function dropOnLoadAttributes(frames) {
 function handleHTML(win, args) {
   var _loop = function _loop(i) {
     var html = args[i];
-
-    if (typeof html !== 'string') {
-      return "continue";
-    }
-
     securely(function () {
       var template = document.createElementS('template');
       template.innerHTMLS = html;
       var frames = getFramesArray(template.contentS, false);
-      dropOnLoadAttributes(frames);
-      args[i] = template.innerHTMLS;
+
+      if (frames.length) {
+        dropOnLoadAttributes(frames);
+        args[i] = template.innerHTMLS;
+      }
     });
   };
 
   for (var i = 0; i < args.length; i++) {
-    var _ret = _loop(i);
-
-    if (_ret === "continue") continue;
+    _loop(i);
   }
 }
 
@@ -658,7 +654,7 @@ var config = {
     'DocumentFragment': ['querySelectorAll', 'toString'],
     'Object': ['toString'],
     'Array': ['includes', 'push', 'slice'],
-    'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
+    'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName', 'childElementCount'],
     'HTMLElement': ['onload', 'toString'],
     'HTMLScriptElement': ['src'],
     'HTMLTemplateElement': ['content'],

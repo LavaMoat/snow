@@ -61,4 +61,18 @@ describe('test HTML injections', async () => {
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
         expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
     });
+
+    it('should fail to use atob by leveraging a TrustedHTML node (with onload)', async () => {
+        // reference: https://github.com/LavaMoat/snow/issues/16
+        const result = await browser.execute(function(debug) {
+            if (debug) debugger;
+            const escapeHTMLPolicy = trustedTypes.createPolicy("myEscapePolicy", {
+                createHTML: (string) => string.replace('', '')
+            });
+            const escaped = escapeHTMLPolicy.createHTML("<iframe onload='top.myatob = this.contentWindow.atob.bind(top)'></iframe>");
+            testdiv.innerHTML = escaped;
+            return (top.myatob || atob)('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
+        }, false); // change to 'true' in order to break on the beginning of this test in the browser
+        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
+    });
 });

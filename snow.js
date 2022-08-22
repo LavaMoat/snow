@@ -496,8 +496,12 @@ var _require = __webpack_require__(733),
     securely = _require.securely;
 
 var _require2 = __webpack_require__(14),
+    removeEventListener = _require2.removeEventListener,
     addEventListener = _require2.addEventListener,
-    slice = _require2.slice;
+    slice = _require2.slice,
+    Map = _require2.Map;
+
+var handlers = new Map();
 
 function callOnload(that, onload, args) {
   if (onload) {
@@ -509,26 +513,46 @@ function callOnload(that, onload, args) {
   }
 }
 
-function getHook(win, cb) {
-  return function (type, listener, options) {
-    var onload = listener;
+function getAddEventListener(win, cb) {
+  return function (type, handler, options) {
+    var listener = handler;
 
     if (type === 'load') {
-      onload = function onload() {
-        hook(win, [this], cb);
-        var args = slice(arguments);
-        callOnload(this, listener, args);
-      };
+      if (!handlers.has(handler)) {
+        handlers.set(handler, function () {
+          hook(win, [this], cb);
+          var args = slice(arguments);
+          callOnload(this, handler, args);
+        });
+      }
+
+      listener = handlers.get(handler);
     }
 
-    return addEventListener(this, type, onload, options);
+    return addEventListener(this, type, listener, options);
+  };
+}
+
+function getRemoveEventListener() {
+  return function (type, handler, options) {
+    var listener = handler;
+
+    if (type === 'load') {
+      listener = handlers.get(handler);
+      handlers.delete(handler);
+    }
+
+    return removeEventListener(this, type, listener, options);
   };
 }
 
 function hookLoadSetters(win, cb) {
   securely(function () {
     ObjectS.defineProperty(win.EventTarget.prototype, 'addEventListener', {
-      value: getHook(win, cb)
+      value: getAddEventListener(win, cb)
+    });
+    ObjectS.defineProperty(win.EventTarget.prototype, 'removeEventListener', {
+      value: getRemoveEventListener()
     });
   });
 }
@@ -545,6 +569,10 @@ var _require = __webpack_require__(733),
 
 function Array() {
   return natives.Array.apply(null, slice(arguments));
+}
+
+function Map() {
+  return new natives.Map();
 }
 
 function slice(arr, start, end) {
@@ -579,9 +607,14 @@ function addEventListener(element, event, listener, options) {
   return natives.addEventListener.call(element, event, listener, options);
 }
 
+function removeEventListener(element, event, listener, options) {
+  return natives.removeEventListener.call(element, event, listener, options);
+}
+
 var natives = securely(function () {
   return {
     Array: ArrayS,
+    Map: MapS,
     slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
     nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
     toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
@@ -589,19 +622,22 @@ var natives = securely(function () {
     setOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').set,
     getAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'getAttribute').value,
     removeAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'removeAttribute').value,
-    addEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'addEventListener').value
+    addEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'addEventListener').value,
+    removeEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'removeEventListener').value
   };
 });
 module.exports = {
   slice: slice,
   Array: Array,
+  Map: Map,
   nodeType: nodeType,
   toString: toString,
   getOnload: getOnload,
   setOnload: setOnload,
   removeAttribute: removeAttribute,
   getAttribute: getAttribute,
-  addEventListener: addEventListener
+  addEventListener: addEventListener,
+  removeEventListener: removeEventListener
 };
 
 /***/ }),

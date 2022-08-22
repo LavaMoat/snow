@@ -3,6 +3,7 @@ const hook = require('./hook');
 const hookOpen = require('./open');
 const hookLoadSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
+const hookShadowDOM = require('./shadow');
 const {addEventListener} = require('./natives');
 
 let callback;
@@ -27,6 +28,7 @@ module.exports = function onWin(cb, win = window) {
     hookOpen(win, hookWin);
     hookLoadSetters(win, hookWin);
     hookDOMInserters(win, hookWin);
+    hookShadowDOM(win, hookWin);
 
     cb(win, securely);
 }

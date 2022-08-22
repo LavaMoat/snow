@@ -654,7 +654,7 @@ var config = {
     'DocumentFragment': ['querySelectorAll', 'toString'],
     'Object': ['toString'],
     'Array': ['includes', 'push', 'slice'],
-    'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName', 'childElementCount'],
+    'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
     'HTMLElement': ['onload', 'toString'],
     'HTMLScriptElement': ['src'],
     'HTMLTemplateElement': ['content'],

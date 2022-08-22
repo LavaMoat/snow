@@ -24,7 +24,7 @@ exports.config = {
     // will be called from there.
     //
     specs: [
-        './test/*.js'
+        `./test/${process.argv[4] || '*'}.js`
     ],
     // Patterns to exclude.
     exclude: [

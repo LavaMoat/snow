@@ -688,6 +688,7 @@ var config = {
     'Node': ['nodeType', 'parentElement', 'toString'],
     'Document': ['querySelectorAll'],
     'DocumentFragment': ['querySelectorAll', 'toString'],
+    'ShadowRoot': ['querySelectorAll', 'toString'],
     'Object': ['toString'],
     'Array': ['includes', 'push', 'slice'],
     'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
@@ -738,6 +739,9 @@ function isTrustedHTML(node) {
 
 function getPrototype(node) {
   switch (toString(node)) {
+    case '[object ShadowRoot]':
+      return ShadowRootS;
+
     case '[object HTMLDocument]':
       return DocumentS;
 

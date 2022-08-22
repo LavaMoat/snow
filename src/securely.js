@@ -13,6 +13,7 @@ const config = {
         'Node': ['nodeType', 'parentElement', 'toString'],
         'Document': ['querySelectorAll'],
         'DocumentFragment': ['querySelectorAll', 'toString'],
+        'ShadowRoot': ['querySelectorAll', 'toString'],
         'Object': ['toString'],
         'Array': ['includes', 'push', 'slice'],
         'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],

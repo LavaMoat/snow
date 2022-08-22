@@ -7,6 +7,8 @@ function isTrustedHTML(node) {
 
 function getPrototype(node) {
     switch (toString(node)) {
+        case '[object ShadowRoot]':
+            return ShadowRootS;
         case '[object HTMLDocument]':
             return DocumentS;
         case '[object DocumentFragment]':

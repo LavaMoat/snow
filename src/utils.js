@@ -1,12 +1,14 @@
 const {securely} = require('./securely');
-const {toString, nodeType, slice, Array} = require('./natives');
+const {toString, nodeType, slice, Array, cloneNode, parse, stringify} = require('./natives');
 
 function isTrustedHTML(node) {
-    return toString(node) === '[object TrustedHTML]';
+    const replacer = (k, v) => node === v ? v : ''; // avoid own props
+    // normal nodes will parse into objects whereas trusted htmls into strings
+    return typeof parse(stringify(node, replacer)) === 'string';
 }
 
 function getPrototype(node) {
-    switch (toString(node)) {
+    switch (toString(cloneNode(node))) {
         case '[object ShadowRoot]':
             return ShadowRootS;
         case '[object HTMLDocument]':
@@ -24,7 +26,7 @@ function isFrameElement(element) {
         '[object HTMLFrameElement]',
         '[object HTMLObjectElement]',
         '[object HTMLEmbedElement]',
-    ].includesS(toString(element)));
+    ].includesS(toString(cloneNode(element))));
 }
 
 function canNodeRunQuerySelector(node) {
@@ -32,7 +34,7 @@ function canNodeRunQuerySelector(node) {
         ElementS.prototype.ELEMENT_NODE,
         ElementS.prototype.DOCUMENT_FRAGMENT_NODE,
         ElementS.prototype.DOCUMENT_NODE,
-    ].includesS(nodeType(node)));
+    ].includesS(nodeType(cloneNode(node))));
 }
 
 function getFramesArray(element, includingParent) {

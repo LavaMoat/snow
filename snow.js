@@ -575,6 +575,14 @@ module.exports = hookLoadSetters;
 var _require = __webpack_require__(733),
     securely = _require.securely;
 
+function parse(text, reviver) {
+  return natives.parse(text, reviver);
+}
+
+function stringify(value, replacer, space) {
+  return natives.stringify(value, replacer, space);
+}
+
 function Array() {
   return natives.Array.apply(null, slice(arguments));
 }
@@ -585,6 +593,10 @@ function Map() {
 
 function slice(arr, start, end) {
   return natives.slice.call(arr, start, end);
+}
+
+function cloneNode(node) {
+  return natives.cloneNode.call(node);
 }
 
 function nodeType(node) {
@@ -623,7 +635,10 @@ var natives = securely(function () {
   return {
     Array: ArrayS,
     Map: MapS,
+    parse: JSON.parseS,
+    stringify: JSON.stringifyS,
     slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
+    cloneNode: Object.getOwnPropertyDescriptor(NodeS.prototype, 'cloneNode').value,
     nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
     toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
     getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
@@ -638,6 +653,9 @@ module.exports = {
   slice: slice,
   Array: Array,
   Map: Map,
+  parse: parse,
+  stringify: stringify,
+  cloneNode: cloneNode,
   nodeType: nodeType,
   toString: toString,
   getOnload: getOnload,
@@ -685,6 +703,7 @@ var secure = __webpack_require__(528);
 
 var config = {
   objects: {
+    'JSON': ['parse', 'stringify'],
     'document': ['createElement'],
     'Object': ['defineProperty', 'getOwnPropertyDescriptor']
   },
@@ -693,7 +712,7 @@ var config = {
     'String': ['toLowerCase'],
     'Function': ['apply', 'call', 'bind'],
     'Map': ['get', 'set'],
-    'Node': ['nodeType', 'parentElement', 'toString'],
+    'Node': ['nodeType', 'parentElement', 'toString', 'cloneNode'],
     'Document': ['querySelectorAll'],
     'DocumentFragment': ['querySelectorAll', 'toString'],
     'ShadowRoot': ['querySelectorAll', 'toString'],
@@ -799,14 +818,23 @@ var _require2 = __webpack_require__(14),
     toString = _require2.toString,
     nodeType = _require2.nodeType,
     slice = _require2.slice,
-    Array = _require2.Array;
+    Array = _require2.Array,
+    cloneNode = _require2.cloneNode,
+    parse = _require2.parse,
+    stringify = _require2.stringify;
 
 function isTrustedHTML(node) {
-  return toString(node) === '[object TrustedHTML]';
+  var replacer = function replacer(k, v) {
+    return node === v ? v : '';
+  }; // avoid own props
+  // normal nodes will parse into objects whereas trusted htmls into strings
+
+
+  return typeof parse(stringify(node, replacer)) === 'string';
 }
 
 function getPrototype(node) {
-  switch (toString(node)) {
+  switch (toString(cloneNode(node))) {
     case '[object ShadowRoot]':
       return ShadowRootS;
 
@@ -823,13 +851,13 @@ function getPrototype(node) {
 
 function isFrameElement(element) {
   return securely(function () {
-    return ['[object HTMLIFrameElement]', '[object HTMLFrameElement]', '[object HTMLObjectElement]', '[object HTMLEmbedElement]'].includesS(toString(element));
+    return ['[object HTMLIFrameElement]', '[object HTMLFrameElement]', '[object HTMLObjectElement]', '[object HTMLEmbedElement]'].includesS(toString(cloneNode(element)));
   });
 }
 
 function canNodeRunQuerySelector(node) {
   return securely(function () {
-    return [ElementS.prototype.ELEMENT_NODE, ElementS.prototype.DOCUMENT_FRAGMENT_NODE, ElementS.prototype.DOCUMENT_NODE].includesS(nodeType(node));
+    return [ElementS.prototype.ELEMENT_NODE, ElementS.prototype.DOCUMENT_FRAGMENT_NODE, ElementS.prototype.DOCUMENT_NODE].includesS(nodeType(cloneNode(node)));
   });
 }
 

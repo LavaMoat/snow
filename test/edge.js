@@ -79,4 +79,21 @@ describe('special cases', () => {
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
         expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
     });
+
+    it('should fail to use atob of an iframe when all element in DOM changed their own toString behaviour', async () => {
+        // reference: https://github.com/LavaMoat/snow/issues/9
+        const result = await browser.executeAsync(function(debug, done) {
+            if (debug) debugger;
+            const all = document.querySelectorAll('*');
+            const fr = document.createElement('iframe');
+            for (const node of [...all, fr]) {
+                Object.defineProperty(node, Symbol.toStringTag, { value: 'bypassResetOnload' });
+            }
+            fr.onload = () => {
+                done(fr.contentWindow.atob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c='));
+            };
+            testdiv.appendChild(fr);
+        }, false); // change to 'true' in order to break on the beginning of this test in the browser
+        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
+    });
 });

@@ -2,6 +2,7 @@ const secure = require('@weizman/securely');
 
 const config = {
     objects: {
+        'JSON': ['parse', 'stringify'],
         'document': ['createElement'],
         'Object': ['defineProperty', 'getOwnPropertyDescriptor'],
     },
@@ -10,7 +11,7 @@ const config = {
         'String': ['toLowerCase'],
         'Function': ['apply', 'call', 'bind'],
         'Map': ['get', 'set'],
-        'Node': ['nodeType', 'parentElement', 'toString'],
+        'Node': ['nodeType', 'parentElement', 'toString', 'cloneNode'],
         'Document': ['querySelectorAll'],
         'DocumentFragment': ['querySelectorAll', 'toString'],
         'ShadowRoot': ['querySelectorAll', 'toString'],

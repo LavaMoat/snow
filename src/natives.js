@@ -1,5 +1,13 @@
 const {securely} = require('./securely');
 
+function parse(text, reviver) {
+    return natives.parse(text, reviver);
+}
+
+function stringify(value, replacer, space) {
+    return natives.stringify(value, replacer, space);
+}
+
 function Array() {
     return natives.Array.apply(null, slice(arguments));
 }
@@ -10,6 +18,10 @@ function Map() {
 
 function slice(arr, start, end) {
     return natives.slice.call(arr, start, end);
+}
+
+function cloneNode(node) {
+    return natives.cloneNode.call(node);
 }
 
 function nodeType(node) {
@@ -46,7 +58,9 @@ function removeEventListener(element, event, listener, options) {
 
 const natives = securely(() => ({
     Array: ArrayS, Map: MapS,
+    parse: JSON.parseS, stringify: JSON.stringifyS,
     slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
+    cloneNode: Object.getOwnPropertyDescriptor(NodeS.prototype, 'cloneNode').value,
     nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
     toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
     getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
@@ -59,7 +73,8 @@ const natives = securely(() => ({
 
 module.exports = {
     slice, Array, Map,
-    nodeType, toString,
+    parse, stringify,
+    cloneNode, nodeType, toString,
     getOnload, setOnload,
     removeAttribute, getAttribute,
     addEventListener, removeEventListener,

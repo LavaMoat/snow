@@ -1,3 +1,4 @@
+const {protectShadows} = require('./shadow');
 const resetOnloadAttributes = require('./attributes');
 const {securely} = require('./securely');
 const {getFramesArray} = require('./utils');
@@ -13,7 +14,7 @@ const map = {
 
 function getHook(win, native, cb) {
     return function() {
-        const args = slice(arguments)
+        const args = slice(arguments);
         const element = securely(() => this.parentElementS || this);
         resetOnloadAttributes(win, args, cb);
         handleHTML(win, args);
@@ -21,6 +22,7 @@ function getHook(win, native, cb) {
         const frames = getFramesArray(element, false);
         hook(win, frames, cb);
         hook(win, args, cb);
+        protectShadows(win, cb, true);
         return ret;
     };
 }

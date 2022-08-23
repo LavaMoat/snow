@@ -383,8 +383,11 @@ var hookLoadSetters = __webpack_require__(459);
 
 var hookDOMInserters = __webpack_require__(58);
 
-var _require2 = __webpack_require__(14),
-    addEventListener = _require2.addEventListener;
+var _require2 = __webpack_require__(373),
+    hookShadowDOM = _require2.hookShadowDOM;
+
+var _require3 = __webpack_require__(14),
+    addEventListener = _require3.addEventListener;
 
 var callback;
 
@@ -410,6 +413,7 @@ module.exports = function onWin(cb) {
   hookOpen(win, hookWin);
   hookLoadSetters(win, hookWin);
   hookDOMInserters(win, hookWin);
+  hookShadowDOM(win, hookWin);
   cb(win, securely);
 };
 
@@ -418,16 +422,19 @@ module.exports = function onWin(cb) {
 /***/ 58:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
+var _require = __webpack_require__(373),
+    protectShadows = _require.protectShadows;
+
 var resetOnloadAttributes = __webpack_require__(586);
 
-var _require = __webpack_require__(733),
-    securely = _require.securely;
+var _require2 = __webpack_require__(733),
+    securely = _require2.securely;
 
-var _require2 = __webpack_require__(648),
-    getFramesArray = _require2.getFramesArray;
+var _require3 = __webpack_require__(648),
+    getFramesArray = _require3.getFramesArray;
 
-var _require3 = __webpack_require__(14),
-    slice = _require3.slice;
+var _require4 = __webpack_require__(14),
+    slice = _require4.slice;
 
 var handleHTML = __webpack_require__(328);
 
@@ -455,6 +462,7 @@ function getHook(win, native, cb) {
     var frames = getFramesArray(element, false);
     hook(win, frames, cb);
     hook(win, args, cb);
+    protectShadows(win, cb, true);
     return ret;
   };
 }
@@ -715,6 +723,66 @@ function secureNewWin(win) {
 module.exports = {
   securely: securely,
   secureNewWin: secureNewWin
+};
+
+/***/ }),
+
+/***/ 373:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var _require = __webpack_require__(733),
+    securely = _require.securely;
+
+var _require2 = __webpack_require__(14),
+    Array = _require2.Array;
+
+var hook = __webpack_require__(228);
+
+var _require3 = __webpack_require__(648),
+    getFramesArray = _require3.getFramesArray;
+
+var shadows = new Array();
+
+function protectShadows(win, cb) {
+  var connectedOnly = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  for (var i = 0; i < shadows.length; i++) {
+    var shadow = shadows[i];
+
+    if (connectedOnly && !shadow.isConnected) {
+      continue;
+    }
+
+    var frames = getFramesArray(shadow, false);
+    hook(win, frames, cb); // this doesn't work for elements under shadow!
+
+    cb(win);
+  }
+}
+
+function getHook(win, native, cb) {
+  return function (options) {
+    var ret = securely(function () {
+      return FunctionS.prototype.call;
+    }).call(native, this, options);
+    shadows.push(ret);
+    protectShadows(win, cb, true);
+    return ret;
+  };
+}
+
+function hookShadowDOM(win, cb) {
+  securely(function () {
+    var desc = ObjectS.getOwnPropertyDescriptor(win.Element.prototype, 'attachShadow');
+    var val = desc.value;
+    desc.value = getHook(win, val, cb);
+    ObjectS.defineProperty(win.Element.prototype, 'attachShadow', desc);
+  });
+}
+
+module.exports = {
+  hookShadowDOM: hookShadowDOM,
+  protectShadows: protectShadows
 };
 
 /***/ }),

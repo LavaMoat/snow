@@ -3,7 +3,7 @@ const hook = require('./hook');
 const hookOpen = require('./open');
 const hookLoadSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
-const hookShadowDOM = require('./shadow');
+const {hookShadowDOM} = require('./shadow');
 const {addEventListener} = require('./natives');
 
 let callback;

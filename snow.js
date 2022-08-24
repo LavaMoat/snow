@@ -402,34 +402,34 @@ var _require3 = __webpack_require__(14),
     Map = _require3.Map,
     Array = _require3.Array;
 
-var secret = (Math.random() + 1).toString(36).substring(7);
+var key = (Math.random() + 1).toString(36).substring(7);
 var wins = new Map();
 
 function isNewWin(win) {
   try {
     if (wins.has(win)) {
-      var _key = wins.get(win);
+      var _secret = wins.get(win);
 
       var desc = Object.getOwnPropertyDescriptor(win, 'SNOW_ID');
 
       if (typeof (desc === null || desc === void 0 ? void 0 : desc.value) === 'function') {
-        var answer = desc.value(secret);
+        var answer = desc.value(key);
 
-        if (answer === _key) {
+        if (answer === _secret) {
           return false;
         }
       }
     }
 
-    var key = new Array();
+    var secret = new Array();
     Object.defineProperty(win, 'SNOW_ID', {
       configurable: false,
       writable: false,
-      value: function value(s) {
-        return s === secret && key;
+      value: function value(k) {
+        return k === key && secret;
       }
     });
-    wins.set(win, key);
+    wins.set(win, secret);
   } catch (err) {}
 
   return true;

@@ -6,27 +6,27 @@ const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
 const {addEventListener, getFrameElement, Object, Map, Array} = require('./natives');
 
-const secret = (Math.random() + 1).toString(36).substring(7);
+const key = (Math.random() + 1).toString(36).substring(7);
 const wins = new Map();
 
 function isNewWin(win) {
     try {
         if (wins.has(win)) {
-            const key = wins.get(win);
+            const secret = wins.get(win);
             const desc = Object.getOwnPropertyDescriptor(win, 'SNOW_ID');
             if (typeof desc?.value === 'function') {
-                const answer = desc.value(secret);
-                if (answer === key) {
+                const answer = desc.value(key);
+                if (answer === secret) {
                     return false;
                 }
             }
         }
-        const key = new Array();
+        const secret = new Array();
         Object.defineProperty(win, 'SNOW_ID', {
             configurable: false, writable: false,
-            value: (s) => s === secret && key,
+            value: (k) => k === key && secret,
         });
-        wins.set(win, key);
+        wins.set(win, secret);
     } catch (err) {}
     return true;
 }

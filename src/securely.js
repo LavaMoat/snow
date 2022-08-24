@@ -11,7 +11,7 @@ const config = {
         'String': ['toLowerCase'],
         'Function': ['apply', 'call', 'bind'],
         'Map': ['get', 'set'],
-        'Node': ['nodeType', 'parentElement', 'toString', 'cloneNode'],
+        'Node': ['nodeType', 'parentElement', 'toString'],
         'Document': ['querySelectorAll'],
         'DocumentFragment': ['querySelectorAll', 'toString', 'replaceChildren', 'append', 'prepend'],
         'ShadowRoot': ['querySelectorAll', 'toString', 'innerHTML'],

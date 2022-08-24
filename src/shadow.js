@@ -10,7 +10,6 @@ function protectShadows(win, cb, connectedOnly) {
         }
         const frames = getFramesArray(shadow, false);
         hook(win, frames, cb);
-        cb(win);
     }
 }
 

@@ -20,12 +20,12 @@ function slice(arr, start, end) {
     return natives.slice.call(arr, start, end);
 }
 
-function cloneNode(node) {
-    return natives.cloneNode.call(node);
-}
-
 function nodeType(node) {
     return natives.nodeType.call(node);
+}
+
+function tagName(element) {
+    return natives.tagName.call(element);
 }
 
 function toString(object) {
@@ -60,8 +60,8 @@ const natives = securely(() => ({
     Array: ArrayS, Map: MapS,
     parse: JSON.parseS, stringify: JSON.stringifyS,
     slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
-    cloneNode: Object.getOwnPropertyDescriptor(NodeS.prototype, 'cloneNode').value,
     nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
+    tagName: Object.getOwnPropertyDescriptor(ElementS.prototype, 'tagName').get,
     toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
     getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
     setOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').set,
@@ -74,7 +74,7 @@ const natives = securely(() => ({
 module.exports = {
     slice, Array, Map,
     parse, stringify,
-    cloneNode, nodeType, toString,
+    nodeType, toString, tagName,
     getOnload, setOnload,
     removeAttribute, getAttribute,
     addEventListener, removeEventListener,

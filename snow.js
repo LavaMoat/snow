@@ -616,12 +616,12 @@ function slice(arr, start, end) {
   return natives.slice.call(arr, start, end);
 }
 
-function cloneNode(node) {
-  return natives.cloneNode.call(node);
-}
-
 function nodeType(node) {
   return natives.nodeType.call(node);
+}
+
+function tagName(element) {
+  return natives.tagName.call(element);
 }
 
 function toString(object) {
@@ -659,8 +659,8 @@ var natives = securely(function () {
     parse: JSON.parseS,
     stringify: JSON.stringifyS,
     slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
-    cloneNode: Object.getOwnPropertyDescriptor(NodeS.prototype, 'cloneNode').value,
     nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
+    tagName: Object.getOwnPropertyDescriptor(ElementS.prototype, 'tagName').get,
     toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
     getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
     setOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').set,
@@ -676,9 +676,9 @@ module.exports = {
   Map: Map,
   parse: parse,
   stringify: stringify,
-  cloneNode: cloneNode,
   nodeType: nodeType,
   toString: toString,
+  tagName: tagName,
   getOnload: getOnload,
   setOnload: setOnload,
   removeAttribute: removeAttribute,
@@ -733,7 +733,7 @@ var config = {
     'String': ['toLowerCase'],
     'Function': ['apply', 'call', 'bind'],
     'Map': ['get', 'set'],
-    'Node': ['nodeType', 'parentElement', 'toString', 'cloneNode'],
+    'Node': ['nodeType', 'parentElement', 'toString'],
     'Document': ['querySelectorAll'],
     'DocumentFragment': ['querySelectorAll', 'toString', 'replaceChildren', 'append', 'prepend'],
     'ShadowRoot': ['querySelectorAll', 'toString', 'innerHTML'],
@@ -789,7 +789,6 @@ function protectShadows(win, cb, connectedOnly) {
 
     var frames = getFramesArray(shadow, false);
     hook(win, frames, cb);
-    cb(win);
   }
 }
 
@@ -829,11 +828,10 @@ var _require = __webpack_require__(733),
     securely = _require.securely;
 
 var _require2 = __webpack_require__(14),
-    toString = _require2.toString,
+    tagName = _require2.tagName,
     nodeType = _require2.nodeType,
     slice = _require2.slice,
     Array = _require2.Array,
-    cloneNode = _require2.cloneNode,
     parse = _require2.parse,
     stringify = _require2.stringify;
 
@@ -858,11 +856,11 @@ function getPrototype(node) {
     return ShadowRootS;
   }
 
-  switch (toString(cloneNode(node))) {
-    case '[object HTMLDocument]':
+  switch (nodeType(node)) {
+    case NodeS.prototype.DOCUMENT_NODE:
       return DocumentS;
 
-    case '[object DocumentFragment]':
+    case NodeS.prototype.DOCUMENT_FRAGMENT_NODE:
       return DocumentFragmentS;
 
     default:
@@ -871,12 +869,16 @@ function getPrototype(node) {
 }
 
 function isFrameElement(element) {
-  if (isShadow(element)) {
-    return false;
-  }
-
   return securely(function () {
-    return ['[object HTMLIFrameElement]', '[object HTMLFrameElement]', '[object HTMLObjectElement]', '[object HTMLEmbedElement]'].includesS(toString(cloneNode(element)));
+    if (nodeType(element) !== ElementS.prototype.ELEMENT_NODE) {
+      return false;
+    }
+
+    if (isShadow(element)) {
+      return false;
+    }
+
+    return ['IFRAME', 'FRAME', 'OBJECT', 'EMBED'].includesS(tagName(element));
   });
 }
 
@@ -886,7 +888,7 @@ function canNodeRunQuerySelector(node) {
   }
 
   return securely(function () {
-    return [ElementS.prototype.ELEMENT_NODE, ElementS.prototype.DOCUMENT_FRAGMENT_NODE, ElementS.prototype.DOCUMENT_NODE].includesS(nodeType(cloneNode(node)));
+    return [ElementS.prototype.ELEMENT_NODE, ElementS.prototype.DOCUMENT_FRAGMENT_NODE, ElementS.prototype.DOCUMENT_NODE].includesS(nodeType(node));
   });
 }
 

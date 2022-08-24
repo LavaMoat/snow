@@ -1,5 +1,5 @@
 const {securely} = require('./securely');
-const {toString, nodeType, slice, Array, cloneNode, parse, stringify} = require('./natives');
+const {tagName, nodeType, slice, Array, parse, stringify} = require('./natives');
 
 const shadows = new Array();
 
@@ -17,10 +17,10 @@ function getPrototype(node) {
     if (isShadow(node)) {
         return ShadowRootS;
     }
-    switch (toString(cloneNode(node))) {
-        case '[object HTMLDocument]':
+    switch (nodeType(node)) {
+        case NodeS.prototype.DOCUMENT_NODE:
             return DocumentS;
-        case '[object DocumentFragment]':
+        case NodeS.prototype.DOCUMENT_FRAGMENT_NODE:
             return DocumentFragmentS;
         default:
             return ElementS;
@@ -28,15 +28,20 @@ function getPrototype(node) {
 }
 
 function isFrameElement(element) {
-    if (isShadow(element)) {
-        return false;
-    }
-    return securely(() => [
-        '[object HTMLIFrameElement]',
-        '[object HTMLFrameElement]',
-        '[object HTMLObjectElement]',
-        '[object HTMLEmbedElement]',
-    ].includesS(toString(cloneNode(element))));
+    return securely(() => {
+        if (nodeType(element) !== ElementS.prototype.ELEMENT_NODE) {
+            return false;
+        }
+        if (isShadow(element)) {
+            return false;
+        }
+        return [
+            'IFRAME',
+            'FRAME',
+            'OBJECT',
+            'EMBED',
+        ].includesS(tagName(element));
+    });
 }
 
 function canNodeRunQuerySelector(node) {
@@ -47,7 +52,7 @@ function canNodeRunQuerySelector(node) {
         ElementS.prototype.ELEMENT_NODE,
         ElementS.prototype.DOCUMENT_FRAGMENT_NODE,
         ElementS.prototype.DOCUMENT_NODE,
-    ].includesS(nodeType(cloneNode(node))));
+    ].includesS(nodeType(node)));
 }
 
 function getFramesArray(element, includingParent) {

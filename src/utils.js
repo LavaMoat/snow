@@ -8,7 +8,7 @@ function isShadow(node) {
 }
 
 function isTrustedHTML(node) {
-    const replacer = (k, v) => node === v ? v : ''; // avoid own props
+    const replacer = (k, v) => (!k && node === v) ? v : ''; // avoid own props
     // normal nodes will parse into objects whereas trusted htmls into strings
     return typeof parse(stringify(node, replacer)) === 'string';
 }

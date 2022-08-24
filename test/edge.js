@@ -20,6 +20,51 @@ describe('special cases', () => {
         expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
     });
 
+    it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin (complex)', async () => {
+        const result = await browser.executeAsync(function(debug, done) {
+            if (debug) debugger;
+            const ifr = document.createElement('iframe');
+            ifr.src = "https://x.com";
+            document.head.appendChild(ifr);
+            const zzz = ifr.contentWindow;
+            setTimeout(() => {
+                ifr.src = "about:blank";
+                setTimeout(() => {
+                    ifr.src = "https://x.com";
+                    setTimeout(() => {
+                        ifr.src = "about:blank";
+                        setTimeout(() => {
+                            done(zzz.atob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c='));
+                        }, 1000);
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        }, false); // change to 'true' in order to break on the beginning of this test in the browser
+        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
+    });
+
+    it('should fail to use atob of an embed that was cross origin and then same origin', async () => {
+        const result = await browser.executeAsync(function(debug, done) {
+            if (debug) debugger;
+            testdiv1.innerHTML = ('<embed id="temp_id_1" type="text/html" src="/">');
+            testdiv2.innerHTML = ('<embed id="temp_id_2" type="text/html" src="https://x.com">');
+            setTimeout(() => {
+                temp_id_2.src = temp_id_1.src;
+                temp_id_1.src = 'https://x.com';
+                setTimeout(() => {
+                    temp_id_1.src = temp_id_2.src;
+                    setTimeout(() => {
+                        done(JSON.stringify([
+                            window[0].atob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c='),
+                            window[1].atob('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c='),
+                        ]))
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        }, false); // change to 'true' in order to break on the beginning of this test in the browser
+        expect(result).toBe(JSON.stringify(['ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW', 'ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW']));
+    });
+
     it('should fail to use atob of an iframe that was reattached to dom', async () => {
         const result = await browser.executeAsync(function(debug, done) {
             if (debug) debugger;

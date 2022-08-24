@@ -195,7 +195,7 @@ var hook = __webpack_require__(228);
 
 var _require = __webpack_require__(648),
     getFramesArray = _require.getFramesArray,
-    isFrameElement = _require.isFrameElement;
+    getFrameTag = _require.getFrameTag;
 
 var _require2 = __webpack_require__(14),
     getOnload = _require2.getOnload,
@@ -204,7 +204,7 @@ var _require2 = __webpack_require__(14),
     addEventListener = _require2.addEventListener;
 
 function resetOnloadAttribute(win, frame, cb) {
-  if (!isFrameElement(frame)) {
+  if (!getFrameTag(frame)) {
     return;
   }
 
@@ -270,25 +270,26 @@ module.exports = workaroundChromiumBug;
 
 var isCrossOrigin = __webpack_require__(851);
 
-var _require = __webpack_require__(733),
-    securely = _require.securely;
-
 var workaroundChromiumBug = __webpack_require__(750);
 
-var _require2 = __webpack_require__(648),
-    shadows = _require2.shadows,
-    getFramesArray = _require2.getFramesArray;
+var _require = __webpack_require__(648),
+    shadows = _require.shadows,
+    getFramesArray = _require.getFramesArray,
+    getFrameTag = _require.getFrameTag;
+
+var _require2 = __webpack_require__(14),
+    getContentWindow = _require2.getContentWindow,
+    Object = _require2.Object,
+    getFrameElement = _require2.getFrameElement;
 
 function findWin(win, frameElement) {
   var i = -1;
 
   while (win[++i]) {
-    var cross = securely(function () {
-      return isCrossOrigin(win[i], win, win.ObjectS);
-    });
+    var cross = isCrossOrigin(win[i], win, Object);
 
     if (!cross) {
-      if (win[i].frameElement === frameElement) {
+      if (getFrameElement(win[i]) === frameElement) {
         return win[i];
       }
     }
@@ -300,7 +301,7 @@ function findWin(win, frameElement) {
 
     for (var j = 0; j < frames.length; j++) {
       if (frames[j] === frameElement) {
-        return frames[j].contentWindow;
+        return getContentWindow(frames[j], getFrameTag(frames[j]));
       }
     }
   }
@@ -327,15 +328,16 @@ module.exports = hook;
 /***/ 328:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var _require = __webpack_require__(733),
-    securely = _require.securely;
+var _require = __webpack_require__(648),
+    getFramesArray = _require.getFramesArray;
 
-var _require2 = __webpack_require__(648),
-    getFramesArray = _require2.getFramesArray;
-
-var _require3 = __webpack_require__(14),
-    removeAttribute = _require3.removeAttribute,
-    getAttribute = _require3.getAttribute;
+var _require2 = __webpack_require__(14),
+    removeAttribute = _require2.removeAttribute,
+    getAttribute = _require2.getAttribute,
+    getTemplateContent = _require2.getTemplateContent,
+    createElement = _require2.createElement,
+    getInnerHTML = _require2.getInnerHTML,
+    setInnerHTML = _require2.setInnerHTML;
 
 var WARN_OF_ONLOAD_ATTRIBUTES = false; // DEBUG MODE ONLY!
 
@@ -358,22 +360,16 @@ function dropOnLoadAttributes(frames) {
 }
 
 function handleHTML(win, args) {
-  var _loop = function _loop(i) {
-    var html = args[i];
-    securely(function () {
-      var template = document.createElementS('template');
-      template.innerHTMLS = html;
-      var frames = getFramesArray(template.contentS, false);
-
-      if (frames.length) {
-        dropOnLoadAttributes(frames);
-        args[i] = template.innerHTMLS;
-      }
-    });
-  };
-
   for (var i = 0; i < args.length; i++) {
-    _loop(i);
+    var html = args[i];
+    var template = createElement(document, 'template');
+    setInnerHTML(template, html);
+    var frames = getFramesArray(getTemplateContent(template), false);
+
+    if (frames.length) {
+      dropOnLoadAttributes(frames);
+      args[i] = getInnerHTML(template);
+    }
   }
 }
 
@@ -400,14 +396,15 @@ var _require2 = __webpack_require__(373),
     hookShadowDOM = _require2.hookShadowDOM;
 
 var _require3 = __webpack_require__(14),
-    addEventListener = _require3.addEventListener;
+    addEventListener = _require3.addEventListener,
+    getFrameElement = _require3.getFrameElement;
 
 var callback;
 
 function onWin(cb, win) {
   function hookWin(contentWindow) {
     onWin(cb, contentWindow);
-    addEventListener(contentWindow.frameElement, 'load', function () {
+    addEventListener(getFrameElement(contentWindow), 'load', function () {
       hook(win, [this], function () {
         onWin(cb, contentWindow);
       });
@@ -443,15 +440,15 @@ var _require = __webpack_require__(373),
 
 var resetOnloadAttributes = __webpack_require__(586);
 
-var _require2 = __webpack_require__(733),
-    securely = _require2.securely;
+var _require2 = __webpack_require__(648),
+    getFramesArray = _require2.getFramesArray,
+    shadows = _require2.shadows;
 
-var _require3 = __webpack_require__(648),
-    getFramesArray = _require3.getFramesArray,
-    shadows = _require3.shadows;
-
-var _require4 = __webpack_require__(14),
-    slice = _require4.slice;
+var _require3 = __webpack_require__(14),
+    getParentElement = _require3.getParentElement,
+    slice = _require3.slice,
+    Object = _require3.Object,
+    Function = _require3.Function;
 
 var handleHTML = __webpack_require__(328);
 
@@ -467,19 +464,13 @@ var map = {
 
 function getHook(win, native, cb) {
   return function () {
-    var _this = this;
-
     var args = slice(arguments);
-    var element = securely(function () {
-      return _this.parentElementS || _this;
-    });
+    var element = getParentElement(this) || this;
     resetOnloadAttributes(win, args, cb);
     resetOnloadAttributes(win, shadows, cb);
     handleHTML(win, args);
     handleHTML(win, shadows);
-    var ret = securely(function () {
-      return FunctionS.prototype.apply;
-    }).call(native, this, args);
+    var ret = Function.prototype.apply.call(native, this, args);
     var frames = getFramesArray(element, false);
     hook(win, frames, cb);
     hook(win, args, cb);
@@ -489,26 +480,16 @@ function getHook(win, native, cb) {
 }
 
 function hookDOMInserters(win, cb) {
-  var _loop = function _loop(proto) {
+  for (var proto in map) {
     var funcs = map[proto];
 
-    var _loop2 = function _loop2(i) {
-      var func = funcs[i];
-      securely(function () {
-        var desc = ObjectS.getOwnPropertyDescriptor(win[proto].prototype, func);
-        var prop = desc.set ? 'set' : 'value';
-        desc[prop] = getHook(win, desc[prop], cb);
-        ObjectS.defineProperty(win[proto].prototype, func, desc);
-      });
-    };
-
     for (var i = 0; i < funcs.length; i++) {
-      _loop2(i);
+      var func = funcs[i];
+      var desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
+      var prop = desc.set ? 'set' : 'value';
+      desc[prop] = getHook(win, desc[prop], cb);
+      Object.defineProperty(win[proto].prototype, func, desc);
     }
-  };
-
-  for (var proto in map) {
-    _loop(proto);
   }
 }
 
@@ -521,14 +502,12 @@ module.exports = hookDOMInserters;
 
 var hook = __webpack_require__(228);
 
-var _require = __webpack_require__(733),
-    securely = _require.securely;
-
-var _require2 = __webpack_require__(14),
-    removeEventListener = _require2.removeEventListener,
-    addEventListener = _require2.addEventListener,
-    slice = _require2.slice,
-    Map = _require2.Map;
+var _require = __webpack_require__(14),
+    removeEventListener = _require.removeEventListener,
+    addEventListener = _require.addEventListener,
+    slice = _require.slice,
+    Map = _require.Map,
+    Object = _require.Object;
 
 var handlers = new Map();
 
@@ -576,13 +555,11 @@ function getRemoveEventListener() {
 }
 
 function hookLoadSetters(win, cb) {
-  securely(function () {
-    ObjectS.defineProperty(win.EventTarget.prototype, 'addEventListener', {
-      value: getAddEventListener(win, cb)
-    });
-    ObjectS.defineProperty(win.EventTarget.prototype, 'removeEventListener', {
-      value: getRemoveEventListener()
-    });
+  Object.defineProperty(win.EventTarget.prototype, 'addEventListener', {
+    value: getAddEventListener(win, cb)
+  });
+  Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', {
+    value: getRemoveEventListener()
   });
 }
 
@@ -595,6 +572,25 @@ module.exports = hookLoadSetters;
 
 var _require = __webpack_require__(733),
     securely = _require.securely;
+
+function getContentWindow(element, tag) {
+  switch (tag) {
+    case 'IFRAME':
+      return natives.iframeContentWindow.call(element);
+
+    case 'FRAME':
+      return natives.frameContentWindow.call(element);
+
+    case 'OBJECT':
+      return natives.objectContentWindow.call(element);
+
+    case 'EMBED':
+      return null;
+
+    default:
+      return null;
+  }
+}
 
 function parse(text, reviver) {
   return natives.parse(text, reviver);
@@ -652,28 +648,82 @@ function removeEventListener(element, event, listener, options) {
   return natives.removeEventListener.call(element, event, listener, options);
 }
 
+function createElement(document, tagName, options) {
+  return natives.createElement.call(document, tagName, options);
+}
+
+function getInnerHTML(element) {
+  return natives.getInnerHTML.call(element);
+}
+
+function setInnerHTML(element, html) {
+  return natives.setInnerHTML.call(element, html);
+}
+
+function getTemplateContent(template) {
+  return natives.getTemplateContent.call(template);
+}
+
+function getFrameElement(win) {
+  return natives.Function.prototype.call.call(natives.getFrameElement, win);
+}
+
+function getParentElement(element) {
+  return natives.getParentElement.call(element);
+}
+
 var natives = securely(function () {
   return {
     Array: ArrayS,
     Map: MapS,
+    Object: ObjectS,
+    Function: FunctionS,
+    Node: NodeS,
+    Element: ElementS,
+    ShadowRoot: ShadowRootS,
+    Document: DocumentS,
+    DocumentFragment: DocumentFragmentS,
     parse: JSON.parseS,
     stringify: JSON.stringifyS,
+    iframeContentWindow: Object.getOwnPropertyDescriptor(HTMLIFrameElementS.prototype, 'contentWindow').get,
+    frameContentWindow: Object.getOwnPropertyDescriptor(HTMLFrameElementS.prototype, 'contentWindow').get,
+    objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElementS.prototype, 'contentWindow').get,
+    createElement: Object.getOwnPropertyDescriptor(DocumentS.prototype, 'createElement').value,
     slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
     nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
     tagName: Object.getOwnPropertyDescriptor(ElementS.prototype, 'tagName').get,
+    getInnerHTML: Object.getOwnPropertyDescriptor(ElementS.prototype, 'innerHTML').get,
+    setInnerHTML: Object.getOwnPropertyDescriptor(ElementS.prototype, 'innerHTML').set,
     toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
     getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
     setOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').set,
     getAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'getAttribute').value,
     removeAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'removeAttribute').value,
     addEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'addEventListener').value,
-    removeEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'removeEventListener').value
+    removeEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'removeEventListener').value,
+    getTemplateContent: Object.getOwnPropertyDescriptor(HTMLTemplateElementS.prototype, 'content').get,
+    getFrameElement: Object.getOwnPropertyDescriptor(window, 'frameElement').get,
+    getParentElement: Object.getOwnPropertyDescriptor(NodeS.prototype, 'parentElement').get
   };
 });
 module.exports = {
+  getParentElement: getParentElement,
+  getTemplateContent: getTemplateContent,
+  getFrameElement: getFrameElement,
+  getInnerHTML: getInnerHTML,
+  setInnerHTML: setInnerHTML,
+  getContentWindow: getContentWindow,
+  createElement: createElement,
   slice: slice,
   Array: Array,
   Map: Map,
+  Object: natives.Object,
+  Function: natives.Function,
+  Node: natives.Node,
+  Element: natives.Element,
+  Document: natives.Document,
+  DocumentFragment: natives.DocumentFragment,
+  ShadowRoot: natives.ShadowRoot,
   parse: parse,
   stringify: stringify,
   nodeType: nodeType,
@@ -743,7 +793,10 @@ var config = {
     'HTMLElement': ['onload', 'toString'],
     'HTMLScriptElement': ['src'],
     'HTMLTemplateElement': ['content'],
-    'EventTarget': ['addEventListener']
+    'EventTarget': ['addEventListener'],
+    'HTMLIFrameElement': ['contentWindow'],
+    'HTMLFrameElement': ['contentWindow'],
+    'HTMLObjectElement': ['contentWindow']
   }
 };
 var securely = secure(top, config);
@@ -770,14 +823,15 @@ module.exports = {
 /***/ 373:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var _require = __webpack_require__(733),
-    securely = _require.securely;
-
 var hook = __webpack_require__(228);
 
-var _require2 = __webpack_require__(648),
-    getFramesArray = _require2.getFramesArray,
-    shadows = _require2.shadows;
+var _require = __webpack_require__(648),
+    getFramesArray = _require.getFramesArray,
+    shadows = _require.shadows;
+
+var _require2 = __webpack_require__(14),
+    Object = _require2.Object,
+    Function = _require2.Function;
 
 function protectShadows(win, cb, connectedOnly) {
   for (var i = 0; i < shadows.length; i++) {
@@ -794,9 +848,7 @@ function protectShadows(win, cb, connectedOnly) {
 
 function getHook(win, native, cb) {
   return function (options) {
-    var ret = securely(function () {
-      return FunctionS.prototype.call;
-    }).call(native, this, options);
+    var ret = Function.prototype.call.call(native, this, options);
     shadows.push(ret);
     protectShadows(win, cb, true);
     return ret;
@@ -804,12 +856,10 @@ function getHook(win, native, cb) {
 }
 
 function hookShadowDOM(win, cb) {
-  securely(function () {
-    var desc = ObjectS.getOwnPropertyDescriptor(win.Element.prototype, 'attachShadow');
-    var val = desc.value;
-    desc.value = getHook(win, val, cb);
-    ObjectS.defineProperty(win.Element.prototype, 'attachShadow', desc);
-  });
+  var desc = Object.getOwnPropertyDescriptor(win.Element.prototype, 'attachShadow');
+  var val = desc.value;
+  desc.value = getHook(win, val, cb);
+  Object.defineProperty(win.Element.prototype, 'attachShadow', desc);
 }
 
 module.exports = {
@@ -824,16 +874,18 @@ module.exports = {
 
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
-var _require = __webpack_require__(733),
-    securely = _require.securely;
-
-var _require2 = __webpack_require__(14),
-    tagName = _require2.tagName,
-    nodeType = _require2.nodeType,
-    slice = _require2.slice,
-    Array = _require2.Array,
-    parse = _require2.parse,
-    stringify = _require2.stringify;
+var _require = __webpack_require__(14),
+    tagName = _require.tagName,
+    nodeType = _require.nodeType,
+    slice = _require.slice,
+    Array = _require.Array,
+    parse = _require.parse,
+    stringify = _require.stringify,
+    Node = _require.Node,
+    Document = _require.Document,
+    DocumentFragment = _require.DocumentFragment,
+    Element = _require.Element,
+    ShadowRoot = _require.ShadowRoot;
 
 var shadows = new Array();
 
@@ -853,33 +905,41 @@ function isTrustedHTML(node) {
 
 function getPrototype(node) {
   if (isShadow(node)) {
-    return ShadowRootS;
+    return ShadowRoot;
   }
 
   switch (nodeType(node)) {
-    case NodeS.prototype.DOCUMENT_NODE:
-      return DocumentS;
+    case Node.prototype.DOCUMENT_NODE:
+      return Document;
 
-    case NodeS.prototype.DOCUMENT_FRAGMENT_NODE:
-      return DocumentFragmentS;
+    case Node.prototype.DOCUMENT_FRAGMENT_NODE:
+      return DocumentFragment;
 
     default:
-      return ElementS;
+      return Element;
   }
 }
 
-function isFrameElement(element) {
-  return securely(function () {
-    if (nodeType(element) !== ElementS.prototype.ELEMENT_NODE) {
-      return false;
-    }
+function getFrameTag(element) {
+  if (!element || _typeof(element) !== 'object') {
+    return null;
+  }
 
-    if (isShadow(element)) {
-      return false;
-    }
+  if (nodeType(element) !== Element.prototype.ELEMENT_NODE) {
+    return null;
+  }
 
-    return ['IFRAME', 'FRAME', 'OBJECT', 'EMBED'].includesS(tagName(element));
-  });
+  if (isShadow(element)) {
+    return null;
+  }
+
+  var tag = tagName(element);
+
+  if (tag !== 'IFRAME' && tag !== 'FRAME' && tag !== 'OBJECT' && tag !== 'EMBED') {
+    return null;
+  }
+
+  return tag;
 }
 
 function canNodeRunQuerySelector(node) {
@@ -887,9 +947,8 @@ function canNodeRunQuerySelector(node) {
     return true;
   }
 
-  return securely(function () {
-    return [ElementS.prototype.ELEMENT_NODE, ElementS.prototype.DOCUMENT_FRAGMENT_NODE, ElementS.prototype.DOCUMENT_NODE].includesS(nodeType(node));
-  });
+  var type = nodeType(node);
+  return type === Element.prototype.ELEMENT_NODE || type === Element.prototype.DOCUMENT_FRAGMENT_NODE || type === Element.prototype.DOCUMENT_NODE;
 }
 
 function getFramesArray(element, includingParent) {
@@ -903,9 +962,8 @@ function getFramesArray(element, includingParent) {
     return frames;
   }
 
-  var list = securely(function () {
-    return getPrototype(element).prototype.querySelectorAll.call(element, 'iframe,frame,object,embed');
-  });
+  var querySelectorAll = getPrototype(element).prototype.querySelectorAll;
+  var list = querySelectorAll.call(element, 'iframe,frame,object,embed');
   fillArrayUniques(frames, slice(list));
 
   if (includingParent) {
@@ -930,7 +988,7 @@ function fillArrayUniques(arr, items) {
 
 module.exports = {
   getFramesArray: getFramesArray,
-  isFrameElement: isFrameElement,
+  getFrameTag: getFrameTag,
   shadows: shadows
 };
 

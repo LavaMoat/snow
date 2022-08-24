@@ -1,9 +1,9 @@
 const hook = require('./hook');
-const {getFramesArray, isFrameElement} = require('./utils');
+const {getFramesArray, getFrameTag} = require('./utils');
 const {getOnload, setOnload, removeAttribute, addEventListener} = require('./natives');
 
 function resetOnloadAttribute(win, frame, cb) {
-    if (!isFrameElement(frame)) {
+    if (!getFrameTag(frame)) {
         return;
     }
 

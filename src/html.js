@@ -1,6 +1,5 @@
-const {securely} = require('./securely');
 const {getFramesArray} = require('./utils');
-const {removeAttribute, getAttribute} = require('./natives');
+const {removeAttribute, getAttribute, getTemplateContent, createElement, getInnerHTML, setInnerHTML} = require('./natives');
 
 const WARN_OF_ONLOAD_ATTRIBUTES = false; // DEBUG MODE ONLY!
 const WARN_OF_ONLOAD_ATTRIBUTES_MSG = 'WARN: Snow: Removing html string iframe onload attribute:';
@@ -21,15 +20,13 @@ function dropOnLoadAttributes(frames) {
 function handleHTML(win, args) {
     for (let i = 0; i < args.length; i++) {
         const html = args[i];
-        securely(() => {
-            const template = document.createElementS('template');
-            template.innerHTMLS = html;
-            const frames = getFramesArray(template.contentS, false);
-            if (frames.length) {
-                dropOnLoadAttributes(frames);
-                args[i] = template.innerHTMLS;
-            }
-        });
+        const template = createElement(document, 'template');
+        setInnerHTML(template, html);
+        const frames = getFramesArray(getTemplateContent(template), false);
+        if (frames.length) {
+            dropOnLoadAttributes(frames);
+            args[i] = getInnerHTML(template);
+        }
     }
 }
 

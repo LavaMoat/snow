@@ -22,6 +22,9 @@ const config = {
         'HTMLScriptElement': ['src'],
         'HTMLTemplateElement': ['content'],
         'EventTarget': ['addEventListener'],
+        'HTMLIFrameElement': ['contentWindow'],
+        'HTMLFrameElement': ['contentWindow'],
+        'HTMLObjectElement': ['contentWindow'],
     }
 };
 

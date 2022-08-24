@@ -69,7 +69,7 @@
                 document.head.appendChild(script);
             }
 
-            SNOW((win) => {
+            location.search.includes('disable') || SNOW((win) => {
                 win.alert = (msg) => {
                     console.log('Snow: ', 'alert API is disabled, message is printed to console instead: ', msg);
                 }

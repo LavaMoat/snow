@@ -1,6 +1,5 @@
 const hook = require('./hook');
-const {securely} = require('./securely');
-const {removeEventListener, addEventListener, slice, Map} = require('./natives');
+const {removeEventListener, addEventListener, slice, Map, Object} = require('./natives');
 
 const handlers = new Map();
 
@@ -44,10 +43,8 @@ function getRemoveEventListener() {
 }
 
 function hookLoadSetters(win, cb) {
-    securely(() => {
-        ObjectS.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getAddEventListener(win, cb) });
-        ObjectS.defineProperty(win.EventTarget.prototype, 'removeEventListener', { value: getRemoveEventListener() });
-    });
+    Object.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getAddEventListener(win, cb) });
+    Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', { value: getRemoveEventListener() });
 }
 
 module.exports = hookLoadSetters;

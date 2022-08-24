@@ -68,4 +68,16 @@ describe('test shadow DOM', async () => {
         }, false); // change to 'true' in order to break on the beginning of this test in the browser
         expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
     });
+
+    it('should fail to use atob of an iframe that is attached to an already attached shadow DOM', async () => {
+        const result = await browser.execute(function(debug) {
+            if (debug) debugger;
+            const a = document.createElement('div');
+            const s = a.attachShadow({mode:'open'});
+            testdiv.append(a);
+            s.innerHTML = '<iframe onload="top.myatob = this.contentWindow.atob.bind(top);"></iframe>';
+            return (top.myatob || atob)('U05PV19JU19OT1RfRElTQUJMSU5HX0FUT0JfSU5fVEhJU19XSU5ET1c=');
+        }, false); // change to 'true' in order to break on the beginning of this test in the browser
+        expect(result).toBe('ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW');
+    });
 });

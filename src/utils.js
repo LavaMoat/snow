@@ -1,6 +1,12 @@
 const {securely} = require('./securely');
 const {toString, nodeType, slice, Array, cloneNode, parse, stringify} = require('./natives');
 
+const shadows = new Array();
+
+function isShadow(node) {
+    return shadows.includes(node);
+}
+
 function isTrustedHTML(node) {
     const replacer = (k, v) => node === v ? v : ''; // avoid own props
     // normal nodes will parse into objects whereas trusted htmls into strings
@@ -8,9 +14,10 @@ function isTrustedHTML(node) {
 }
 
 function getPrototype(node) {
+    if (isShadow(node)) {
+        return ShadowRootS;
+    }
     switch (toString(cloneNode(node))) {
-        case '[object ShadowRoot]':
-            return ShadowRootS;
         case '[object HTMLDocument]':
             return DocumentS;
         case '[object DocumentFragment]':
@@ -21,6 +28,9 @@ function getPrototype(node) {
 }
 
 function isFrameElement(element) {
+    if (isShadow(element)) {
+        return false;
+    }
     return securely(() => [
         '[object HTMLIFrameElement]',
         '[object HTMLFrameElement]',
@@ -30,6 +40,9 @@ function isFrameElement(element) {
 }
 
 function canNodeRunQuerySelector(node) {
+    if (isShadow(node)) {
+        return true;
+    }
     return securely(() => [
         ElementS.prototype.ELEMENT_NODE,
         ElementS.prototype.DOCUMENT_FRAGMENT_NODE,
@@ -73,4 +86,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {getFramesArray, isFrameElement};
+module.exports = {getFramesArray, isFrameElement, shadows};

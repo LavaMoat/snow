@@ -1,18 +1,15 @@
 const {securely} = require('./securely');
-const {Array} = require('./natives');
 const hook = require('./hook');
-const {getFramesArray} = require('./utils');
+const {getFramesArray, shadows} = require('./utils');
 
-const shadows = new Array();
-
-function protectShadows(win, cb, connectedOnly = false) {
+function protectShadows(win, cb, connectedOnly) {
     for (let i = 0; i < shadows.length; i++) {
         const shadow = shadows[i];
         if (connectedOnly && !shadow.isConnected) {
             continue;
         }
         const frames = getFramesArray(shadow, false);
-        hook(win, frames, cb); // this doesn't work for elements under shadow!
+        hook(win, frames, cb);
         cb(win);
     }
 }

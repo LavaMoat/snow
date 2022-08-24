@@ -268,16 +268,19 @@ module.exports = workaroundChromiumBug;
 /***/ 228:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
+var isCrossOrigin = __webpack_require__(851);
+
 var _require = __webpack_require__(733),
     securely = _require.securely;
 
-var isCrossOrigin = __webpack_require__(851);
-
 var workaroundChromiumBug = __webpack_require__(750);
 
+var _require2 = __webpack_require__(648),
+    shadows = _require2.shadows,
+    getFramesArray = _require2.getFramesArray;
+
 function findWin(win, frameElement) {
-  var frame = null,
-      i = -1;
+  var i = -1;
 
   while (win[++i]) {
     var cross = securely(function () {
@@ -286,13 +289,23 @@ function findWin(win, frameElement) {
 
     if (!cross) {
       if (win[i].frameElement === frameElement) {
-        frame = win[i];
-        break;
+        return win[i];
       }
     }
   }
 
-  return frame;
+  for (var _i = 0; _i < shadows.length; _i++) {
+    var shadow = shadows[_i];
+    var frames = getFramesArray(shadow, false);
+
+    for (var j = 0; j < frames.length; j++) {
+      if (frames[j] === frameElement) {
+        return frames[j].contentWindow;
+      }
+    }
+  }
+
+  return null;
 }
 
 function hook(win, frames, cb) {
@@ -391,9 +404,7 @@ var _require3 = __webpack_require__(14),
 
 var callback;
 
-module.exports = function onWin(cb) {
-  var win = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window;
-
+function onWin(cb, win) {
   function hookWin(contentWindow) {
     onWin(cb, contentWindow);
     addEventListener(contentWindow.frameElement, 'load', function () {
@@ -415,6 +426,11 @@ module.exports = function onWin(cb) {
   hookDOMInserters(win, hookWin);
   hookShadowDOM(win, hookWin);
   cb(win, securely);
+}
+
+module.exports = function (cb) {
+  var win = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window;
+  onWin(cb, win);
 };
 
 /***/ }),
@@ -431,7 +447,8 @@ var _require2 = __webpack_require__(733),
     securely = _require2.securely;
 
 var _require3 = __webpack_require__(648),
-    getFramesArray = _require3.getFramesArray;
+    getFramesArray = _require3.getFramesArray,
+    shadows = _require3.shadows;
 
 var _require4 = __webpack_require__(14),
     slice = _require4.slice;
@@ -441,9 +458,11 @@ var handleHTML = __webpack_require__(328);
 var hook = __webpack_require__(228);
 
 var map = {
+  DocumentFragment: ['replaceChildren', 'append', 'prepend'],
   Document: ['replaceChildren', 'append', 'prepend', 'write', 'writeln'],
   Node: ['appendChild', 'insertBefore', 'replaceChild'],
-  Element: ['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'replaceWith', 'insertAdjacentElement', 'append', 'before', 'prepend', 'after', 'replaceChildren']
+  Element: ['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'replaceWith', 'insertAdjacentElement', 'append', 'before', 'prepend', 'after', 'replaceChildren'],
+  ShadowRoot: ['innerHTML']
 };
 
 function getHook(win, native, cb) {
@@ -455,7 +474,9 @@ function getHook(win, native, cb) {
       return _this.parentElementS || _this;
     });
     resetOnloadAttributes(win, args, cb);
+    resetOnloadAttributes(win, shadows, cb);
     handleHTML(win, args);
+    handleHTML(win, shadows);
     var ret = securely(function () {
       return FunctionS.prototype.apply;
     }).call(native, this, args);
@@ -714,8 +735,8 @@ var config = {
     'Map': ['get', 'set'],
     'Node': ['nodeType', 'parentElement', 'toString', 'cloneNode'],
     'Document': ['querySelectorAll'],
-    'DocumentFragment': ['querySelectorAll', 'toString'],
-    'ShadowRoot': ['querySelectorAll', 'toString'],
+    'DocumentFragment': ['querySelectorAll', 'toString', 'replaceChildren', 'append', 'prepend'],
+    'ShadowRoot': ['querySelectorAll', 'toString', 'innerHTML'],
     'Object': ['toString'],
     'Array': ['includes', 'push', 'slice'],
     'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
@@ -752,19 +773,13 @@ module.exports = {
 var _require = __webpack_require__(733),
     securely = _require.securely;
 
-var _require2 = __webpack_require__(14),
-    Array = _require2.Array;
-
 var hook = __webpack_require__(228);
 
-var _require3 = __webpack_require__(648),
-    getFramesArray = _require3.getFramesArray;
+var _require2 = __webpack_require__(648),
+    getFramesArray = _require2.getFramesArray,
+    shadows = _require2.shadows;
 
-var shadows = new Array();
-
-function protectShadows(win, cb) {
-  var connectedOnly = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
+function protectShadows(win, cb, connectedOnly) {
   for (var i = 0; i < shadows.length; i++) {
     var shadow = shadows[i];
 
@@ -773,8 +788,7 @@ function protectShadows(win, cb) {
     }
 
     var frames = getFramesArray(shadow, false);
-    hook(win, frames, cb); // this doesn't work for elements under shadow!
-
+    hook(win, frames, cb);
     cb(win);
   }
 }
@@ -823,6 +837,12 @@ var _require2 = __webpack_require__(14),
     parse = _require2.parse,
     stringify = _require2.stringify;
 
+var shadows = new Array();
+
+function isShadow(node) {
+  return shadows.includes(node);
+}
+
 function isTrustedHTML(node) {
   var replacer = function replacer(k, v) {
     return node === v ? v : '';
@@ -834,10 +854,11 @@ function isTrustedHTML(node) {
 }
 
 function getPrototype(node) {
-  switch (toString(cloneNode(node))) {
-    case '[object ShadowRoot]':
-      return ShadowRootS;
+  if (isShadow(node)) {
+    return ShadowRootS;
+  }
 
+  switch (toString(cloneNode(node))) {
     case '[object HTMLDocument]':
       return DocumentS;
 
@@ -850,12 +871,20 @@ function getPrototype(node) {
 }
 
 function isFrameElement(element) {
+  if (isShadow(element)) {
+    return false;
+  }
+
   return securely(function () {
     return ['[object HTMLIFrameElement]', '[object HTMLFrameElement]', '[object HTMLObjectElement]', '[object HTMLEmbedElement]'].includesS(toString(cloneNode(element)));
   });
 }
 
 function canNodeRunQuerySelector(node) {
+  if (isShadow(node)) {
+    return true;
+  }
+
   return securely(function () {
     return [ElementS.prototype.ELEMENT_NODE, ElementS.prototype.DOCUMENT_FRAGMENT_NODE, ElementS.prototype.DOCUMENT_NODE].includesS(nodeType(cloneNode(node)));
   });
@@ -899,7 +928,8 @@ function fillArrayUniques(arr, items) {
 
 module.exports = {
   getFramesArray: getFramesArray,
-  isFrameElement: isFrameElement
+  isFrameElement: isFrameElement,
+  shadows: shadows
 };
 
 /***/ }),

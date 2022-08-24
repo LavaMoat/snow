@@ -8,7 +8,7 @@ const {addEventListener} = require('./natives');
 
 let callback;
 
-module.exports = function onWin(cb, win = window) {
+function onWin(cb, win) {
     function hookWin(contentWindow) {
         onWin(cb, contentWindow);
         addEventListener(contentWindow.frameElement, 'load', function() {
@@ -31,4 +31,8 @@ module.exports = function onWin(cb, win = window) {
     hookShadowDOM(win, hookWin);
 
     cb(win, securely);
+}
+
+module.exports = function(cb, win = window) {
+    onWin(cb, win);
 }

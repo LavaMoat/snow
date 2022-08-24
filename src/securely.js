@@ -28,19 +28,9 @@ const config = {
     }
 };
 
-const securely = secure(top, config);
-
-const wins = securely(() => {
-   const arr = new ArrayS();
-   arr.push(top);
-   return arr;
-});
-
-function secureNewWin(win) {
-    if (!wins.includes(win)) {
-        wins.push(win);
-        secure(win, config);
+module.exports = {
+    securely: secure(top, config),
+    secure: function (win) {
+        return secure(win, config);
     }
-}
-
-module.exports = {securely, secureNewWin};
+};

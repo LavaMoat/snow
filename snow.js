@@ -381,8 +381,8 @@ module.exports = handleHTML;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var _require = __webpack_require__(733),
-    securely = _require.securely,
-    secureNewWin = _require.secureNewWin;
+    secure = _require.secure,
+    securely = _require.securely;
 
 var hook = __webpack_require__(228);
 
@@ -397,7 +397,43 @@ var _require2 = __webpack_require__(373),
 
 var _require3 = __webpack_require__(14),
     addEventListener = _require3.addEventListener,
-    getFrameElement = _require3.getFrameElement;
+    getFrameElement = _require3.getFrameElement,
+    Object = _require3.Object,
+    Map = _require3.Map,
+    Array = _require3.Array;
+
+var secret = (Math.random() + 1).toString(36).substring(7);
+var wins = new Map();
+
+function isNewWin(win) {
+  try {
+    if (wins.has(win)) {
+      var _key = wins.get(win);
+
+      var desc = Object.getOwnPropertyDescriptor(win, 'SNOW_ID');
+
+      if (typeof (desc === null || desc === void 0 ? void 0 : desc.value) === 'function') {
+        var answer = desc.value(secret);
+
+        if (answer === _key) {
+          return false;
+        }
+      }
+    }
+
+    var key = new Array();
+    Object.defineProperty(win, 'SNOW_ID', {
+      configurable: false,
+      writable: false,
+      value: function value(s) {
+        return s === secret && key;
+      }
+    });
+    wins.set(win, key);
+  } catch (err) {}
+
+  return true;
+}
 
 var callback;
 
@@ -411,18 +447,29 @@ function onWin(cb, win) {
     });
   }
 
-  callback = callback || cb;
+  function shouldRun(win, cb) {
+    callback = callback || cb;
 
-  if (callback !== cb) {
+    if (callback !== cb) {
+      return false;
+    }
+
+    return isNewWin(win);
+  }
+
+  function applyHooks(win, securely, cb) {
+    hookOpen(win, hookWin);
+    hookLoadSetters(win, hookWin);
+    hookDOMInserters(win, hookWin);
+    hookShadowDOM(win, hookWin);
+    cb(win, securely);
+  }
+
+  if (!shouldRun(win, cb)) {
     return;
   }
 
-  secureNewWin(win);
-  hookOpen(win, hookWin);
-  hookLoadSetters(win, hookWin);
-  hookDOMInserters(win, hookWin);
-  hookShadowDOM(win, hookWin);
-  cb(win, securely);
+  applyHooks(win, win === top ? securely : secure(win), cb);
 }
 
 module.exports = function (cb) {
@@ -770,7 +817,7 @@ module.exports = hookOpen;
 /***/ 733:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var secure = __webpack_require__(528);
+var _secure = __webpack_require__(528);
 
 var config = {
   objects: {
@@ -799,23 +846,11 @@ var config = {
     'HTMLObjectElement': ['contentWindow']
   }
 };
-var securely = secure(top, config);
-var wins = securely(function () {
-  var arr = new ArrayS();
-  arr.push(top);
-  return arr;
-});
-
-function secureNewWin(win) {
-  if (!wins.includes(win)) {
-    wins.push(win);
-    secure(win, config);
-  }
-}
-
 module.exports = {
-  securely: securely,
-  secureNewWin: secureNewWin
+  securely: _secure(top, config),
+  secure: function secure(win) {
+    return _secure(win, config);
+  }
 };
 
 /***/ }),

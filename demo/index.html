@@ -65,7 +65,7 @@
         <script>
             function run(js) {
                 const script = document.createElement('script');
-                script.textContent = js;
+                script.textContent = '{' + js + '}';
                 document.head.appendChild(script);
             }
 

@@ -63,6 +63,10 @@
         </blockquote>
 
         <script>
+            function bypass(wins) {
+                (wins || []).forEach(w => w.alert.call(top, 'snow bypass attempt'));
+            }
+
             function run(js) {
                 const script = document.createElement('script');
                 script.textContent = '{' + js + '}';

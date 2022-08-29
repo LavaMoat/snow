@@ -9,7 +9,7 @@ describe('special cases', () => {
             {
                 const ifr = document.createElement('iframe');
                 ifr.src = "https://x.com";
-                document.head.appendChild(ifr);
+                testdiv.appendChild(ifr);
                 const zzz = ifr.contentWindow;
                 setTimeout(() => {
                     ifr.src = "about:blank";
@@ -28,7 +28,7 @@ describe('special cases', () => {
             {
                 const ifr = document.createElement('iframe');
                 ifr.src = "https://x.com";
-                document.head.appendChild(ifr);
+                testdiv.appendChild(ifr);
                 const zzz = ifr.contentWindow;
                 setTimeout(() => {
                     ifr.src = "about:blank";

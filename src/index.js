@@ -4,34 +4,30 @@ const hookOpen = require('./open');
 const hookLoadSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
-const {addEventListener, getFrameElement, Object, Map, Array} = require('./natives');
+const {addEventListener, getFrameElement} = require('./natives');
+const {isMarked, mark} = require('./mark');
+const {error, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
-const secret = (Math.random() + 1).toString(36).substring(7);
-const wins = new Map();
-
-function isNewWin(win) {
+function shouldRun(win) {
     try {
-        if (wins.has(win)) {
-            const key = wins.get(win);
-            const desc = Object.getOwnPropertyDescriptor(win, 'SNOW_ID');
-            if (typeof desc?.value === 'function') {
-                const answer = desc.value(secret);
-                if (answer === key) {
-                    return false;
-                }
-            }
+        if (isMarked(win)) {
+            return false;
         }
-        const key = new Array();
-        Object.defineProperty(win, 'SNOW_ID', {
-            configurable: false, writable: false,
-            value: (s) => s === secret && key,
-        });
-        wins.set(win, key);
-    } catch (err) {}
-    return true;
+        mark(win);
+        return true;
+    } catch (err) {
+        error(ERR_MARK_NEW_WINDOW_FAILED, win, err);
+    }
+    return shouldRun(win);
 }
 
-let callback;
+function applyHooks(win, hookWin, securely, cb) {
+    hookOpen(win, hookWin);
+    hookLoadSetters(win, hookWin);
+    hookDOMInserters(win, hookWin);
+    hookShadowDOM(win, hookWin);
+    cb(win, securely);
+}
 
 function onWin(cb, win) {
     function hookWin(contentWindow) {
@@ -43,29 +39,16 @@ function onWin(cb, win) {
         });
     }
 
-    function shouldRun(win, cb) {
-        callback = callback || cb;
-        if (callback !== cb) {
-            return false;
-        }
-        return isNewWin(win);
+    if (shouldRun(win)) {
+        applyHooks(win, hookWin, win === top ? securely : secure(win), cb);
     }
-
-    function applyHooks(win, securely, cb) {
-        hookOpen(win, hookWin);
-        hookLoadSetters(win, hookWin);
-        hookDOMInserters(win, hookWin);
-        hookShadowDOM(win, hookWin);
-        cb(win, securely);
-    }
-
-    if (!shouldRun(win, cb)) {
-        return;
-    }
-
-    applyHooks(win, win === top ? securely : secure(win), cb);
 }
 
-module.exports = function(cb, win = window) {
-    onWin(cb, win);
+let used = false;
+
+module.exports = function(cb, win) {
+    if (!used) {
+        used = true;
+        onWin(cb, win || top);
+    }
 }

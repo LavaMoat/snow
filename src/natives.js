@@ -59,8 +59,8 @@ function removeAttribute(element, attribute) {
     return natives.removeAttribute.call(element, attribute);
 }
 
-function getAttribute(element) {
-    return natives.getAttribute.call(element);
+function getAttribute(element, attribute) {
+    return natives.getAttribute.call(element, attribute);
 }
 
 function addEventListener(element, event, listener, options) {

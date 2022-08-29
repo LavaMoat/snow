@@ -339,23 +339,19 @@ var _require2 = __webpack_require__(14),
     getInnerHTML = _require2.getInnerHTML,
     setInnerHTML = _require2.setInnerHTML;
 
-var WARN_OF_ONLOAD_ATTRIBUTES = false; // DEBUG MODE ONLY!
-
-var WARN_OF_ONLOAD_ATTRIBUTES_MSG = 'WARN: Snow: Removing html string iframe onload attribute:';
+var _require3 = __webpack_require__(312),
+    warn = _require3.warn,
+    WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = _require3.WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED;
 
 function dropOnLoadAttributes(frames) {
   for (var i = 0; i < frames.length; i++) {
     var frame = frames[i];
+    var onload = getAttribute(frame, 'onload');
 
-    if (WARN_OF_ONLOAD_ATTRIBUTES) {
-      var onload = getAttribute(frame, 'onload');
-
-      if (onload) {
-        console.warn(WARN_OF_ONLOAD_ATTRIBUTES_MSG, frame, onload);
-      }
+    if (onload) {
+      warn(WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED, frame, onload);
+      removeAttribute(frame, 'onload');
     }
-
-    removeAttribute(frame, 'onload');
   }
 }
 
@@ -397,45 +393,38 @@ var _require2 = __webpack_require__(373),
 
 var _require3 = __webpack_require__(14),
     addEventListener = _require3.addEventListener,
-    getFrameElement = _require3.getFrameElement,
-    Object = _require3.Object,
-    Map = _require3.Map,
-    Array = _require3.Array;
+    getFrameElement = _require3.getFrameElement;
 
-var secret = (Math.random() + 1).toString(36).substring(7);
-var wins = new Map();
+var _require4 = __webpack_require__(111),
+    isMarked = _require4.isMarked,
+    mark = _require4.mark;
 
-function isNewWin(win) {
+var _require5 = __webpack_require__(312),
+    error = _require5.error,
+    ERR_MARK_NEW_WINDOW_FAILED = _require5.ERR_MARK_NEW_WINDOW_FAILED;
+
+function shouldRun(win) {
   try {
-    if (wins.has(win)) {
-      var _key = wins.get(win);
-
-      var desc = Object.getOwnPropertyDescriptor(win, 'SNOW_ID');
-
-      if (typeof (desc === null || desc === void 0 ? void 0 : desc.value) === 'function') {
-        var answer = desc.value(secret);
-
-        if (answer === _key) {
-          return false;
-        }
-      }
+    if (isMarked(win)) {
+      return false;
     }
 
-    var key = new Array();
-    Object.defineProperty(win, 'SNOW_ID', {
-      configurable: false,
-      writable: false,
-      value: function value(s) {
-        return s === secret && key;
-      }
-    });
-    wins.set(win, key);
-  } catch (err) {}
+    mark(win);
+    return true;
+  } catch (err) {
+    error(ERR_MARK_NEW_WINDOW_FAILED, win, err);
+  }
 
-  return true;
+  return shouldRun(win);
 }
 
-var callback;
+function applyHooks(win, hookWin, securely, cb) {
+  hookOpen(win, hookWin);
+  hookLoadSetters(win, hookWin);
+  hookDOMInserters(win, hookWin);
+  hookShadowDOM(win, hookWin);
+  cb(win, securely);
+}
 
 function onWin(cb, win) {
   function hookWin(contentWindow) {
@@ -447,34 +436,18 @@ function onWin(cb, win) {
     });
   }
 
-  function shouldRun(win, cb) {
-    callback = callback || cb;
-
-    if (callback !== cb) {
-      return false;
-    }
-
-    return isNewWin(win);
+  if (shouldRun(win)) {
+    applyHooks(win, hookWin, win === top ? securely : secure(win), cb);
   }
-
-  function applyHooks(win, securely, cb) {
-    hookOpen(win, hookWin);
-    hookLoadSetters(win, hookWin);
-    hookDOMInserters(win, hookWin);
-    hookShadowDOM(win, hookWin);
-    cb(win, securely);
-  }
-
-  if (!shouldRun(win, cb)) {
-    return;
-  }
-
-  applyHooks(win, win === top ? securely : secure(win), cb);
 }
 
-module.exports = function (cb) {
-  var win = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window;
-  onWin(cb, win);
+var used = false;
+
+module.exports = function (cb, win) {
+  if (!used) {
+    used = true;
+    onWin(cb, win || top);
+  }
 };
 
 /***/ }),
@@ -614,6 +587,97 @@ module.exports = hookLoadSetters;
 
 /***/ }),
 
+/***/ 312:
+/***/ ((module) => {
+
+var WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
+var ERR_MARK_NEW_WINDOW_FAILED = 2;
+
+function warn(msg, a, b) {
+  switch (msg) {
+    case WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED:
+      var frame = a,
+          onload = b;
+      console.warn('SNOW:', 'removing html string iframe onload attribute:', frame, "\"".concat(onload, "\"."), '\nthis technique is less common under legitimate use, but can be used to attack snow and therefore is removed.', '\nif this harms your web app, open an issue at snow github repo.');
+      break;
+
+    default:
+      break;
+  }
+}
+
+function error(msg, a, b) {
+  switch (msg) {
+    case ERR_MARK_NEW_WINDOW_FAILED:
+      var win = a,
+          err = b;
+      console.error('SNOW:', 'failed to mark new window:', win, '.', '\nthis is either a bug in snow or an attack attempt.', '\nthis typically causes an infinite loop until either one is solved.', '\nerror caught:\n', err);
+      break;
+
+    default:
+      break;
+  }
+}
+
+module.exports = {
+  warn: warn,
+  error: error,
+  WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED: WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
+  ERR_MARK_NEW_WINDOW_FAILED: ERR_MARK_NEW_WINDOW_FAILED
+};
+
+/***/ }),
+
+/***/ 111:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var _require = __webpack_require__(14),
+    Map = _require.Map,
+    Object = _require.Object,
+    Array = _require.Array;
+
+var secret = (Math.random() + 1).toString(36).substring(7);
+var wins = new Map();
+
+function isMarked(win) {
+  if (!wins.has(win)) {
+    return false;
+  }
+
+  var desc = Object.getOwnPropertyDescriptor(win, 'SNOW_ID');
+
+  if (!desc || !Object.hasOwnProperty.call(desc, 'value')) {
+    return false;
+  }
+
+  if (typeof desc.value !== 'function') {
+    return false;
+  }
+
+  var key = wins.get(win);
+  var answer = desc.value(secret);
+  return answer === key;
+}
+
+function mark(win) {
+  var key = new Array();
+  Object.defineProperty(win, 'SNOW_ID', {
+    configurable: false,
+    writable: false,
+    value: function value(s) {
+      return s === secret && key;
+    }
+  });
+  wins.set(win, key);
+}
+
+module.exports = {
+  isMarked: isMarked,
+  mark: mark
+};
+
+/***/ }),
+
 /***/ 14:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -683,8 +747,8 @@ function removeAttribute(element, attribute) {
   return natives.removeAttribute.call(element, attribute);
 }
 
-function getAttribute(element) {
-  return natives.getAttribute.call(element);
+function getAttribute(element, attribute) {
+  return natives.getAttribute.call(element, attribute);
 }
 
 function addEventListener(element, event, listener, options) {

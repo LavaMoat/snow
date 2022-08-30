@@ -26,6 +26,6 @@ describe('test custom elements', async () => {
                 document.body.appendChild(document.createElement('iframe', {is: `legit-element${n}`}));
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

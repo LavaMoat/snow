@@ -12,7 +12,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of multiple iframes added to DOM', async () => {
@@ -28,7 +28,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow, ifr2.contentWindow, ifr3.contentWindow]);
             }
         });
-        expect(result).toBe('Y,Y,Y');
+        expect(result).toBe('V,V,V');
     });
 
     it('should fail to use atob of an iframe added by Node.prototype.insertBefore', async () => {
@@ -40,7 +40,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe added by Node.prototype.replaceChild', async () => {
@@ -52,7 +52,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe added by Element.prototype.replaceWith', async () => {
@@ -64,7 +64,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe added by Element.prototype.insertAdjacentElement', async () => {
@@ -76,7 +76,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe added by Element.prototype.append', async () => {
@@ -88,7 +88,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe added by Element.prototype.before', async () => {
@@ -100,7 +100,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe added by Element.prototype.prepend', async () => {
@@ -112,7 +112,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe added by Element.prototype.after', async () => {
@@ -124,7 +124,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe added by Element.prototype.replaceChildren', async () => {
@@ -136,7 +136,7 @@ describe('test DOM insertions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe added by Document.prototype.append', async () => {
@@ -152,7 +152,7 @@ describe('test DOM insertions', async () => {
                 bypass([d.firstChild.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe added by Document.prototype.prepend', async () => {
@@ -168,6 +168,6 @@ describe('test DOM insertions', async () => {
                 bypass([d.firstChild.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

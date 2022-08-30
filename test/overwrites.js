@@ -13,7 +13,7 @@ describe('test overrides of native functions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.includes override attempt', async () => {
@@ -26,7 +26,7 @@ describe('test overrides of native functions', async () => {
                 return ifr.contentWindow.atob('WA==');
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.push override attempt', async () => {
@@ -39,7 +39,7 @@ describe('test overrides of native functions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.slice override attempt', async () => {
@@ -52,7 +52,7 @@ describe('test overrides of native functions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Function.prototype.call override attempt', async () => {
@@ -65,7 +65,7 @@ describe('test overrides of native functions', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Element.prototype.parentElement override attempt', async () => {
@@ -77,7 +77,7 @@ describe('test overrides of native functions', async () => {
                 bypass([xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Function.prototype.apply override attempt', async () => {
@@ -89,7 +89,7 @@ describe('test overrides of native functions', async () => {
                 return xxx.contentWindow.atob('WA==');
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Element.prototype.getElementsByTagName override attempt', async () => {
@@ -101,7 +101,7 @@ describe('test overrides of native functions', async () => {
                 bypass([xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Object.getOwnPropertyDescriptor override attempt', async () => {
@@ -113,7 +113,7 @@ describe('test overrides of native functions', async () => {
                 bypass([xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Object.getPrototypeOf override attempt', async () => {
@@ -125,7 +125,7 @@ describe('test overrides of native functions', async () => {
                 bypass([xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via window.Error override attempt', async () => {
@@ -137,7 +137,7 @@ describe('test overrides of native functions', async () => {
                 bypass([xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Object.defineProperty override attempt', async () => {
@@ -149,6 +149,6 @@ describe('test overrides of native functions', async () => {
                 bypass([xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

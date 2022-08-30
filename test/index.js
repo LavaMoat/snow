@@ -18,7 +18,7 @@ module.exports = async function setup(injectSnow = true) {
     // use SNOW to disable atob
     await browser.execute(function() {
         window.SNOW((win) => {
-            win.atob = _ => 'Y';
+            win.atob = _ => 'V';
         }, window);
     });
 

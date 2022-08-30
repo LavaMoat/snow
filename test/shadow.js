@@ -14,7 +14,7 @@ describe('test shadow DOM', async () => {
                 bypass([s.firstChild.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that is DOM inserted as part of a shadow DOM', async () => {
@@ -28,7 +28,7 @@ describe('test shadow DOM', async () => {
                 bypass([s.firstChild.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe load event that is DOM inserted as part of a shadow DOM', async () => {
@@ -45,7 +45,7 @@ describe('test shadow DOM', async () => {
                 testdiv.append(a);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe onload that is DOM inserted as part of a shadow DOM', async () => {
@@ -62,7 +62,7 @@ describe('test shadow DOM', async () => {
                 testdiv.append(a);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that is innerHTML attached with onload attribute as part of a shadow DOM', async () => {
@@ -76,7 +76,7 @@ describe('test shadow DOM', async () => {
                 bypass([{atob: top.myatob || atob, alert: top.myalert || alert}]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that is attached to an already attached shadow DOM', async () => {
@@ -90,6 +90,6 @@ describe('test shadow DOM', async () => {
                 bypass([{atob: top.myatob || atob, alert: top.myalert || alert}]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

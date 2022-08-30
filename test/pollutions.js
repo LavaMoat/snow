@@ -14,7 +14,7 @@ describe('test overrides of objects for prototype pollution attempts', async () 
                 done(top.myatob('WA=='), [ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Securely removeAttributeS prototype pollution (attribute)', async () => {
@@ -31,7 +31,7 @@ describe('test overrides of objects for prototype pollution attempts', async () 
                 done(top.myatob('WA=='), [ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Securely addEventListenerS prototype pollution', async () => {
@@ -48,7 +48,7 @@ describe('test overrides of objects for prototype pollution attempts', async () 
                 done(top.myatob('WA=='), [ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Securely toStringS prototype pollution (TrustedHTML)', async () => {
@@ -63,7 +63,7 @@ describe('test overrides of objects for prototype pollution attempts', async () 
                 done(x.firstChild.contentWindow.atob('WA=='), [x.firstChild.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Securely nodeTypeS prototype pollution', async () => {
@@ -81,7 +81,7 @@ describe('test overrides of objects for prototype pollution attempts', async () 
                 done(x.firstChild.contentWindow.atob('WA=='), [x.firstChild.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Securely toStringS prototype pollution (getting correct prototype)', async () => {
@@ -99,7 +99,7 @@ describe('test overrides of objects for prototype pollution attempts', async () 
                 done(x.firstChild.contentWindow.atob('WA=='), [x.firstChild.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Securely toStringS prototype pollution (telling if element is frame)', async () => {
@@ -113,6 +113,6 @@ describe('test overrides of objects for prototype pollution attempts', async () 
                 done(top.myatob('WA=='), [ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

@@ -1,9 +1,8 @@
 const secure = require('@weizman/securely');
 
-const wins = [top];
-
 const config = {
     objects: {
+        'JSON': ['parse', 'stringify'],
         'document': ['createElement'],
         'Object': ['defineProperty', 'getOwnPropertyDescriptor'],
     },
@@ -14,7 +13,8 @@ const config = {
         'Map': ['get', 'set'],
         'Node': ['nodeType', 'parentElement', 'toString'],
         'Document': ['querySelectorAll'],
-        'DocumentFragment': ['querySelectorAll', 'toString'],
+        'DocumentFragment': ['querySelectorAll', 'toString', 'replaceChildren', 'append', 'prepend'],
+        'ShadowRoot': ['querySelectorAll', 'toString', 'innerHTML'],
         'Object': ['toString'],
         'Array': ['includes', 'push', 'slice'],
         'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
@@ -22,18 +22,15 @@ const config = {
         'HTMLScriptElement': ['src'],
         'HTMLTemplateElement': ['content'],
         'EventTarget': ['addEventListener'],
+        'HTMLIFrameElement': ['contentWindow'],
+        'HTMLFrameElement': ['contentWindow'],
+        'HTMLObjectElement': ['contentWindow'],
     }
 };
 
-const securely = secure(top, config);
-
-function secureNewWin(win) {
-    securely(() => {
-        if (!wins.includesS(win)) {
-            wins.pushS(win);
-            secure(win, config);
-        }
-    });
-}
-
-module.exports = {securely, secureNewWin};
+module.exports = {
+    securely: secure(top, config),
+    secure: function (win) {
+        return secure(win, config);
+    }
+};

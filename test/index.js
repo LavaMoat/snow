@@ -4,7 +4,7 @@ const path = require('path');
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();
 
 module.exports = async function setup(injectSnow = true) {
-    await browser.url(`https://facebook.com/`);
+    await browser.url(`https://example.com/`);
 
     if (!injectSnow) return;
 
@@ -18,9 +18,7 @@ module.exports = async function setup(injectSnow = true) {
     // use SNOW to disable atob
     await browser.execute(function() {
         window.SNOW((win) => {
-            win.atob = function() {
-                return 'ATOB_IS_DISABLED_IN_THIS_WINDOW_BY_SNOW';
-            };
+            win.atob = _ => 'V';
         }, window);
     });
 

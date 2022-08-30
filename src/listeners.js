@@ -1,7 +1,7 @@
 const hook = require('./hook');
-const {securely} = require('./securely');
-const {getArguments} = require('./utils');
-const {addEventListener} = require('./natives');
+const {removeEventListener, addEventListener, slice, Map, Object} = require('./natives');
+
+const handlers = new Map();
 
 function callOnload(that, onload, args) {
     if (onload) {
@@ -14,24 +14,37 @@ function callOnload(that, onload, args) {
     }
 }
 
-function getHook(win, cb) {
-    return function(type, listener, options) {
-        let onload = listener;
+function getAddEventListener(win, cb) {
+    return function(type, handler, options) {
+        let listener = handler;
         if (type === 'load') {
-            onload = function () {
-                hook(win, [this], cb);
-                const args = getArguments(arguments);
-                callOnload(this, listener, args);
-            };
+            if (!handlers.has(handler)) {
+                handlers.set(handler, function () {
+                    hook(win, [this], cb);
+                    const args = slice(arguments);
+                    callOnload(this, handler, args);
+                });
+            }
+            listener = handlers.get(handler);
         }
-        return addEventListener(this, type, onload, options);
+        return addEventListener(this, type, listener, options);
+    }
+}
+
+function getRemoveEventListener() {
+    return function(type, handler, options) {
+        let listener = handler;
+        if (type === 'load') {
+            listener = handlers.get(handler);
+            handlers.delete(handler);
+        }
+        return removeEventListener(this, type, listener, options);
     }
 }
 
 function hookLoadSetters(win, cb) {
-    securely(() => {
-        ObjectS.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getHook(win, cb) });
-    });
+    Object.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getAddEventListener(win, cb) });
+    Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', { value: getRemoveEventListener() });
 }
 
 module.exports = hookLoadSetters;

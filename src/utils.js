@@ -1,48 +1,68 @@
-const {securely} = require('./securely');
-const {toString, nodeType} = require('./natives');
+const {tagName, nodeType, slice, Array, parse, stringify,
+    Node, Document, DocumentFragment, Element, ShadowRoot} = require('./natives');
 
-function getArguments(oldArgs) {
-    const args = [];
-    for (let i = 0; i < oldArgs.length; i++) {
-        args[i] = oldArgs[i];
-    }
-    return args;
+const shadows = new Array();
+
+function isShadow(node) {
+    return shadows.includes(node);
 }
 
 function isTrustedHTML(node) {
-    return toString(node) === '[object TrustedHTML]';
+    const replacer = (k, v) => (!k && node === v) ? v : ''; // avoid own props
+    // normal nodes will parse into objects whereas trusted htmls into strings
+    return typeof parse(stringify(node, replacer)) === 'string';
 }
 
 function getPrototype(node) {
-    switch (toString(node)) {
-        case '[object HTMLDocument]':
-            return DocumentS;
-        case '[object DocumentFragment]':
-            return DocumentFragmentS;
+    if (isShadow(node)) {
+        return ShadowRoot;
+    }
+
+    switch (nodeType(node)) {
+        case Node.prototype.DOCUMENT_NODE:
+            return Document;
+        case Node.prototype.DOCUMENT_FRAGMENT_NODE:
+            return DocumentFragment;
         default:
-            return ElementS;
+            return Element;
     }
 }
 
-function isFrameElement(element) {
-    return securely(() => [
-        '[object HTMLIFrameElement]',
-        '[object HTMLFrameElement]',
-        '[object HTMLObjectElement]',
-        '[object HTMLEmbedElement]',
-    ].includesS(toString(element)));
+function getFrameTag(element) {
+    if (!element || typeof element !== 'object') {
+        return null;
+    }
+
+    if (nodeType(element) !== Element.prototype.ELEMENT_NODE) {
+        return null;
+    }
+
+    if (isShadow(element)) {
+        return null;
+    }
+
+    const tag = tagName(element);
+    if (tag !== 'IFRAME' && tag !== 'FRAME' && tag !== 'OBJECT' && tag !== 'EMBED') {
+        return null;
+    }
+
+    return tag;
 }
 
 function canNodeRunQuerySelector(node) {
-    return securely(() => [
-        ElementS.prototype.ELEMENT_NODE,
-        ElementS.prototype.DOCUMENT_FRAGMENT_NODE,
-        ElementS.prototype.DOCUMENT_NODE,
-    ].includesS(nodeType(node)));
+    if (isShadow(node)) {
+        return true;
+    }
+    const type = nodeType(node);
+    return (
+        type === Element.prototype.ELEMENT_NODE ||
+        type === Element.prototype.DOCUMENT_FRAGMENT_NODE ||
+        type === Element.prototype.DOCUMENT_NODE
+    );
 }
 
 function getFramesArray(element, includingParent) {
-    const frames = [];
+    const frames = new Array();
 
     if (null === element || typeof element !== 'object') {
         return frames;
@@ -52,11 +72,10 @@ function getFramesArray(element, includingParent) {
         return frames;
     }
 
-    const list = securely(() => {
-        return getPrototype(element).prototype.querySelectorAll.call(element, 'iframe,frame,object,embed');
-    });
+    const querySelectorAll = getPrototype(element).prototype.querySelectorAll;
+    const list = querySelectorAll.call(element, 'iframe,frame,object,embed');
 
-    fillArrayUniques(frames, securely(() => ArrayS.prototype.slice.call(list)));
+    fillArrayUniques(frames, slice(list));
     if (includingParent) {
         fillArrayUniques(frames, [element]);
     }
@@ -67,17 +86,14 @@ function getFramesArray(element, includingParent) {
 function fillArrayUniques(arr, items) {
     let isArrUpdated = false;
 
-    securely(() => {
-        for (let i = 0; i < items.length; i++) {
-            if (!arr.includesS(items[i])) {
-                arr.pushS(items[i]);
-                isArrUpdated = true;
-            }
-
+    for (let i = 0; i < items.length; i++) {
+        if (!arr.includes(items[i])) {
+            arr.push(items[i]);
+            isArrUpdated = true;
         }
-    });
+    }
 
     return isArrUpdated;
 }
 
-module.exports = {getArguments, getFramesArray, isFrameElement};
+module.exports = {getFramesArray, getFrameTag, shadows};

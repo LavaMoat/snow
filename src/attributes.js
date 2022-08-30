@@ -1,19 +1,20 @@
 const hook = require('./hook');
-const {getFramesArray, isFrameElement} = require('./utils');
+const {getFramesArray, getFrameTag} = require('./utils');
 const {getOnload, setOnload, removeAttribute, addEventListener} = require('./natives');
 
 function resetOnloadAttribute(win, frame, cb) {
-    if (!isFrameElement(frame)) {
+    if (!getFrameTag(frame)) {
         return;
     }
+
+    addEventListener(frame, 'load', function() {
+        hook(win, [this], cb);
+    });
 
     const onload = getOnload(frame);
     if (onload) {
         setOnload(frame, null);
         removeAttribute(frame, 'onload');
-        addEventListener(frame, 'load', function() {
-            hook(win, [this], cb);
-        });
         setOnload(frame, onload);
     }
 }

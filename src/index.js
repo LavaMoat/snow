@@ -1,32 +1,54 @@
-const {securely, secureNewWin} = require('./securely');
+const {secure, securely} = require('./securely');
 const hook = require('./hook');
 const hookOpen = require('./open');
 const hookLoadSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
-const {addEventListener} = require('./natives');
+const {hookShadowDOM} = require('./shadow');
+const {addEventListener, getFrameElement} = require('./natives');
+const {isMarked, mark} = require('./mark');
+const {error, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
-let callback;
+function shouldRun(win) {
+    try {
+        const run = !isMarked(win);
+        if (run) {
+            mark(win);
+        }
+        return run;
+    } catch (err) {
+        error(ERR_MARK_NEW_WINDOW_FAILED, win, err);
+    }
+    return shouldRun(win);
+}
 
-module.exports = function onWin(cb, win = window) {
+function applyHooks(win, hookWin, securely, cb) {
+    hookOpen(win, hookWin);
+    hookLoadSetters(win, hookWin);
+    hookDOMInserters(win, hookWin);
+    hookShadowDOM(win, hookWin);
+    cb(win, securely);
+}
+
+function onWin(cb, win) {
     function hookWin(contentWindow) {
         onWin(cb, contentWindow);
-        addEventListener(contentWindow.frameElement, 'load', function() {
+        addEventListener(getFrameElement(contentWindow), 'load', function() {
             hook(win, [this], function() {
                 onWin(cb, contentWindow);
             });
         });
     }
 
-    callback = callback || cb;
-    if (callback !== cb) {
-        return;
+    if (shouldRun(win)) {
+        applyHooks(win, hookWin, win === top ? securely : secure(win), cb);
     }
+}
 
-    secureNewWin(win);
+let used = false;
 
-    hookOpen(win, hookWin);
-    hookLoadSetters(win, hookWin);
-    hookDOMInserters(win, hookWin);
-
-    cb(win, securely);
+module.exports = function(cb, win) {
+    if (!used) {
+        used = true;
+        onWin(cb, win || top);
+    }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@weizman/snow",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "register to the creation event of any newborn window in the webpage",
   "main": "src/index.js",
   "devDependencies": {
@@ -11,7 +11,7 @@
     "@wdio/mocha-framework": "^7.5.3",
     "@wdio/spec-reporter": "^7.5.3",
     "babel-loader": "^8.2.2",
-    "chromedriver": "^102.0.0",
+    "chromedriver": "^104.0.0",
     "wdio-chromedriver-service": "7.0.0",
     "webpack": "^5.33.2",
     "webpack-cli": "^4.6.0"
@@ -36,6 +36,6 @@
   "homepage": "https://lavamoat.github.io/snow/",
   "dependencies": {
     "is-cross-origin": "^1.0.1",
-    "@weizman/securely": "^1.0.1"
+    "@weizman/securely": "^1.0.2"
   }
 }

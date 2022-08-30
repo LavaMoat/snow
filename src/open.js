@@ -1,4 +1,4 @@
-const {getArguments} = require('./utils');
+const {slice} = require('./natives');
 
 // https://github.com/lavamoat/snow/issues/2
 const ISSUE_2_SOLVED = false;
@@ -10,7 +10,7 @@ function hookOpen(win, cb) {
             return null;
         }
 
-        const args = getArguments(arguments);
+        const args = slice(arguments);
         const opened = realOpen.apply(this, args);
         cb(opened);
         return opened;

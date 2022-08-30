@@ -3,6 +3,35 @@ const setup = require('./index');
 describe('test HTML injections', async () => {
     beforeEach(setup);
 
+    it('should fail to use atob of an iframe created by srcdoc', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            {
+                const ifr = document.createElement('iframe');
+                top.bypass = bypass;
+                ifr.srcdoc = `<script>top.bypass([this]);</script>`
+                testdiv.appendChild(ifr);
+            }
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an iframe created by srcdoc with onload attribute of a nested iframe', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            {
+                const ifr = document.createElement('iframe');
+                top.bypass = bypass;
+                ifr.srcdoc = `
+<iframe onload="top.bypass([this.contentWindow]);"></iframe>
+<script>setTimeout(() => top.bypass([window]), 1000)</script>
+`;
+                testdiv.appendChild(ifr);
+            }
+        });
+        expect(result).toBe('V');
+    });
+
     it('should fail to use atob of an iframe created by innerHTML', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));

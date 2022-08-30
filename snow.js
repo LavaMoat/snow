@@ -405,12 +405,13 @@ var _require5 = __webpack_require__(312),
 
 function shouldRun(win) {
   try {
-    if (isMarked(win)) {
-      return false;
+    var run = !isMarked(win);
+
+    if (run) {
+      mark(win);
     }
 
-    mark(win);
-    return true;
+    return run;
   } catch (err) {
     error(ERR_MARK_NEW_WINDOW_FAILED, win, err);
   }

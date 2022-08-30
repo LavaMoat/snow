@@ -10,11 +10,11 @@ const {error, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
 function shouldRun(win) {
     try {
-        if (isMarked(win)) {
-            return false;
+        const run = !isMarked(win);
+        if (run) {
+            mark(win);
         }
-        mark(win);
-        return true;
+        return run;
     } catch (err) {
         error(ERR_MARK_NEW_WINDOW_FAILED, win, err);
     }

@@ -11,6 +11,7 @@ const map = {
     Node: ['appendChild', 'insertBefore', 'replaceChild'],
     Element: ['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'replaceWith', 'insertAdjacentElement', 'append', 'before', 'prepend', 'after', 'replaceChildren'],
     ShadowRoot: ['innerHTML'],
+    HTMLIFrameElement: ['srcdoc'],
 };
 
 function getHook(win, native, cb) {

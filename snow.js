@@ -480,7 +480,8 @@ var map = {
   Document: ['replaceChildren', 'append', 'prepend', 'write', 'writeln'],
   Node: ['appendChild', 'insertBefore', 'replaceChild'],
   Element: ['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'replaceWith', 'insertAdjacentElement', 'append', 'before', 'prepend', 'after', 'replaceChildren'],
-  ShadowRoot: ['innerHTML']
+  ShadowRoot: ['innerHTML'] // HTMLIFrameElement: ['srcdoc'],
+
 };
 
 function getHook(win, native, cb) {

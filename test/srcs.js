@@ -13,7 +13,7 @@ describe('test different iframe src', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe with src javascript:', async () => {
@@ -26,7 +26,7 @@ describe('test different iframe src', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe with src javascript: via the javascript: (src then inject)', async () => {
@@ -40,7 +40,7 @@ describe('test different iframe src', async () => {
                 testdiv.appendChild(ifr);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe with src javascript: via the javascript: (inject then src)', async () => {
@@ -54,6 +54,6 @@ describe('test different iframe src', async () => {
                 ifr.src = `javascript:top["${rnd}"]([this])`;
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

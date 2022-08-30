@@ -11,7 +11,7 @@ describe.skip('window.open API', () => {
                 bypass([win]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin', async () => {
@@ -27,6 +27,6 @@ describe.skip('window.open API', () => {
                 }, 1000);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

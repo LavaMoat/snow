@@ -14,7 +14,7 @@ describe('test HTML injections', async () => {
                 bypass([window[rnd].contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe created by outerHTML', async () => {
@@ -28,7 +28,7 @@ describe('test HTML injections', async () => {
                 bypass([window[rnd].contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe created by insertAdjacentHTML', async () => {
@@ -42,7 +42,7 @@ describe('test HTML injections', async () => {
                 bypass([window[rnd].contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of a div\'s child iframe created by innerHTML', async () => {
@@ -56,7 +56,7 @@ describe('test HTML injections', async () => {
                 bypass([window[rnd].contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of via js execution via innerHTML call', async () => {
@@ -69,7 +69,7 @@ describe('test HTML injections', async () => {
                 bypass([xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob by leveraging a TrustedHTML node (with onload)', async () => {
@@ -85,7 +85,7 @@ describe('test HTML injections', async () => {
                 bypass([xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob by leveraging a TrustedHTML node', async () => {
@@ -101,6 +101,6 @@ describe('test HTML injections', async () => {
                 bypass([xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

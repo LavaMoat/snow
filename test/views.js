@@ -12,7 +12,7 @@ describe('test different views', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an frame', async () => {
@@ -24,7 +24,7 @@ describe('test different views', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an object', async () => {
@@ -35,7 +35,7 @@ describe('test different views', async () => {
                 bypass([temp_id.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an embed', async () => {
@@ -49,6 +49,6 @@ describe('test different views', async () => {
                 bypass([window[0]]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

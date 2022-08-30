@@ -29,7 +29,7 @@ describe('test numeric indexes overrides', async () => {
                 bypass([fr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should crash snow via property n override attempt', async () => {
@@ -65,6 +65,6 @@ describe('test numeric indexes overrides', async () => {
                 bypass([fr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

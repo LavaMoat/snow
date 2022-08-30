@@ -24,6 +24,6 @@ describe('test normal cases', async () => {
                 bypass([top]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

@@ -14,7 +14,7 @@ describe('test listeners', async () => {
                 testdiv.appendChild(ifr);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should attach same load event listener only once', async () => {

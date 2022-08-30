@@ -19,7 +19,7 @@ describe('special cases', () => {
                 }, 1000);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin (complex)', async () => {
@@ -44,7 +44,7 @@ describe('special cases', () => {
                 }, 1000);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an embed that was cross origin and then same origin', async () => {
@@ -65,7 +65,7 @@ describe('special cases', () => {
                 }, 1000);
             }
         });
-        expect(result).toBe('Y,Y');
+        expect(result).toBe('V,V');
     });
 
     it('should fail to use atob of an iframe that was reattached to dom', async () => {
@@ -83,7 +83,7 @@ describe('special cases', () => {
                 });
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe within an iframe within an iframe', async () => {
@@ -107,7 +107,7 @@ describe('special cases', () => {
                 testdiv.appendChild(ifr);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that had its document written', async () => {
@@ -120,7 +120,7 @@ describe('special cases', () => {
                 bypass([ifr.contentWindow.xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that had its document written-ln', async () => {
@@ -133,7 +133,7 @@ describe('special cases', () => {
                 bypass([ifr.contentWindow.xxx.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe when all element in DOM changed their own toString behaviour', async () => {
@@ -152,6 +152,6 @@ describe('special cases', () => {
                 testdiv.appendChild(fr);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

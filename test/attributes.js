@@ -13,7 +13,7 @@ describe('test DOM attributes', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that calls atob via onload setAttributeNS', async () => {
@@ -26,7 +26,7 @@ describe('test DOM attributes', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that calls atob via onload setAttributeNode', async () => {
@@ -40,7 +40,7 @@ describe('test DOM attributes', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that calls atob via onload setAttributeNodeNS', async () => {
@@ -54,7 +54,7 @@ describe('test DOM attributes', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that calls atob via onload setNamedItem', async () => {
@@ -68,7 +68,7 @@ describe('test DOM attributes', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that calls atob via onload setNamedItemNS', async () => {
@@ -82,6 +82,6 @@ describe('test DOM attributes', async () => {
                 bypass([ifr.contentWindow]);
             }
         });
-        expect(result).toBe('Y');
+        expect(result).toBe('V');
     });
 });

@@ -17,6 +17,23 @@ describe('test shadow DOM', async () => {
         expect(result).toBe('V');
     });
 
+    it('should fail to use atob of an iframe that is innerHTML attached as part of a shadow DOM inside another shadow DOM', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            {
+                const a = document.createElement('div');
+                const s = a.attachShadow({mode: 'open'});
+                const d = document.createElement('div');
+                s.appendChild(d);
+                const s2 = d.attachShadow({mode: 'open'});
+                s2.innerHTML = '<iframe></iframe>';
+                testdiv.append(a);
+                bypass([s2.firstChild.contentWindow]);
+            }
+        });
+        expect(result).toBe('V');
+    });
+
     it('should fail to use atob of an iframe that is DOM inserted as part of a shadow DOM', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));

@@ -604,14 +604,14 @@ function warn(msg, a, b) {
       var frame = a,
           onload = b;
       bail = false;
-      console.warn('SNOW:', 'removing html string iframe onload attribute:', frame, "\"".concat(onload, "\"."), '\nthis technique is less common under legitimate use, but can be used to attack snow and therefore is removed.', '\nif this harms your web app, open an issue at snow github repo.');
+      console.warn('SNOW:', 'removing html string iframe onload attribute:', frame, "\"".concat(onload, "\""), '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
       break;
 
     case WARN_OPEN_API_DISABLED:
       var args = a,
           win = b;
       bail = true;
-      console.warn('SNOW:', 'blocking open API call:', args, win, '\nlearn more about why open API is blocked by snow completely here:', 'https://github.com/lavamoat/snow/issues/2');
+      console.warn('SNOW:', 'blocking open API call:', args, win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
       break;
 
     default:
@@ -629,7 +629,7 @@ function error(msg, a, b) {
       var win = a,
           err = b;
       bail = true;
-      console.error('SNOW:', 'failed to mark new window:', win, '.', '\nthis is either a bug in snow or an attack attempt.', '\nthis typically causes an infinite loop until either one is solved.', '\nerror caught:\n', err);
+      console.error('SNOW:', 'failed to mark new window:', win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', '\n', 'in order to maintain a bulletproof defense mechanism, failing to mark a new window typically causes an infinite loop', '.', '\n', 'error caught:', '\n', err);
       break;
 
     default:

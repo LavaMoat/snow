@@ -5,7 +5,7 @@ describe('test marking mechanism is safe', async () => {
 
     it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Map proto', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 Object.defineProperty(Map.prototype, 'has', {value:1});
                 Object.defineProperty(Map.prototype, 'get', {value:1});
@@ -29,7 +29,7 @@ describe('test marking mechanism is safe', async () => {
 
     it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Object proto getOwnPropertyDescriptor prop', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 Object.defineProperty(Object, 'getOwnPropertyDescriptor', {value:1});
                 const ifr = document.createElement('iframe');
@@ -51,7 +51,7 @@ describe('test marking mechanism is safe', async () => {
 
     it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Object proto hasOwnProperty prop', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 Object.defineProperty(Object, 'hasOwnProperty', {value:1});
                 const ifr = document.createElement('iframe');
@@ -73,7 +73,7 @@ describe('test marking mechanism is safe', async () => {
 
     it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Object proto defineProperty prop', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 Object.defineProperty(Object, 'defineProperty', {value:1});
                 const ifr = document.createElement('iframe');

@@ -5,7 +5,7 @@ describe('test without Snow', async () => {
 
     it('should succeed to use top.atob normally', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 bypass([top]);
             }
@@ -19,7 +19,7 @@ describe('test normal cases', async () => {
 
     it('should fail to use top.atob normally', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 bypass([top]);
             }

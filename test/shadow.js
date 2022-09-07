@@ -5,7 +5,7 @@ describe('test shadow DOM', async () => {
 
     it('should fail to use atob of an iframe that is innerHTML attached as part of a shadow DOM', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'open'});
@@ -19,7 +19,7 @@ describe('test shadow DOM', async () => {
 
     it('should fail to use atob of an iframe that is innerHTML attached as part of a shadow DOM inside another shadow DOM', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'open'});
@@ -36,7 +36,7 @@ describe('test shadow DOM', async () => {
 
     it('should fail to use atob of an iframe that is DOM inserted as part of a shadow DOM', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'open'});
@@ -50,7 +50,7 @@ describe('test shadow DOM', async () => {
 
     it('should fail to use atob of an iframe load event that is DOM inserted as part of a shadow DOM', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'open'});
@@ -67,7 +67,7 @@ describe('test shadow DOM', async () => {
 
     it('should fail to use atob of an iframe onload that is DOM inserted as part of a shadow DOM', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'open'});
@@ -84,7 +84,7 @@ describe('test shadow DOM', async () => {
 
     it('should fail to use atob of an iframe that is innerHTML attached with onload attribute as part of a shadow DOM', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'open'});
@@ -98,7 +98,7 @@ describe('test shadow DOM', async () => {
 
     it('should fail to use atob of an iframe that is attached to an already attached shadow DOM', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'open'});

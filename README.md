@@ -2,17 +2,18 @@
 
 > **S**ecuring **N**ested **O**wnership of **W**indows
 
-`Snow` aspires to standardize how to recursively own newborn windows within a browser webpage, 
-from the context of the webpage itself.
+`Snow` aspires to standardize how to recursively own newborn windows (aka iframes/realms) within a browser web app, 
+from the context of the app itself, and ideally to achieve that goal as a browser builtin API in the future.
 
-By providing `Snow` a callback, it will make sure to call it with every new window that is being 
+Until then, it comes in the form of a shim that once applied to the page exposes an API that when is 
+provided with a callback, will make sure to call it with every new window that is being 
 injected to DOM, before its creator gets a hold on it.
 
 This ability exists for extensions (with the `all_frames: true` property), but `Snow` brings it
-to non extension javascript with the same privileges as the website.
+to non extension javascript with the same privileges as the web app.
 
 * [Test](https://lavamoat.github.io/snow/demo/) `Snow` for yourself with this live demo!
-* [Learn](https://github.com/lavamoat/snow/wiki/Introducing-Snow) more about the motivation behind `Snow`
+* [Learn](https://github.com/lavamoat/snow/wiki/Introducing-Snow) more about the motivation behind `Snow` and why it should be a browser builtin API
 * `Snow` is still experimental ⚠️ - your [help](#contribute) is highly appreciated!
 
 ## Usage
@@ -53,8 +54,7 @@ in order for it to play its role securely.
    synchronously (do not use `async=true`!).
 
 2. **It's better to be served as-is** - If it goes through any bundlers that might change it,
-   `snow` may contain flaws that attackers might use to cancel its effect (for further
-   explanation see [natives](https://github.com/lavamoat/snow/wiki/Introducing-Snow#natives) section)
+   the modified version might contain flaws that attackers might use to cancel its effect. 
 
 `SNOW` API can also be required as part of a bundle instead of a script tag:
 
@@ -69,7 +69,10 @@ const snow = require('@weizman/snow');
 ## Contribute
 
 This project is an important POC aspiring to standardize how windows should be hermetically
-hooked, however it is not yet production ready:
+handled, however it is not yet production ready.
+
+`snow` eventually is a shim that comes to both demonstrate and utilize the API we wish to see builtin to browsers in the future. 
+Until `snow` becomes a platform builtin API, we have to attempt to overcome several challenges that are significantly harder to do so in pure javascript:
 
 ### Support
 
@@ -89,6 +92,10 @@ to bypass its hooks.
 
 Bottom line - `snow` might have security vulnerabilities!
 
+Hopefully in the future `snow` will become a builtin API provided by the browser. 
+Achieving that goal will allow security assurance - such functionality will be safer to implement 
+on behalf of the browser rather than the web app.
+
 ### Tests
 
 In order to assure security, there are many tests that verify that `snow`
@@ -96,7 +103,7 @@ is fully hermetic as promised - everything that `snow` supports is fully tested.
 
 The tests mainly try to bypass `snow` in any possible way.
 
-If you found a vulnerability in `snow`, open a PR with a test that demonstrates it.
+If you found a vulnerability in `snow`, open a PR with a test that demonstrates it (or just let us know, and we'll do it).
 
 ### Help
 

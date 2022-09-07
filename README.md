@@ -15,16 +15,6 @@ to non extension javascript with the same privileges as the website.
 * [Learn](https://github.com/lavamoat/snow/wiki/Introducing-Snow) more about the motivation behind `Snow`
 * `Snow` is still experimental ⚠️ - your [help](#contribute) is highly appreciated!
 
-
-## *IMPORTANT NOTE*
-
-It has been discovered that [`open` API](https://developer.mozilla.org/en-US/docs/Web/API/Window/open) allows bypassing of Snow in a way that is non-trivial to patch.
-
-This is fully described in [issue #2](https://github.com/lavamoat/snow/issues/2), and until this issue is resolved, `open` API
-is fully disabled by Snow to prevent vulnerability. 
-
-If your web app depends on `open` API, you cannot use Snow, until this issue is resolved and a solution is rolled out (if not, Snow is still right for you)
-
 ## Usage
 
 ```javascript
@@ -115,30 +105,15 @@ to become production ready and reshape how hermetic window hooking should look l
 
 ## Troubleshooting
 
-Here are some important things to know about Snow, and some problems you might have with it:
+In [log.js](https://github.com/LavaMoat/snow/blob/main/src/log.js) file you can find references
+to issues you might encounter using snow. 
+If you do, you should see an error/warning thrown to console in your application with a reference
+to the relevant issue thread.
 
-### html string iframes onload attributes
+In each thread a discussion around the issue is being made in order to better solve it, so please
+share your experience with the issue in order for us to solve it in the best way possible.
 
-`onload` attributes of iframes that were created via html string
-can be used to execute code that bypasses `snow`:
-
-```javascript
-document.body.innerHTML = '<iframe onload=alert("BYPASS_SNOW")></iframe>'
-```
-
-At this point, it was decided that `snow` drops those
-listeners as protection because:
-
-1. Hooking those listeners is not trivial and requires research.
-2. After some research of major websites, no javascript that uses
-this technique was found, not even once.
-
-This might cause issues in your website if you're using this technique. 
-If it does, rebuild Snow with `WARN_OF_ONLOAD_ATTRIBUTES=true`, and reload the website.
-
-If logs of found onload attributes appear, Snow might
-interrupt your website flow. If so, open an issue at:
-[https://github.com/lavamoat/snow/issues/new](https://github.com/lavamoat/snow/issues/new?title=Snow+disrupts+website+flow+when+removing+html+string+iframes+onload+attributes&body=Reproduce+by+running+snow+on+%3CWEBSITE_URL%3E)
+If you encounter an issue that is not being handled by snow correctly, please open a new one.
 
 ## Supporters
 

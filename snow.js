@@ -594,38 +594,57 @@ module.exports = hookLoadSetters;
 
 var WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
 var ERR_MARK_NEW_WINDOW_FAILED = 2;
+var WARN_OPEN_API_DISABLED = 3;
 
 function warn(msg, a, b) {
+  var bail;
+
   switch (msg) {
     case WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED:
       var frame = a,
           onload = b;
-      console.warn('SNOW:', 'removing html string iframe onload attribute:', frame, "\"".concat(onload, "\"."), '\nthis technique is less common under legitimate use, but can be used to attack snow and therefore is removed.', '\nif this harms your web app, open an issue at snow github repo.');
+      bail = false;
+      console.warn('SNOW:', 'removing html string iframe onload attribute:', frame, "\"".concat(onload, "\""), '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
+      break;
+
+    case WARN_OPEN_API_DISABLED:
+      var args = a,
+          win = b;
+      bail = true;
+      console.warn('SNOW:', 'blocking open API call:', args, win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
       break;
 
     default:
       break;
   }
+
+  return bail;
 }
 
 function error(msg, a, b) {
+  var bail;
+
   switch (msg) {
     case ERR_MARK_NEW_WINDOW_FAILED:
       var win = a,
           err = b;
-      console.error('SNOW:', 'failed to mark new window:', win, '.', '\nthis is either a bug in snow or an attack attempt.', '\nthis typically causes an infinite loop until either one is solved.', '\nerror caught:\n', err);
+      bail = true;
+      console.error('SNOW:', 'failed to mark new window:', win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', '\n', 'in order to maintain a bulletproof defense mechanism, failing to mark a new window typically causes an infinite loop', '.', '\n', 'error caught:', '\n', err);
       break;
 
     default:
       break;
   }
+
+  return bail;
 }
 
 module.exports = {
   warn: warn,
   error: error,
   WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED: WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
-  ERR_MARK_NEW_WINDOW_FAILED: ERR_MARK_NEW_WINDOW_FAILED
+  ERR_MARK_NEW_WINDOW_FAILED: ERR_MARK_NEW_WINDOW_FAILED,
+  WARN_OPEN_API_DISABLED: WARN_OPEN_API_DISABLED
 };
 
 /***/ }),
@@ -856,21 +875,25 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var _require = __webpack_require__(14),
-    slice = _require.slice; // https://github.com/lavamoat/snow/issues/2
+    slice = _require.slice,
+    Function = _require.Function;
 
-
-var ISSUE_2_SOLVED = false;
+var _require2 = __webpack_require__(312),
+    warn = _require2.warn,
+    WARN_OPEN_API_DISABLED = _require2.WARN_OPEN_API_DISABLED;
 
 function hookOpen(win, cb) {
   var realOpen = win.open;
 
   win.open = function () {
-    if (!ISSUE_2_SOLVED) {
+    var args = slice(arguments);
+    var blocked = warn(WARN_OPEN_API_DISABLED, args, win);
+
+    if (blocked) {
       return null;
     }
 
-    var args = slice(arguments);
-    var opened = realOpen.apply(this, args);
+    var opened = Function.prototype.apply.call(realOpen, this, args);
     cb(opened);
     return opened;
   };

@@ -1,7 +1,7 @@
 {
   "name": "@weizman/snow",
-  "version": "1.1.0",
-  "description": "register to the creation event of any newborn window in the webpage",
+  "version": "1.1.1",
+  "description": "standardize how to recursively own newborn windows within a web app, from the context of the app itself",
   "main": "src/index.js",
   "devDependencies": {
     "@babel/core": "^7.13.15",

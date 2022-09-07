@@ -1,17 +1,17 @@
-const {slice} = require('./natives');
-
-// https://github.com/lavamoat/snow/issues/2
-const ISSUE_2_SOLVED = false;
+const {slice, Function} = require('./natives');
+const {warn, WARN_OPEN_API_DISABLED} = require('./log');
 
 function hookOpen(win, cb) {
     const realOpen = win.open;
     win.open = function() {
-        if (!ISSUE_2_SOLVED) {
+        const args = slice(arguments);
+
+        const blocked = warn(WARN_OPEN_API_DISABLED, args, win);
+        if (blocked) {
             return null;
         }
 
-        const args = slice(arguments);
-        const opened = realOpen.apply(this, args);
+        const opened = Function.prototype.apply.call(realOpen, this, args);
         cb(opened);
         return opened;
     }

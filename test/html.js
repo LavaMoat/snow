@@ -5,7 +5,7 @@ describe('test HTML injections', async () => {
 
     it('should fail to use atob of an iframe created by srcdoc', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const ifr = document.createElement('iframe');
                 top.bypass = bypass;
@@ -18,7 +18,7 @@ describe('test HTML injections', async () => {
 
     it('should fail to use atob of an iframe created by srcdoc with onload attribute of a nested iframe', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const ifr = document.createElement('iframe');
                 top.bypass = bypass;
@@ -34,7 +34,7 @@ describe('test HTML injections', async () => {
 
     it('should fail to use atob of an iframe created by innerHTML', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const rnd = Math.random().toString(36).substring(7);
                 const div = document.createElement('div');
@@ -48,7 +48,7 @@ describe('test HTML injections', async () => {
 
     it('should fail to use atob of an iframe created by outerHTML', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const rnd = Math.random().toString(36).substring(7);
                 const div = document.createElement('div');
@@ -62,7 +62,7 @@ describe('test HTML injections', async () => {
 
     it('should fail to use atob of an iframe created by insertAdjacentHTML', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const rnd = Math.random().toString(36).substring(7);
                 const div = document.createElement('div');
@@ -76,7 +76,7 @@ describe('test HTML injections', async () => {
 
     it('should fail to use atob of a div\'s child iframe created by innerHTML', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const rnd = Math.random().toString(36).substring(7);
                 const div = document.createElement('div');
@@ -90,7 +90,7 @@ describe('test HTML injections', async () => {
 
     it('should fail to use atob of via js execution via innerHTML call', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const div = document.createElement('div');
                 testdiv.appendChild(div);
@@ -104,7 +104,7 @@ describe('test HTML injections', async () => {
     it('should fail to use atob by leveraging a TrustedHTML node (with onload)', async () => {
         // reference: https://github.com/LavaMoat/snow/issues/16
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const escapeHTMLPolicy = trustedTypes.createPolicy("myEscapePolicy", {
                     createHTML: (string) => string.replace('', '')
@@ -120,7 +120,7 @@ describe('test HTML injections', async () => {
     it('should fail to use atob by leveraging a TrustedHTML node', async () => {
         // reference: https://github.com/LavaMoat/snow/issues/16
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const escapeHTMLPolicy = trustedTypes.createPolicy("myEscapePolicy", {
                     createHTML: (string) => string.replace('', '')

@@ -1,11 +1,11 @@
 const setup = require('./index');
 
-describe.skip('window.open API', () => {
+describe('window.open API', () => {
     beforeEach(setup);
 
     it('should fail to use atob of a window that was created via open API', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
                 const win = open("");
                 bypass([win]);
@@ -16,11 +16,11 @@ describe.skip('window.open API', () => {
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => win.atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
             {
-                const win = open("https://example.com");
+                const win = open("https://example1.com");
                 setTimeout(() => {
-                    win.location.href = "about:blank";
+                    win && (win.location.href = "about:blank");
                     setTimeout(() => {
                         bypass([win]);
                     }, 1000)

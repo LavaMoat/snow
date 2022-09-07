@@ -54,7 +54,8 @@ in order for it to play its role securely.
    synchronously (do not use `async=true`!).
 
 2. **It's better to be served as-is** - If it goes through any bundlers that might change it,
-   the modified version might contain flaws that attackers might use to cancel its effect. 
+   the modified version might contain flaws that attackers might use to cancel its effect (for further
+   explanation see [natives](https://github.com/lavamoat/snow/wiki/Introducing-Snow#natives) section). 
 
 `SNOW` API can also be required as part of a bundle instead of a script tag:
 

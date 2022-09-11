@@ -1,4 +1,30 @@
-const {securely} = require('./securely');
+const securely = require('@weizman/securely')(window, {
+    objects: {
+        'JSON': ['parse', 'stringify'],
+        'document': ['createElement'],
+        'Object': ['defineProperty', 'getOwnPropertyDescriptor'],
+    },
+    prototypes: {
+        'Attr': ['localName', 'name', 'nodeName'],
+        'String': ['toLowerCase'],
+        'Function': ['apply', 'call', 'bind'],
+        'Map': ['get', 'set'],
+        'Node': ['nodeType', 'parentElement', 'toString'],
+        'Document': ['querySelectorAll'],
+        'DocumentFragment': ['querySelectorAll', 'toString', 'replaceChildren', 'append', 'prepend'],
+        'ShadowRoot': ['querySelectorAll', 'toString', 'innerHTML'],
+        'Object': ['toString'],
+        'Array': ['includes', 'push', 'slice'],
+        'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
+        'HTMLElement': ['onload', 'toString'],
+        'HTMLScriptElement': ['src'],
+        'HTMLTemplateElement': ['content'],
+        'EventTarget': ['addEventListener'],
+        'HTMLIFrameElement': ['contentWindow'],
+        'HTMLFrameElement': ['contentWindow'],
+        'HTMLObjectElement': ['contentWindow'],
+    }
+});
 
 function getContentWindow(element, tag) {
     switch (tag) {
@@ -122,12 +148,8 @@ const natives = securely(() => ({
 }));
 
 module.exports = {
-    getParentElement,
-    getTemplateContent, getFrameElement,
-    getInnerHTML, setInnerHTML,
-    getContentWindow,
-    createElement,
-    slice, Array, Map,
+    securely,
+
     Object: natives.Object,
     Function: natives.Function,
     Node: natives.Node,
@@ -135,6 +157,13 @@ module.exports = {
     Document: natives.Document,
     DocumentFragment: natives.DocumentFragment,
     ShadowRoot: natives.ShadowRoot,
+
+    getParentElement,
+    getTemplateContent, getFrameElement,
+    getInnerHTML, setInnerHTML,
+    getContentWindow,
+    createElement,
+    slice, Array, Map,
     parse, stringify,
     nodeType, toString, tagName,
     getOnload, setOnload,

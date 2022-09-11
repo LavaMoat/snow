@@ -1,10 +1,9 @@
-const {secure, securely} = require('./securely');
 const hook = require('./hook');
 const hookOpen = require('./open');
 const hookLoadSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
-const {addEventListener, getFrameElement} = require('./natives');
+const {securely, addEventListener, getFrameElement} = require('./natives');
 const {isMarked, mark} = require('./mark');
 const {error, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
@@ -40,7 +39,7 @@ function onWin(cb, win) {
     }
 
     if (shouldRun(win)) {
-        applyHooks(win, hookWin, win === top ? securely : secure(win), cb);
+        applyHooks(win, hookWin, securely, cb);
     }
 }
 
@@ -49,6 +48,6 @@ let used = false;
 module.exports = function(cb, win) {
     if (!used) {
         used = true;
-        onWin(cb, win || top);
+        onWin(cb, win || window);
     }
 }

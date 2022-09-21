@@ -420,7 +420,7 @@ function applyHooks(win, hookWin, securely, cb) {
   hookOpen(win, hookWin);
   hookLoadSetters(win, hookWin);
   hookDOMInserters(win, hookWin);
-  hookShadowDOM(win, hookWin);debugger;
+  hookShadowDOM(win, hookWin);
   cb(win, securely);
 }
 

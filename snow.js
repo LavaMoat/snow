@@ -376,10 +376,6 @@ module.exports = handleHTML;
 /***/ 352:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var _require = __webpack_require__(733),
-    secure = _require.secure,
-    securely = _require.securely;
-
 var hook = __webpack_require__(228);
 
 var hookOpen = __webpack_require__(583);
@@ -388,20 +384,21 @@ var hookLoadSetters = __webpack_require__(459);
 
 var hookDOMInserters = __webpack_require__(58);
 
-var _require2 = __webpack_require__(373),
-    hookShadowDOM = _require2.hookShadowDOM;
+var _require = __webpack_require__(373),
+    hookShadowDOM = _require.hookShadowDOM;
 
-var _require3 = __webpack_require__(14),
-    addEventListener = _require3.addEventListener,
-    getFrameElement = _require3.getFrameElement;
+var _require2 = __webpack_require__(14),
+    securely = _require2.securely,
+    addEventListener = _require2.addEventListener,
+    getFrameElement = _require2.getFrameElement;
 
-var _require4 = __webpack_require__(111),
-    isMarked = _require4.isMarked,
-    mark = _require4.mark;
+var _require3 = __webpack_require__(111),
+    isMarked = _require3.isMarked,
+    mark = _require3.mark;
 
-var _require5 = __webpack_require__(312),
-    error = _require5.error,
-    ERR_MARK_NEW_WINDOW_FAILED = _require5.ERR_MARK_NEW_WINDOW_FAILED;
+var _require4 = __webpack_require__(312),
+    error = _require4.error,
+    ERR_MARK_NEW_WINDOW_FAILED = _require4.ERR_MARK_NEW_WINDOW_FAILED;
 
 function shouldRun(win) {
   try {
@@ -438,7 +435,7 @@ function onWin(cb, win) {
   }
 
   if (shouldRun(win)) {
-    applyHooks(win, hookWin, win === top ? securely : secure(win), cb);
+    applyHooks(win, hookWin, securely, cb);
   }
 }
 
@@ -702,8 +699,33 @@ module.exports = {
 /***/ 14:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var _require = __webpack_require__(733),
-    securely = _require.securely;
+var securely = __webpack_require__(528)(top, {
+  objects: {
+    'JSON': ['parse', 'stringify'],
+    'document': ['createElement'],
+    'Object': ['defineProperty', 'getOwnPropertyDescriptor']
+  },
+  prototypes: {
+    'Attr': ['localName', 'name', 'nodeName'],
+    'String': ['toLowerCase'],
+    'Function': ['apply', 'call', 'bind'],
+    'Map': ['get', 'set'],
+    'Node': ['nodeType', 'parentElement', 'toString'],
+    'Document': ['querySelectorAll'],
+    'DocumentFragment': ['querySelectorAll', 'toString', 'replaceChildren', 'append', 'prepend'],
+    'ShadowRoot': ['querySelectorAll', 'toString', 'innerHTML'],
+    'Object': ['toString'],
+    'Array': ['includes', 'push', 'slice'],
+    'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
+    'HTMLElement': ['onload', 'toString'],
+    'HTMLScriptElement': ['src'],
+    'HTMLTemplateElement': ['content'],
+    'EventTarget': ['addEventListener'],
+    'HTMLIFrameElement': ['contentWindow'],
+    'HTMLFrameElement': ['contentWindow'],
+    'HTMLObjectElement': ['contentWindow']
+  }
+});
 
 function getContentWindow(element, tag) {
   switch (tag) {
@@ -839,6 +861,14 @@ var natives = securely(function () {
   };
 });
 module.exports = {
+  securely: securely,
+  Object: natives.Object,
+  Function: natives.Function,
+  Node: natives.Node,
+  Element: natives.Element,
+  Document: natives.Document,
+  DocumentFragment: natives.DocumentFragment,
+  ShadowRoot: natives.ShadowRoot,
   getParentElement: getParentElement,
   getTemplateContent: getTemplateContent,
   getFrameElement: getFrameElement,
@@ -849,13 +879,6 @@ module.exports = {
   slice: slice,
   Array: Array,
   Map: Map,
-  Object: natives.Object,
-  Function: natives.Function,
-  Node: natives.Node,
-  Element: natives.Element,
-  Document: natives.Document,
-  DocumentFragment: natives.DocumentFragment,
-  ShadowRoot: natives.ShadowRoot,
   parse: parse,
   stringify: stringify,
   nodeType: nodeType,
@@ -900,47 +923,6 @@ function hookOpen(win, cb) {
 }
 
 module.exports = hookOpen;
-
-/***/ }),
-
-/***/ 733:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var _secure = __webpack_require__(528);
-
-var config = {
-  objects: {
-    'JSON': ['parse', 'stringify'],
-    'document': ['createElement'],
-    'Object': ['defineProperty', 'getOwnPropertyDescriptor']
-  },
-  prototypes: {
-    'Attr': ['localName', 'name', 'nodeName'],
-    'String': ['toLowerCase'],
-    'Function': ['apply', 'call', 'bind'],
-    'Map': ['get', 'set'],
-    'Node': ['nodeType', 'parentElement', 'toString'],
-    'Document': ['querySelectorAll'],
-    'DocumentFragment': ['querySelectorAll', 'toString', 'replaceChildren', 'append', 'prepend'],
-    'ShadowRoot': ['querySelectorAll', 'toString', 'innerHTML'],
-    'Object': ['toString'],
-    'Array': ['includes', 'push', 'slice'],
-    'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
-    'HTMLElement': ['onload', 'toString'],
-    'HTMLScriptElement': ['src'],
-    'HTMLTemplateElement': ['content'],
-    'EventTarget': ['addEventListener'],
-    'HTMLIFrameElement': ['contentWindow'],
-    'HTMLFrameElement': ['contentWindow'],
-    'HTMLObjectElement': ['contentWindow']
-  }
-};
-module.exports = {
-  securely: _secure(top, config),
-  secure: function secure(win) {
-    return _secure(win, config);
-  }
-};
 
 /***/ }),
 

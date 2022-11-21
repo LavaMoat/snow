@@ -452,7 +452,7 @@ function natively(win, cb) {
   ifr.parentElement.removeChild(ifr);
   return ret;
 }
-function generateNatives(win) {
+function natives(win) {
   return natively(win, function (win) {
     const {
       JSON,
@@ -474,7 +474,7 @@ function generateNatives(win) {
       HTMLFrameElement,
       HTMLObjectElement
     } = win;
-    const natives = {
+    const bag = {
       JSON,
       Attr,
       String,
@@ -494,14 +494,14 @@ function generateNatives(win) {
       HTMLFrameElement,
       HTMLObjectElement
     };
-    natives.document = {
+    bag.document = {
       createElement: win.document.createElement
     };
-    return natives;
+    return bag;
   });
 }
 function setup(win) {
-  const natives = generateNatives(win);
+  const bag = natives(win);
   const {
     Function,
     Map,
@@ -518,8 +518,8 @@ function setup(win) {
     HTMLIFrameElement,
     HTMLFrameElement,
     HTMLObjectElement
-  } = natives;
-  Object.assign(natives, {
+  } = bag;
+  Object.assign(bag, {
     iframeContentWindow: Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'contentWindow').get,
     frameContentWindow: Object.getOwnPropertyDescriptor(HTMLFrameElement.prototype, 'contentWindow').get,
     objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElement.prototype, 'contentWindow').get,
@@ -548,11 +548,11 @@ function setup(win) {
     Document,
     DocumentFragment,
     ShadowRoot,
+    Array,
+    Map,
     getContentWindow,
     parse,
     stringify,
-    Array,
-    Map,
     slice,
     nodeType,
     tagName,
@@ -573,11 +573,11 @@ function setup(win) {
   function getContentWindow(element, tag) {
     switch (tag) {
       case 'IFRAME':
-        return natives.iframeContentWindow.call(element);
+        return bag.iframeContentWindow.call(element);
       case 'FRAME':
-        return natives.frameContentWindow.call(element);
+        return bag.frameContentWindow.call(element);
       case 'OBJECT':
-        return natives.objectContentWindow.call(element);
+        return bag.objectContentWindow.call(element);
       case 'EMBED':
         return null;
       default:
@@ -585,58 +585,58 @@ function setup(win) {
     }
   }
   function parse(text, reviver) {
-    return natives.JSON.parse(text, reviver);
+    return bag.JSON.parse(text, reviver);
   }
   function stringify(value, replacer, space) {
-    return natives.JSON.stringify(value, replacer, space);
+    return bag.JSON.stringify(value, replacer, space);
   }
   function slice(arr, start, end) {
-    return natives.slice.call(arr, start, end);
+    return bag.slice.call(arr, start, end);
   }
   function nodeType(node) {
-    return natives.nodeType.call(node);
+    return bag.nodeType.call(node);
   }
   function tagName(element) {
-    return natives.tagName.call(element);
+    return bag.tagName.call(element);
   }
   function toString(object) {
-    return natives.toString.call(object);
+    return bag.toString.call(object);
   }
   function getOnload(element) {
-    return natives.getOnload.call(element);
+    return bag.getOnload.call(element);
   }
   function setOnload(element, onload) {
-    return natives.setOnload.call(element, onload);
+    return bag.setOnload.call(element, onload);
   }
   function removeAttribute(element, attribute) {
-    return natives.removeAttribute.call(element, attribute);
+    return bag.removeAttribute.call(element, attribute);
   }
   function getAttribute(element, attribute) {
-    return natives.getAttribute.call(element, attribute);
+    return bag.getAttribute.call(element, attribute);
   }
   function addEventListener(element, event, listener, options) {
-    return natives.addEventListener.call(element, event, listener, options);
+    return bag.addEventListener.call(element, event, listener, options);
   }
   function removeEventListener(element, event, listener, options) {
-    return natives.removeEventListener.call(element, event, listener, options);
+    return bag.removeEventListener.call(element, event, listener, options);
   }
   function createElement(document, tagName, options) {
-    return natives.createElement.call(document, tagName, options);
+    return bag.createElement.call(document, tagName, options);
   }
   function getInnerHTML(element) {
-    return natives.getInnerHTML.call(element);
+    return bag.getInnerHTML.call(element);
   }
   function setInnerHTML(element, html) {
-    return natives.setInnerHTML.call(element, html);
+    return bag.setInnerHTML.call(element, html);
   }
   function getTemplateContent(template) {
-    return natives.getTemplateContent.call(template);
+    return bag.getTemplateContent.call(template);
   }
   function getFrameElement(win) {
-    return natives.Function.prototype.call.call(natives.getFrameElement, win);
+    return bag.Function.prototype.call.call(bag.getFrameElement, win);
   }
   function getParentElement(element) {
-    return natives.getParentElement.call(element);
+    return bag.getParentElement.call(element);
   }
 }
 module.exports = setup(top);

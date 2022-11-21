@@ -468,7 +468,6 @@ function generateNatives(win) {
       Array,
       Element,
       HTMLElement,
-      HTMLScriptElement,
       HTMLTemplateElement,
       EventTarget,
       HTMLIFrameElement,
@@ -489,7 +488,6 @@ function generateNatives(win) {
       Array,
       Element,
       HTMLElement,
-      HTMLScriptElement,
       HTMLTemplateElement,
       EventTarget,
       HTMLIFrameElement,
@@ -505,9 +503,6 @@ function generateNatives(win) {
 function setup(win) {
   const natives = generateNatives(win);
   const {
-    JSON,
-    Attr,
-    String,
     Function,
     Map,
     Node,
@@ -518,7 +513,6 @@ function setup(win) {
     Array,
     Element,
     HTMLElement,
-    HTMLScriptElement,
     HTMLTemplateElement,
     EventTarget,
     HTMLIFrameElement,

@@ -1,6 +1,6 @@
 {
   "name": "@weizman/snow",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "standardize how to recursively own newborn windows within a web app, from the context of the app itself",
   "main": "src/index.js",
   "devDependencies": {
@@ -37,7 +37,6 @@
   },
   "homepage": "https://lavamoat.github.io/snow/",
   "dependencies": {
-    "is-cross-origin": "^1.0.1",
-    "@weizman/securely": "^1.0.2"
+    "is-cross-origin": "^1.0.1"
   }
 }

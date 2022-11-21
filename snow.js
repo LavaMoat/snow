@@ -3,193 +3,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 528:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-const objects = __webpack_require__(88);
-const prototypes = __webpack_require__(311);
-const specifics = __webpack_require__(199);
-
-let allowNativesAccess = false;
-
-function shouldAllowNativesAccess() {
-    return allowNativesAccess;
-}
-
-function natively(win, cb) {
-    const ifr = win.document.createElement('iframe');
-    win.document.head.appendChild(ifr);
-    cb(ifr.contentWindow);
-    ifr.parentElement.removeChild(ifr);
-}
-
-function securely(cb, a, b, c, d, e, f, g, h, i, j) {
-    const state = allowNativesAccess;
-
-    allowNativesAccess = true;
-
-    let ret, err;
-    try {
-        ret = cb(a, b, c, d, e, f, g, h, i, j);
-    } catch (e) {
-        err = e;
-    }
-
-    if (!state) {
-        allowNativesAccess = false;
-    }
-
-    if (err) {
-        throw err;
-    }
-
-    return ret;
-}
-
-function secure(win, config) {
-    natively(win, (nativeWin) => {
-        securely(() => {
-            config = config || new nativeWin.Object();
-            objects(win, nativeWin, shouldAllowNativesAccess, config.objects || new nativeWin.Object());
-            prototypes(win, nativeWin, shouldAllowNativesAccess, config.prototypes || new nativeWin.Object());
-            specifics(win, nativeWin, shouldAllowNativesAccess);
-        });
-    });
-
-    return securely;
-}
-
-module.exports = secure;
-
-/***/ }),
-
-/***/ 88:
-/***/ ((module) => {
-
-module.exports = function objects(win, nativeWin, shouldAllowNativesAccess, objects) {
-    for (const object in objects) {
-        const apis = objects[object];
-        for (let i = 0; i < apis.length; i++) {
-            const api = apis[i];
-            let native = nativeWin[object][api];
-            if (typeof native === 'function') {
-                native = native.bind(win[object]);
-            }
-            nativeWin['Object'].defineProperty(win[object], api + 'S', {
-                configurable: false,
-                get: function () {
-                    if (!shouldAllowNativesAccess()) {
-                        return;
-                    }
-
-                    return native;
-                },
-            });
-        }
-    }
-}
-
-/***/ }),
-
-/***/ 311:
-/***/ ((module) => {
-
-function method(func, shouldAllowNativesAccess) {
-    return function(a, b, c, d, e) {
-        if (!shouldAllowNativesAccess()) {
-            return;
-        }
-
-        return func(this, a, b, c, d, e);
-    };
-}
-
-function descriptor(nativeWin, desc, shouldAllowNativesAccess) {
-    const value = desc.value;
-    const set = desc.set || (() => {});
-    const get = desc.get || (() => value);
-
-    desc.configurable = false;
-
-    delete desc.value;
-    delete desc.writable;
-
-    const getter = nativeWin['Function'].prototype.call.bind(get);
-    const setter = nativeWin['Function'].prototype.call.bind(set);
-
-    desc.get = method(getter, shouldAllowNativesAccess);
-    desc.set = method(setter, shouldAllowNativesAccess);
-
-    return desc;
-}
-
-function prototype(win, nativeWin, done, shouldAllowNativesAccess, prototype, property) {
-    let proto = win[prototype];
-    const arr = new nativeWin.Array();
-    while (true) {
-        const desc = nativeWin['Object'].getOwnPropertyDescriptor(proto.prototype, property);
-        nativeWin['Array'].prototype.push.call(arr, proto.prototype);
-        if (desc) {
-            break;
-        }
-        proto = nativeWin['Object'].getPrototypeOf(proto.prototype).constructor;
-    }
-    const desc = nativeWin['Object'].getOwnPropertyDescriptor(arr[arr.length - 1], property);
-    while (arr.length) {
-        const proto = nativeWin['Array'].prototype.pop.call(arr);
-        if (!done[proto.constructor.name] || !nativeWin['Array'].prototype.includes.call(done[proto.constructor.name], property)) {
-            nativeWin['Object'].defineProperty(proto, property + 'S', descriptor(nativeWin, desc, shouldAllowNativesAccess));
-            done[proto.constructor.name] = done[proto.constructor.name] || new nativeWin.Array();
-            nativeWin['Array'].prototype.push.call(done[proto.constructor.name], property);
-        }
-    }
-}
-
-module.exports = function prototypes(win, nativeWin, shouldAllowNativesAccess, prototypes) {
-    const done = new nativeWin.Object();
-    for (const proto in prototypes) {
-        const native = nativeWin[proto];
-        nativeWin['Object'].defineProperty(win, proto + 'S', {
-            configurable: false,
-            get: function() {
-                if (!shouldAllowNativesAccess()) {
-                    return;
-                }
-
-                return native;
-            }
-        });
-        done[proto] = done[proto] || new nativeWin.Array();
-        const properties = prototypes[proto];
-        for (let i = 0; i < properties.length; i++) {
-            const property = properties[i];
-            prototype(win, nativeWin, done, shouldAllowNativesAccess, proto, property);
-            prototype(win, nativeWin, done, shouldAllowNativesAccess, proto + 'S', property);
-        }
-    }
-}
-
-/***/ }),
-
-/***/ 199:
-/***/ ((module) => {
-
-module.exports = function specifics(win, nativeWin, shouldAllowNativesAccess) {
-    let getDocumentCurrentScript = nativeWin['Object'].getOwnPropertyDescriptor(win.Document.prototype, 'currentScript').get.bind(win.document);
-    nativeWin['Object'].defineProperty(win.document, 'currentScript' + 'S', {
-        configurable: false,
-        get: function() {
-            if (!shouldAllowNativesAccess()) {
-                return;
-            }
-
-            return getDocumentCurrentScript();
-        }
-    });
-}
-
-/***/ }),
-
 /***/ 586:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -630,172 +443,209 @@ module.exports = {
 /***/ }),
 
 /***/ 14:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module) => {
 
-const securely = __webpack_require__(528)(window, {
-  objects: {
-    'JSON': ['parse', 'stringify'],
-    'document': ['createElement'],
-    'Object': ['defineProperty', 'getOwnPropertyDescriptor']
-  },
-  prototypes: {
-    'Attr': ['localName', 'name', 'nodeName'],
-    'String': ['toLowerCase'],
-    'Function': ['apply', 'call', 'bind'],
-    'Map': ['get', 'set'],
-    'Node': ['nodeType', 'parentElement', 'toString'],
-    'Document': ['querySelectorAll'],
-    'DocumentFragment': ['querySelectorAll', 'toString', 'replaceChildren', 'append', 'prepend'],
-    'ShadowRoot': ['querySelectorAll', 'toString', 'innerHTML'],
-    'Object': ['toString'],
-    'Array': ['includes', 'push', 'slice'],
-    'Element': ['innerHTML', 'toString', 'querySelectorAll', 'getAttribute', 'removeAttribute', 'tagName'],
-    'HTMLElement': ['onload', 'toString'],
-    'HTMLScriptElement': ['src'],
-    'HTMLTemplateElement': ['content'],
-    'EventTarget': ['addEventListener'],
-    'HTMLIFrameElement': ['contentWindow'],
-    'HTMLFrameElement': ['contentWindow'],
-    'HTMLObjectElement': ['contentWindow']
+function natively(win, cb) {
+  const ifr = win.document.createElement('iframe');
+  win.document.head.appendChild(ifr);
+  const ret = cb(ifr.contentWindow);
+  ifr.parentElement.removeChild(ifr);
+  return ret;
+}
+function generateNatives(win) {
+  return natively(win, function (win) {
+    const {
+      JSON,
+      Attr,
+      String,
+      Function,
+      Map,
+      Node,
+      Document,
+      DocumentFragment,
+      ShadowRoot,
+      Object,
+      Array,
+      Element,
+      HTMLElement,
+      HTMLScriptElement,
+      HTMLTemplateElement,
+      EventTarget,
+      HTMLIFrameElement,
+      HTMLFrameElement,
+      HTMLObjectElement
+    } = win;
+    const natives = {
+      JSON,
+      Attr,
+      String,
+      Function,
+      Map,
+      Node,
+      Document,
+      DocumentFragment,
+      ShadowRoot,
+      Object,
+      Array,
+      Element,
+      HTMLElement,
+      HTMLScriptElement,
+      HTMLTemplateElement,
+      EventTarget,
+      HTMLIFrameElement,
+      HTMLFrameElement,
+      HTMLObjectElement
+    };
+    natives.document = {
+      createElement: win.document.createElement
+    };
+    return natives;
+  });
+}
+function setup(win) {
+  const natives = generateNatives(win);
+  const {
+    JSON,
+    Attr,
+    String,
+    Function,
+    Map,
+    Node,
+    Document,
+    DocumentFragment,
+    ShadowRoot,
+    Object,
+    Array,
+    Element,
+    HTMLElement,
+    HTMLScriptElement,
+    HTMLTemplateElement,
+    EventTarget,
+    HTMLIFrameElement,
+    HTMLFrameElement,
+    HTMLObjectElement
+  } = natives;
+  Object.assign(natives, {
+    iframeContentWindow: Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'contentWindow').get,
+    frameContentWindow: Object.getOwnPropertyDescriptor(HTMLFrameElement.prototype, 'contentWindow').get,
+    objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElement.prototype, 'contentWindow').get,
+    createElement: Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value,
+    slice: Object.getOwnPropertyDescriptor(Array.prototype, 'slice').value,
+    nodeType: Object.getOwnPropertyDescriptor(Node.prototype, 'nodeType').get,
+    tagName: Object.getOwnPropertyDescriptor(Element.prototype, 'tagName').get,
+    getInnerHTML: Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML').get,
+    setInnerHTML: Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML').set,
+    toString: Object.getOwnPropertyDescriptor(Object.prototype, 'toString').value,
+    getOnload: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'onload').get,
+    setOnload: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'onload').set,
+    getAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'getAttribute').value,
+    removeAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'removeAttribute').value,
+    addEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'addEventListener').value,
+    removeEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'removeEventListener').value,
+    getTemplateContent: Object.getOwnPropertyDescriptor(HTMLTemplateElement.prototype, 'content').get,
+    getFrameElement: Object.getOwnPropertyDescriptor(win, 'frameElement').get,
+    getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get
+  });
+  return {
+    Object,
+    Function,
+    Node,
+    Element,
+    Document,
+    DocumentFragment,
+    ShadowRoot,
+    getContentWindow,
+    parse,
+    stringify,
+    Array,
+    Map,
+    slice,
+    nodeType,
+    tagName,
+    toString,
+    getOnload,
+    setOnload,
+    removeAttribute,
+    getAttribute,
+    addEventListener,
+    removeEventListener,
+    createElement,
+    getInnerHTML,
+    setInnerHTML,
+    getTemplateContent,
+    getFrameElement,
+    getParentElement
+  };
+  function getContentWindow(element, tag) {
+    switch (tag) {
+      case 'IFRAME':
+        return natives.iframeContentWindow.call(element);
+      case 'FRAME':
+        return natives.frameContentWindow.call(element);
+      case 'OBJECT':
+        return natives.objectContentWindow.call(element);
+      case 'EMBED':
+        return null;
+      default:
+        return null;
+    }
   }
-});
-function getContentWindow(element, tag) {
-  switch (tag) {
-    case 'IFRAME':
-      return natives.iframeContentWindow.call(element);
-    case 'FRAME':
-      return natives.frameContentWindow.call(element);
-    case 'OBJECT':
-      return natives.objectContentWindow.call(element);
-    case 'EMBED':
-      return null;
-    default:
-      return null;
+  function parse(text, reviver) {
+    return natives.JSON.parse(text, reviver);
+  }
+  function stringify(value, replacer, space) {
+    return natives.JSON.stringify(value, replacer, space);
+  }
+  function slice(arr, start, end) {
+    return natives.slice.call(arr, start, end);
+  }
+  function nodeType(node) {
+    return natives.nodeType.call(node);
+  }
+  function tagName(element) {
+    return natives.tagName.call(element);
+  }
+  function toString(object) {
+    return natives.toString.call(object);
+  }
+  function getOnload(element) {
+    return natives.getOnload.call(element);
+  }
+  function setOnload(element, onload) {
+    return natives.setOnload.call(element, onload);
+  }
+  function removeAttribute(element, attribute) {
+    return natives.removeAttribute.call(element, attribute);
+  }
+  function getAttribute(element, attribute) {
+    return natives.getAttribute.call(element, attribute);
+  }
+  function addEventListener(element, event, listener, options) {
+    return natives.addEventListener.call(element, event, listener, options);
+  }
+  function removeEventListener(element, event, listener, options) {
+    return natives.removeEventListener.call(element, event, listener, options);
+  }
+  function createElement(document, tagName, options) {
+    return natives.createElement.call(document, tagName, options);
+  }
+  function getInnerHTML(element) {
+    return natives.getInnerHTML.call(element);
+  }
+  function setInnerHTML(element, html) {
+    return natives.setInnerHTML.call(element, html);
+  }
+  function getTemplateContent(template) {
+    return natives.getTemplateContent.call(template);
+  }
+  function getFrameElement(win) {
+    return natives.Function.prototype.call.call(natives.getFrameElement, win);
+  }
+  function getParentElement(element) {
+    return natives.getParentElement.call(element);
   }
 }
-function parse(text, reviver) {
-  return natives.parse(text, reviver);
-}
-function stringify(value, replacer, space) {
-  return natives.stringify(value, replacer, space);
-}
-function Array() {
-  return natives.Array.apply(null, slice(arguments));
-}
-function Map() {
-  return new natives.Map();
-}
-function slice(arr, start, end) {
-  return natives.slice.call(arr, start, end);
-}
-function nodeType(node) {
-  return natives.nodeType.call(node);
-}
-function tagName(element) {
-  return natives.tagName.call(element);
-}
-function toString(object) {
-  return natives.toString.call(object);
-}
-function getOnload(element) {
-  return natives.getOnload.call(element);
-}
-function setOnload(element, onload) {
-  return natives.setOnload.call(element, onload);
-}
-function removeAttribute(element, attribute) {
-  return natives.removeAttribute.call(element, attribute);
-}
-function getAttribute(element, attribute) {
-  return natives.getAttribute.call(element, attribute);
-}
-function addEventListener(element, event, listener, options) {
-  return natives.addEventListener.call(element, event, listener, options);
-}
-function removeEventListener(element, event, listener, options) {
-  return natives.removeEventListener.call(element, event, listener, options);
-}
-function createElement(document, tagName, options) {
-  return natives.createElement.call(document, tagName, options);
-}
-function getInnerHTML(element) {
-  return natives.getInnerHTML.call(element);
-}
-function setInnerHTML(element, html) {
-  return natives.setInnerHTML.call(element, html);
-}
-function getTemplateContent(template) {
-  return natives.getTemplateContent.call(template);
-}
-function getFrameElement(win) {
-  return natives.Function.prototype.call.call(natives.getFrameElement, win);
-}
-function getParentElement(element) {
-  return natives.getParentElement.call(element);
-}
-const natives = securely(() => ({
-  Array: ArrayS,
-  Map: MapS,
-  Object: ObjectS,
-  Function: FunctionS,
-  Node: NodeS,
-  Element: ElementS,
-  ShadowRoot: ShadowRootS,
-  Document: DocumentS,
-  DocumentFragment: DocumentFragmentS,
-  parse: JSON.parseS,
-  stringify: JSON.stringifyS,
-  iframeContentWindow: Object.getOwnPropertyDescriptor(HTMLIFrameElementS.prototype, 'contentWindow').get,
-  frameContentWindow: Object.getOwnPropertyDescriptor(HTMLFrameElementS.prototype, 'contentWindow').get,
-  objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElementS.prototype, 'contentWindow').get,
-  createElement: Object.getOwnPropertyDescriptor(DocumentS.prototype, 'createElement').value,
-  slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
-  nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
-  tagName: Object.getOwnPropertyDescriptor(ElementS.prototype, 'tagName').get,
-  getInnerHTML: Object.getOwnPropertyDescriptor(ElementS.prototype, 'innerHTML').get,
-  setInnerHTML: Object.getOwnPropertyDescriptor(ElementS.prototype, 'innerHTML').set,
-  toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
-  getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
-  setOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').set,
-  getAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'getAttribute').value,
-  removeAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'removeAttribute').value,
-  addEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'addEventListener').value,
-  removeEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'removeEventListener').value,
-  getTemplateContent: Object.getOwnPropertyDescriptor(HTMLTemplateElementS.prototype, 'content').get,
-  getFrameElement: Object.getOwnPropertyDescriptor(window, 'frameElement').get,
-  getParentElement: Object.getOwnPropertyDescriptor(NodeS.prototype, 'parentElement').get
-}));
-module.exports = {
-  securely,
-  Object: natives.Object,
-  Function: natives.Function,
-  Node: natives.Node,
-  Element: natives.Element,
-  Document: natives.Document,
-  DocumentFragment: natives.DocumentFragment,
-  ShadowRoot: natives.ShadowRoot,
-  getParentElement,
-  getTemplateContent,
-  getFrameElement,
-  getInnerHTML,
-  setInnerHTML,
-  getContentWindow,
-  createElement,
-  slice,
-  Array,
-  Map,
-  parse,
-  stringify,
-  nodeType,
-  toString,
-  tagName,
-  getOnload,
-  setOnload,
-  removeAttribute,
-  getAttribute,
-  addEventListener,
-  removeEventListener
-};
+module.exports = setup(top);
 
 /***/ }),
 

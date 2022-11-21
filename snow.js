@@ -1,3 +1,5 @@
+(function(){
+"use strict";
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -191,47 +193,41 @@ module.exports = function specifics(win, nativeWin, shouldAllowNativesAccess) {
 /***/ 586:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var hook = __webpack_require__(228);
-
-var _require = __webpack_require__(648),
-    getFramesArray = _require.getFramesArray,
-    getFrameTag = _require.getFrameTag;
-
-var _require2 = __webpack_require__(14),
-    getOnload = _require2.getOnload,
-    setOnload = _require2.setOnload,
-    removeAttribute = _require2.removeAttribute,
-    addEventListener = _require2.addEventListener;
-
+const hook = __webpack_require__(228);
+const {
+  getFramesArray,
+  getFrameTag
+} = __webpack_require__(648);
+const {
+  getOnload,
+  setOnload,
+  removeAttribute,
+  addEventListener
+} = __webpack_require__(14);
 function resetOnloadAttribute(win, frame, cb) {
   if (!getFrameTag(frame)) {
     return;
   }
-
   addEventListener(frame, 'load', function () {
     hook(win, [this], cb);
   });
-  var onload = getOnload(frame);
-
+  const onload = getOnload(frame);
   if (onload) {
     setOnload(frame, null);
     removeAttribute(frame, 'onload');
     setOnload(frame, onload);
   }
 }
-
 function resetOnloadAttributes(win, args, cb) {
-  for (var i = 0; i < args.length; i++) {
-    var element = args[i];
-    var frames = getFramesArray(element, true);
-
-    for (var _i = 0; _i < frames.length; _i++) {
-      var frame = frames[_i];
+  for (let i = 0; i < args.length; i++) {
+    const element = args[i];
+    const frames = getFramesArray(element, true);
+    for (let i = 0; i < frames.length; i++) {
+      const frame = frames[i];
       resetOnloadAttribute(win, frame, cb);
     }
   }
 }
-
 module.exports = resetOnloadAttributes;
 
 /***/ }),
@@ -257,10 +253,10 @@ one must first try to access any property of it.
 This for some reason registers it to the window.frames list, otherwise it won't be there.
 
 */
+
 function workaroundChromiumBug(frame) {
   frame && frame.contentWindow;
 }
-
 module.exports = workaroundChromiumBug;
 
 /***/ }),
@@ -268,59 +264,49 @@ module.exports = workaroundChromiumBug;
 /***/ 228:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var isCrossOrigin = __webpack_require__(851);
-
-var workaroundChromiumBug = __webpack_require__(750);
-
-var _require = __webpack_require__(648),
-    shadows = _require.shadows,
-    getFramesArray = _require.getFramesArray,
-    getFrameTag = _require.getFrameTag;
-
-var _require2 = __webpack_require__(14),
-    getContentWindow = _require2.getContentWindow,
-    Object = _require2.Object,
-    getFrameElement = _require2.getFrameElement;
-
+const isCrossOrigin = __webpack_require__(851);
+const workaroundChromiumBug = __webpack_require__(750);
+const {
+  shadows,
+  getFramesArray,
+  getFrameTag
+} = __webpack_require__(648);
+const {
+  getContentWindow,
+  Object,
+  getFrameElement
+} = __webpack_require__(14);
 function findWin(win, frameElement) {
-  var i = -1;
-
+  let i = -1;
   while (win[++i]) {
-    var cross = isCrossOrigin(win[i], win, Object);
-
+    const cross = isCrossOrigin(win[i], win, Object);
     if (!cross) {
       if (getFrameElement(win[i]) === frameElement) {
         return win[i];
       }
     }
   }
-
-  for (var _i = 0; _i < shadows.length; _i++) {
-    var shadow = shadows[_i];
-    var frames = getFramesArray(shadow, false);
-
-    for (var j = 0; j < frames.length; j++) {
+  for (let i = 0; i < shadows.length; i++) {
+    const shadow = shadows[i];
+    const frames = getFramesArray(shadow, false);
+    for (let j = 0; j < frames.length; j++) {
       if (frames[j] === frameElement) {
         return getContentWindow(frames[j], getFrameTag(frames[j]));
       }
     }
   }
-
   return null;
 }
-
 function hook(win, frames, cb) {
-  for (var i = 0; i < frames.length; i++) {
-    var frame = frames[i];
+  for (let i = 0; i < frames.length; i++) {
+    const frame = frames[i];
     workaroundChromiumBug(frame);
-    var contentWindow = findWin(win, frame);
-
+    const contentWindow = findWin(win, frame);
     if (contentWindow) {
       cb(contentWindow);
     }
   }
 }
-
 module.exports = hook;
 
 /***/ }),
@@ -328,47 +314,43 @@ module.exports = hook;
 /***/ 328:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var _require = __webpack_require__(648),
-    getFramesArray = _require.getFramesArray;
-
-var _require2 = __webpack_require__(14),
-    removeAttribute = _require2.removeAttribute,
-    getAttribute = _require2.getAttribute,
-    getTemplateContent = _require2.getTemplateContent,
-    createElement = _require2.createElement,
-    getInnerHTML = _require2.getInnerHTML,
-    setInnerHTML = _require2.setInnerHTML;
-
-var _require3 = __webpack_require__(312),
-    warn = _require3.warn,
-    WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = _require3.WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED;
-
+const {
+  getFramesArray
+} = __webpack_require__(648);
+const {
+  removeAttribute,
+  getAttribute,
+  getTemplateContent,
+  createElement,
+  getInnerHTML,
+  setInnerHTML
+} = __webpack_require__(14);
+const {
+  warn,
+  WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED
+} = __webpack_require__(312);
 function dropOnLoadAttributes(frames) {
-  for (var i = 0; i < frames.length; i++) {
-    var frame = frames[i];
-    var onload = getAttribute(frame, 'onload');
-
+  for (let i = 0; i < frames.length; i++) {
+    const frame = frames[i];
+    const onload = getAttribute(frame, 'onload');
     if (onload) {
       warn(WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED, frame, onload);
       removeAttribute(frame, 'onload');
     }
   }
 }
-
 function handleHTML(win, args) {
-  for (var i = 0; i < args.length; i++) {
-    var html = args[i];
-    var template = createElement(document, 'template');
+  for (let i = 0; i < args.length; i++) {
+    const html = args[i];
+    const template = createElement(document, 'template');
     setInnerHTML(template, html);
-    var frames = getFramesArray(getTemplateContent(template), false);
-
+    const frames = getFramesArray(getTemplateContent(template), false);
     if (frames.length) {
       dropOnLoadAttributes(frames);
       args[i] = getInnerHTML(template);
     }
   }
 }
-
 module.exports = handleHTML;
 
 /***/ }),
@@ -376,46 +358,38 @@ module.exports = handleHTML;
 /***/ 352:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var hook = __webpack_require__(228);
-
-var hookOpen = __webpack_require__(583);
-
-var hookLoadSetters = __webpack_require__(459);
-
-var hookDOMInserters = __webpack_require__(58);
-
-var _require = __webpack_require__(373),
-    hookShadowDOM = _require.hookShadowDOM;
-
-var _require2 = __webpack_require__(14),
-    securely = _require2.securely,
-    addEventListener = _require2.addEventListener,
-    getFrameElement = _require2.getFrameElement;
-
-var _require3 = __webpack_require__(111),
-    isMarked = _require3.isMarked,
-    mark = _require3.mark;
-
-var _require4 = __webpack_require__(312),
-    error = _require4.error,
-    ERR_MARK_NEW_WINDOW_FAILED = _require4.ERR_MARK_NEW_WINDOW_FAILED;
-
+const hook = __webpack_require__(228);
+const hookOpen = __webpack_require__(583);
+const hookLoadSetters = __webpack_require__(459);
+const hookDOMInserters = __webpack_require__(58);
+const {
+  hookShadowDOM
+} = __webpack_require__(373);
+const {
+  securely,
+  addEventListener,
+  getFrameElement
+} = __webpack_require__(14);
+const {
+  isMarked,
+  mark
+} = __webpack_require__(111);
+const {
+  error,
+  ERR_MARK_NEW_WINDOW_FAILED
+} = __webpack_require__(312);
 function shouldRun(win) {
   try {
-    var run = !isMarked(win);
-
+    const run = !isMarked(win);
     if (run) {
       mark(win);
     }
-
     return run;
   } catch (err) {
     error(ERR_MARK_NEW_WINDOW_FAILED, win, err);
   }
-
   return shouldRun(win);
 }
-
 function applyHooks(win, hookWin, securely, cb) {
   hookOpen(win, hookWin);
   hookLoadSetters(win, hookWin);
@@ -423,7 +397,6 @@ function applyHooks(win, hookWin, securely, cb) {
   hookShadowDOM(win, hookWin);
   cb(win, securely);
 }
-
 function onWin(cb, win) {
   function hookWin(contentWindow) {
     onWin(cb, contentWindow);
@@ -433,18 +406,15 @@ function onWin(cb, win) {
       });
     });
   }
-
   if (shouldRun(win)) {
     applyHooks(win, hookWin, securely, cb);
   }
 }
-
-var used = false;
-
+let used = false;
 module.exports = function (cb, win) {
   if (!used) {
     used = true;
-    onWin(cb, win || top);
+    onWin(cb, win || window);
   }
 };
 
@@ -453,26 +423,23 @@ module.exports = function (cb, win) {
 /***/ 58:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var _require = __webpack_require__(373),
-    protectShadows = _require.protectShadows;
-
-var resetOnloadAttributes = __webpack_require__(586);
-
-var _require2 = __webpack_require__(648),
-    getFramesArray = _require2.getFramesArray,
-    shadows = _require2.shadows;
-
-var _require3 = __webpack_require__(14),
-    getParentElement = _require3.getParentElement,
-    slice = _require3.slice,
-    Object = _require3.Object,
-    Function = _require3.Function;
-
-var handleHTML = __webpack_require__(328);
-
-var hook = __webpack_require__(228);
-
-var map = {
+const {
+  protectShadows
+} = __webpack_require__(373);
+const resetOnloadAttributes = __webpack_require__(586);
+const {
+  getFramesArray,
+  shadows
+} = __webpack_require__(648);
+const {
+  getParentElement,
+  slice,
+  Object,
+  Function
+} = __webpack_require__(14);
+const handleHTML = __webpack_require__(328);
+const hook = __webpack_require__(228);
+const map = {
   DocumentFragment: ['replaceChildren', 'append', 'prepend'],
   Document: ['replaceChildren', 'append', 'prepend', 'write', 'writeln'],
   Node: ['appendChild', 'insertBefore', 'replaceChild'],
@@ -480,38 +447,34 @@ var map = {
   ShadowRoot: ['innerHTML'],
   HTMLIFrameElement: ['srcdoc']
 };
-
 function getHook(win, native, cb) {
   return function () {
-    var args = slice(arguments);
-    var element = getParentElement(this) || this;
+    const args = slice(arguments);
+    const element = getParentElement(this) || this;
     resetOnloadAttributes(win, args, cb);
     resetOnloadAttributes(win, shadows, cb);
     handleHTML(win, args);
     handleHTML(win, shadows);
-    var ret = Function.prototype.apply.call(native, this, args);
-    var frames = getFramesArray(element, false);
+    const ret = Function.prototype.apply.call(native, this, args);
+    const frames = getFramesArray(element, false);
     hook(win, frames, cb);
     hook(win, args, cb);
     protectShadows(win, cb, true);
     return ret;
   };
 }
-
 function hookDOMInserters(win, cb) {
-  for (var proto in map) {
-    var funcs = map[proto];
-
-    for (var i = 0; i < funcs.length; i++) {
-      var func = funcs[i];
-      var desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
-      var prop = desc.set ? 'set' : 'value';
+  for (const proto in map) {
+    const funcs = map[proto];
+    for (let i = 0; i < funcs.length; i++) {
+      const func = funcs[i];
+      const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
+      const prop = desc.set ? 'set' : 'value';
       desc[prop] = getHook(win, desc[prop], cb);
       Object.defineProperty(win[proto].prototype, func, desc);
     }
   }
 }
-
 module.exports = hookDOMInserters;
 
 /***/ }),
@@ -519,17 +482,15 @@ module.exports = hookDOMInserters;
 /***/ 459:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var hook = __webpack_require__(228);
-
-var _require = __webpack_require__(14),
-    removeEventListener = _require.removeEventListener,
-    addEventListener = _require.addEventListener,
-    slice = _require.slice,
-    Map = _require.Map,
-    Object = _require.Object;
-
-var handlers = new Map();
-
+const hook = __webpack_require__(228);
+const {
+  removeEventListener,
+  addEventListener,
+  slice,
+  Map,
+  Object
+} = __webpack_require__(14);
+const handlers = new Map();
 function callOnload(that, onload, args) {
   if (onload) {
     if (onload.handleEvent) {
@@ -539,40 +500,32 @@ function callOnload(that, onload, args) {
     }
   }
 }
-
 function getAddEventListener(win, cb) {
   return function (type, handler, options) {
-    var listener = handler;
-
+    let listener = handler;
     if (type === 'load') {
       if (!handlers.has(handler)) {
         handlers.set(handler, function () {
           hook(win, [this], cb);
-          var args = slice(arguments);
+          const args = slice(arguments);
           callOnload(this, handler, args);
         });
       }
-
       listener = handlers.get(handler);
     }
-
     return addEventListener(this, type, listener, options);
   };
 }
-
 function getRemoveEventListener() {
   return function (type, handler, options) {
-    var listener = handler;
-
+    let listener = handler;
     if (type === 'load') {
       listener = handlers.get(handler);
       handlers.delete(handler);
     }
-
     return removeEventListener(this, type, listener, options);
   };
 }
-
 function hookLoadSetters(win, cb) {
   Object.defineProperty(win.EventTarget.prototype, 'addEventListener', {
     value: getAddEventListener(win, cb)
@@ -581,7 +534,6 @@ function hookLoadSetters(win, cb) {
     value: getRemoveEventListener()
   });
 }
-
 module.exports = hookLoadSetters;
 
 /***/ }),
@@ -589,59 +541,49 @@ module.exports = hookLoadSetters;
 /***/ 312:
 /***/ ((module) => {
 
-var WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
-var ERR_MARK_NEW_WINDOW_FAILED = 2;
-var WARN_OPEN_API_DISABLED = 3;
-
+const WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
+const ERR_MARK_NEW_WINDOW_FAILED = 2;
+const WARN_OPEN_API_DISABLED = 3;
 function warn(msg, a, b) {
-  var bail;
-
+  let bail;
   switch (msg) {
     case WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED:
-      var frame = a,
-          onload = b;
+      const frame = a,
+        onload = b;
       bail = false;
-      console.warn('SNOW:', 'removing html string iframe onload attribute:', frame, "\"".concat(onload, "\""), '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
+      console.warn('SNOW:', 'removing html string iframe onload attribute:', frame, `"${onload}"`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
       break;
-
     case WARN_OPEN_API_DISABLED:
-      var args = a,
-          win = b;
+      const args = a,
+        win = b;
       bail = true;
       console.warn('SNOW:', 'blocking open API call:', args, win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
       break;
-
     default:
       break;
   }
-
   return bail;
 }
-
 function error(msg, a, b) {
-  var bail;
-
+  let bail;
   switch (msg) {
     case ERR_MARK_NEW_WINDOW_FAILED:
-      var win = a,
-          err = b;
+      const win = a,
+        err = b;
       bail = true;
       console.error('SNOW:', 'failed to mark new window:', win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', '\n', 'in order to maintain a bulletproof defense mechanism, failing to mark a new window typically causes an infinite loop', '.', '\n', 'error caught:', '\n', err);
       break;
-
     default:
       break;
   }
-
   return bail;
 }
-
 module.exports = {
-  warn: warn,
-  error: error,
-  WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED: WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
-  ERR_MARK_NEW_WINDOW_FAILED: ERR_MARK_NEW_WINDOW_FAILED,
-  WARN_OPEN_API_DISABLED: WARN_OPEN_API_DISABLED
+  warn,
+  error,
+  WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
+  ERR_MARK_NEW_WINDOW_FAILED,
+  WARN_OPEN_API_DISABLED
 };
 
 /***/ }),
@@ -649,49 +591,40 @@ module.exports = {
 /***/ 111:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var _require = __webpack_require__(14),
-    Map = _require.Map,
-    Object = _require.Object,
-    Array = _require.Array;
-
-var secret = (Math.random() + 1).toString(36).substring(7);
-var wins = new Map();
-
+const {
+  Map,
+  Object,
+  Array
+} = __webpack_require__(14);
+const secret = (Math.random() + 1).toString(36).substring(7);
+const wins = new Map();
 function isMarked(win) {
   if (!wins.has(win)) {
     return false;
   }
-
-  var desc = Object.getOwnPropertyDescriptor(win, 'SNOW_ID');
-
+  const desc = Object.getOwnPropertyDescriptor(win, 'SNOW_ID');
   if (!desc || !Object.hasOwnProperty.call(desc, 'value')) {
     return false;
   }
-
   if (typeof desc.value !== 'function') {
     return false;
   }
-
-  var key = wins.get(win);
-  var answer = desc.value(secret);
+  const key = wins.get(win);
+  const answer = desc.value(secret);
   return answer === key;
 }
-
 function mark(win) {
-  var key = new Array();
+  const key = new Array();
   Object.defineProperty(win, 'SNOW_ID', {
     configurable: false,
     writable: false,
-    value: function value(s) {
-      return s === secret && key;
-    }
+    value: s => s === secret && key
   });
   wins.set(win, key);
 }
-
 module.exports = {
-  isMarked: isMarked,
-  mark: mark
+  isMarked,
+  mark
 };
 
 /***/ }),
@@ -699,7 +632,7 @@ module.exports = {
 /***/ 14:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var securely = __webpack_require__(528)(top, {
+const securely = __webpack_require__(528)(window, {
   objects: {
     'JSON': ['parse', 'stringify'],
     'document': ['createElement'],
@@ -726,142 +659,114 @@ var securely = __webpack_require__(528)(top, {
     'HTMLObjectElement': ['contentWindow']
   }
 });
-
 function getContentWindow(element, tag) {
   switch (tag) {
     case 'IFRAME':
       return natives.iframeContentWindow.call(element);
-
     case 'FRAME':
       return natives.frameContentWindow.call(element);
-
     case 'OBJECT':
       return natives.objectContentWindow.call(element);
-
     case 'EMBED':
       return null;
-
     default:
       return null;
   }
 }
-
 function parse(text, reviver) {
   return natives.parse(text, reviver);
 }
-
 function stringify(value, replacer, space) {
   return natives.stringify(value, replacer, space);
 }
-
 function Array() {
   return natives.Array.apply(null, slice(arguments));
 }
-
 function Map() {
   return new natives.Map();
 }
-
 function slice(arr, start, end) {
   return natives.slice.call(arr, start, end);
 }
-
 function nodeType(node) {
   return natives.nodeType.call(node);
 }
-
 function tagName(element) {
   return natives.tagName.call(element);
 }
-
 function toString(object) {
   return natives.toString.call(object);
 }
-
 function getOnload(element) {
   return natives.getOnload.call(element);
 }
-
 function setOnload(element, onload) {
   return natives.setOnload.call(element, onload);
 }
-
 function removeAttribute(element, attribute) {
   return natives.removeAttribute.call(element, attribute);
 }
-
 function getAttribute(element, attribute) {
   return natives.getAttribute.call(element, attribute);
 }
-
 function addEventListener(element, event, listener, options) {
   return natives.addEventListener.call(element, event, listener, options);
 }
-
 function removeEventListener(element, event, listener, options) {
   return natives.removeEventListener.call(element, event, listener, options);
 }
-
 function createElement(document, tagName, options) {
   return natives.createElement.call(document, tagName, options);
 }
-
 function getInnerHTML(element) {
   return natives.getInnerHTML.call(element);
 }
-
 function setInnerHTML(element, html) {
   return natives.setInnerHTML.call(element, html);
 }
-
 function getTemplateContent(template) {
   return natives.getTemplateContent.call(template);
 }
-
 function getFrameElement(win) {
   return natives.Function.prototype.call.call(natives.getFrameElement, win);
 }
-
 function getParentElement(element) {
   return natives.getParentElement.call(element);
 }
-
-var natives = securely(function () {
-  return {
-    Array: ArrayS,
-    Map: MapS,
-    Object: ObjectS,
-    Function: FunctionS,
-    Node: NodeS,
-    Element: ElementS,
-    ShadowRoot: ShadowRootS,
-    Document: DocumentS,
-    DocumentFragment: DocumentFragmentS,
-    parse: JSON.parseS,
-    stringify: JSON.stringifyS,
-    iframeContentWindow: Object.getOwnPropertyDescriptor(HTMLIFrameElementS.prototype, 'contentWindow').get,
-    frameContentWindow: Object.getOwnPropertyDescriptor(HTMLFrameElementS.prototype, 'contentWindow').get,
-    objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElementS.prototype, 'contentWindow').get,
-    createElement: Object.getOwnPropertyDescriptor(DocumentS.prototype, 'createElement').value,
-    slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
-    nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
-    tagName: Object.getOwnPropertyDescriptor(ElementS.prototype, 'tagName').get,
-    getInnerHTML: Object.getOwnPropertyDescriptor(ElementS.prototype, 'innerHTML').get,
-    setInnerHTML: Object.getOwnPropertyDescriptor(ElementS.prototype, 'innerHTML').set,
-    toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
-    getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
-    setOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').set,
-    getAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'getAttribute').value,
-    removeAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'removeAttribute').value,
-    addEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'addEventListener').value,
-    removeEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'removeEventListener').value,
-    getTemplateContent: Object.getOwnPropertyDescriptor(HTMLTemplateElementS.prototype, 'content').get,
-    getFrameElement: Object.getOwnPropertyDescriptor(window, 'frameElement').get,
-    getParentElement: Object.getOwnPropertyDescriptor(NodeS.prototype, 'parentElement').get
-  };
-});
+const natives = securely(() => ({
+  Array: ArrayS,
+  Map: MapS,
+  Object: ObjectS,
+  Function: FunctionS,
+  Node: NodeS,
+  Element: ElementS,
+  ShadowRoot: ShadowRootS,
+  Document: DocumentS,
+  DocumentFragment: DocumentFragmentS,
+  parse: JSON.parseS,
+  stringify: JSON.stringifyS,
+  iframeContentWindow: Object.getOwnPropertyDescriptor(HTMLIFrameElementS.prototype, 'contentWindow').get,
+  frameContentWindow: Object.getOwnPropertyDescriptor(HTMLFrameElementS.prototype, 'contentWindow').get,
+  objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElementS.prototype, 'contentWindow').get,
+  createElement: Object.getOwnPropertyDescriptor(DocumentS.prototype, 'createElement').value,
+  slice: Object.getOwnPropertyDescriptor(ArrayS.prototype, 'slice').value,
+  nodeType: Object.getOwnPropertyDescriptor(NodeS.prototype, 'nodeType').get,
+  tagName: Object.getOwnPropertyDescriptor(ElementS.prototype, 'tagName').get,
+  getInnerHTML: Object.getOwnPropertyDescriptor(ElementS.prototype, 'innerHTML').get,
+  setInnerHTML: Object.getOwnPropertyDescriptor(ElementS.prototype, 'innerHTML').set,
+  toString: Object.getOwnPropertyDescriptor(ObjectS.prototype, 'toString').value,
+  getOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').get,
+  setOnload: Object.getOwnPropertyDescriptor(HTMLElementS.prototype, 'onload').set,
+  getAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'getAttribute').value,
+  removeAttribute: Object.getOwnPropertyDescriptor(ElementS.prototype, 'removeAttribute').value,
+  addEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'addEventListener').value,
+  removeEventListener: Object.getOwnPropertyDescriptor(EventTargetS.prototype, 'removeEventListener').value,
+  getTemplateContent: Object.getOwnPropertyDescriptor(HTMLTemplateElementS.prototype, 'content').get,
+  getFrameElement: Object.getOwnPropertyDescriptor(window, 'frameElement').get,
+  getParentElement: Object.getOwnPropertyDescriptor(NodeS.prototype, 'parentElement').get
+}));
 module.exports = {
-  securely: securely,
+  securely,
   Object: natives.Object,
   Function: natives.Function,
   Node: natives.Node,
@@ -869,27 +774,27 @@ module.exports = {
   Document: natives.Document,
   DocumentFragment: natives.DocumentFragment,
   ShadowRoot: natives.ShadowRoot,
-  getParentElement: getParentElement,
-  getTemplateContent: getTemplateContent,
-  getFrameElement: getFrameElement,
-  getInnerHTML: getInnerHTML,
-  setInnerHTML: setInnerHTML,
-  getContentWindow: getContentWindow,
-  createElement: createElement,
-  slice: slice,
-  Array: Array,
-  Map: Map,
-  parse: parse,
-  stringify: stringify,
-  nodeType: nodeType,
-  toString: toString,
-  tagName: tagName,
-  getOnload: getOnload,
-  setOnload: setOnload,
-  removeAttribute: removeAttribute,
-  getAttribute: getAttribute,
-  addEventListener: addEventListener,
-  removeEventListener: removeEventListener
+  getParentElement,
+  getTemplateContent,
+  getFrameElement,
+  getInnerHTML,
+  setInnerHTML,
+  getContentWindow,
+  createElement,
+  slice,
+  Array,
+  Map,
+  parse,
+  stringify,
+  nodeType,
+  toString,
+  tagName,
+  getOnload,
+  setOnload,
+  removeAttribute,
+  getAttribute,
+  addEventListener,
+  removeEventListener
 };
 
 /***/ }),
@@ -897,31 +802,27 @@ module.exports = {
 /***/ 583:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var _require = __webpack_require__(14),
-    slice = _require.slice,
-    Function = _require.Function;
-
-var _require2 = __webpack_require__(312),
-    warn = _require2.warn,
-    WARN_OPEN_API_DISABLED = _require2.WARN_OPEN_API_DISABLED;
-
+const {
+  slice,
+  Function
+} = __webpack_require__(14);
+const {
+  warn,
+  WARN_OPEN_API_DISABLED
+} = __webpack_require__(312);
 function hookOpen(win, cb) {
-  var realOpen = win.open;
-
+  const realOpen = win.open;
   win.open = function () {
-    var args = slice(arguments);
-    var blocked = warn(WARN_OPEN_API_DISABLED, args, win);
-
+    const args = slice(arguments);
+    const blocked = warn(WARN_OPEN_API_DISABLED, args, win);
     if (blocked) {
       return null;
     }
-
-    var opened = Function.prototype.apply.call(realOpen, this, args);
+    const opened = Function.prototype.apply.call(realOpen, this, args);
     cb(opened);
     return opened;
   };
 }
-
 module.exports = hookOpen;
 
 /***/ }),
@@ -929,48 +830,42 @@ module.exports = hookOpen;
 /***/ 373:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var hook = __webpack_require__(228);
-
-var _require = __webpack_require__(648),
-    getFramesArray = _require.getFramesArray,
-    shadows = _require.shadows;
-
-var _require2 = __webpack_require__(14),
-    Object = _require2.Object,
-    Function = _require2.Function;
-
+const hook = __webpack_require__(228);
+const {
+  getFramesArray,
+  shadows
+} = __webpack_require__(648);
+const {
+  Object,
+  Function
+} = __webpack_require__(14);
 function protectShadows(win, cb, connectedOnly) {
-  for (var i = 0; i < shadows.length; i++) {
-    var shadow = shadows[i];
-
+  for (let i = 0; i < shadows.length; i++) {
+    const shadow = shadows[i];
     if (connectedOnly && !shadow.isConnected) {
       continue;
     }
-
-    var frames = getFramesArray(shadow, false);
+    const frames = getFramesArray(shadow, false);
     hook(win, frames, cb);
   }
 }
-
 function getHook(win, native, cb) {
   return function (options) {
-    var ret = Function.prototype.call.call(native, this, options);
+    const ret = Function.prototype.call.call(native, this, options);
     shadows.push(ret);
     protectShadows(win, cb, true);
     return ret;
   };
 }
-
 function hookShadowDOM(win, cb) {
-  var desc = Object.getOwnPropertyDescriptor(win.Element.prototype, 'attachShadow');
-  var val = desc.value;
+  const desc = Object.getOwnPropertyDescriptor(win.Element.prototype, 'attachShadow');
+  const val = desc.value;
   desc.value = getHook(win, val, cb);
   Object.defineProperty(win.Element.prototype, 'attachShadow', desc);
 }
-
 module.exports = {
-  hookShadowDOM: hookShadowDOM,
-  protectShadows: protectShadows
+  hookShadowDOM,
+  protectShadows
 };
 
 /***/ }),
@@ -978,124 +873,94 @@ module.exports = {
 /***/ 648:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
-var _require = __webpack_require__(14),
-    tagName = _require.tagName,
-    nodeType = _require.nodeType,
-    slice = _require.slice,
-    Array = _require.Array,
-    parse = _require.parse,
-    stringify = _require.stringify,
-    Node = _require.Node,
-    Document = _require.Document,
-    DocumentFragment = _require.DocumentFragment,
-    Element = _require.Element,
-    ShadowRoot = _require.ShadowRoot;
-
-var shadows = new Array();
-
+const {
+  tagName,
+  nodeType,
+  slice,
+  Array,
+  parse,
+  stringify,
+  Node,
+  Document,
+  DocumentFragment,
+  Element,
+  ShadowRoot
+} = __webpack_require__(14);
+const shadows = new Array();
 function isShadow(node) {
   return shadows.includes(node);
 }
-
 function isTrustedHTML(node) {
-  var replacer = function replacer(k, v) {
-    return !k && node === v ? v : '';
-  }; // avoid own props
+  const replacer = (k, v) => !k && node === v ? v : ''; // avoid own props
   // normal nodes will parse into objects whereas trusted htmls into strings
-
-
   return typeof parse(stringify(node, replacer)) === 'string';
 }
-
 function getPrototype(node) {
   if (isShadow(node)) {
     return ShadowRoot;
   }
-
   switch (nodeType(node)) {
     case Node.prototype.DOCUMENT_NODE:
       return Document;
-
     case Node.prototype.DOCUMENT_FRAGMENT_NODE:
       return DocumentFragment;
-
     default:
       return Element;
   }
 }
-
 function getFrameTag(element) {
-  if (!element || _typeof(element) !== 'object') {
+  if (!element || typeof element !== 'object') {
     return null;
   }
-
   if (nodeType(element) !== Element.prototype.ELEMENT_NODE) {
     return null;
   }
-
   if (isShadow(element)) {
     return null;
   }
-
-  var tag = tagName(element);
-
+  const tag = tagName(element);
   if (tag !== 'IFRAME' && tag !== 'FRAME' && tag !== 'OBJECT' && tag !== 'EMBED') {
     return null;
   }
-
   return tag;
 }
-
 function canNodeRunQuerySelector(node) {
   if (isShadow(node)) {
     return true;
   }
-
-  var type = nodeType(node);
+  const type = nodeType(node);
   return type === Element.prototype.ELEMENT_NODE || type === Element.prototype.DOCUMENT_FRAGMENT_NODE || type === Element.prototype.DOCUMENT_NODE;
 }
-
 function getFramesArray(element, includingParent) {
-  var frames = new Array();
-
-  if (null === element || _typeof(element) !== 'object') {
+  const frames = new Array();
+  if (null === element || typeof element !== 'object') {
     return frames;
   }
-
   if (isTrustedHTML(element) || !canNodeRunQuerySelector(element)) {
     return frames;
   }
-
-  var querySelectorAll = getPrototype(element).prototype.querySelectorAll;
-  var list = querySelectorAll.call(element, 'iframe,frame,object,embed');
+  const querySelectorAll = getPrototype(element).prototype.querySelectorAll;
+  const list = querySelectorAll.call(element, 'iframe,frame,object,embed');
   fillArrayUniques(frames, slice(list));
-
   if (includingParent) {
     fillArrayUniques(frames, [element]);
   }
-
   return frames;
 }
-
 function fillArrayUniques(arr, items) {
-  var isArrUpdated = false;
-
-  for (var i = 0; i < items.length; i++) {
+  let isArrUpdated = false;
+  for (let i = 0; i < items.length; i++) {
     if (!arr.includes(items[i])) {
       arr.push(items[i]);
       isArrUpdated = true;
     }
   }
-
   return isArrUpdated;
 }
-
 module.exports = {
-  getFramesArray: getFramesArray,
-  getFrameTag: getFrameTag,
-  shadows: shadows
+  getFramesArray,
+  getFrameTag,
+  shadows
 };
 
 /***/ }),
@@ -1205,7 +1070,6 @@ var __webpack_exports__ = {};
 /* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(352);
 /* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_src_index__WEBPACK_IMPORTED_MODULE_0__);
 
-
 (function (win) {
   Object.defineProperty(win, 'SNOW', {
     value: (_src_index__WEBPACK_IMPORTED_MODULE_0___default())
@@ -1215,3 +1079,4 @@ var __webpack_exports__ = {};
 
 /******/ })()
 ;
+}())

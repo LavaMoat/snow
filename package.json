@@ -1,6 +1,6 @@
 {
   "name": "@weizman/snow",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "standardize how to recursively own newborn windows within a web app, from the context of the app itself",
   "main": "src/index.js",
   "devDependencies": {
@@ -11,14 +11,16 @@
     "@wdio/mocha-framework": "^7.5.3",
     "@wdio/spec-reporter": "^7.5.3",
     "babel-loader": "^8.2.2",
-    "chromedriver": "^104.0.0",
+    "chromedriver": "^107.0.0",
     "wdio-chromedriver-service": "7.0.0",
     "webpack": "^5.33.2",
     "webpack-cli": "^4.6.0"
   },
   "scripts": {
-    "build-dev": "webpack --config ./webpack.config.js",
-    "build-prod": "webpack --config ./webpack.prod.config.js",
+    "use-strict-dev": "node -p 'fs.writeFileSync(`snow.js`, `(function(){\n\"use strict\";\n` + fs.readFileSync(`snow.js`)+ `\n}())`) , `successfully wrapped snow.js with use-strict scope`'",
+    "use-strict-prod": "node -p 'fs.writeFileSync(`snow.prod.js`, `(function(){\"use strict\";` + fs.readFileSync(`snow.prod.js`)+ `}())`) , `successfully wrapped snow.prod.js with use-strict scope`'",
+    "build-dev": "webpack --config ./webpack.config.js && yarn use-strict-dev",
+    "build-prod": "webpack --config ./webpack.prod.config.js && yarn use-strict-prod",
     "build": "yarn build-prod & yarn build-dev",
     "test": "./node_modules/.bin/wdio run wdio.conf.js",
     "build-test": "yarn build && yarn test"

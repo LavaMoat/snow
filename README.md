@@ -34,11 +34,11 @@ window.SNOW((win) => {
 ## Install
 
 The latest `snow` [production version](https://raw.githubusercontent.com/lavamoat/snow/main/snow.prod.js) is included in the official repo
-and also in [upkg cdn](https://unpkg.com/@weizman/snow/snow.prod.js), so in order to
+and also in [upkg cdn](https://unpkg.com/@lavamoat/snow/snow.prod.js), so in order to
 install `snow` in the website, simply place it wherever and serve it to the website as-is:
 
 ```html
-<script src="https://unpkg.com/@weizman/snow/snow.prod.js"></script>
+<script src="https://unpkg.com/@lavamoat/snow/snow.prod.js"></script>
 ```
 
 After this line, window should expose `window.SNOW` API for the
@@ -60,11 +60,11 @@ in order for it to play its role securely.
 `SNOW` API can also be required as part of a bundle instead of a script tag:
 
 ```
-yarn add @weizman/snow
+yarn add @lavamoat/snow
 ```
 
 ```javascript
-const snow = require('@weizman/snow');
+const snow = require('@lavamoat/snow');
 ```
 
 ## Contribute

@@ -1,5 +1,5 @@
 {
-  "name": "@weizman/snow",
+  "name": "@lavamoat/snow",
   "version": "1.2.1",
   "description": "standardize how to recursively own newborn windows within a web app, from the context of the app itself",
   "main": "src/index.js",

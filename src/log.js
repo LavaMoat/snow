@@ -16,7 +16,7 @@ function warn(msg, a, b) {
             break;
         case WARN_OPEN_API_DISABLED:
             const args = a, win = b;
-            bail = true;
+            bail = false;
             console.warn('SNOW:',
                 'blocking open API call:', args, win, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',

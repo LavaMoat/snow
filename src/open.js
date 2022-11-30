@@ -1,19 +1,35 @@
-const {slice, Function} = require('./natives');
-const {warn, WARN_OPEN_API_DISABLED} = require('./log');
+const {slice, Function, Object,  Reflect, Proxy} = require('./natives');
+const {warn, WARN_OPEN_API_LIMITED} = require('./log');
 
 function hookOpen(win, cb) {
     const realOpen = win.open;
     win.open = function() {
         const args = slice(arguments);
 
-        const blocked = warn(WARN_OPEN_API_DISABLED, args, win);
-        if (blocked) {
-            return null;
-        }
-
         const opened = Function.prototype.apply.call(realOpen, this, args);
         cb(opened);
-        return opened;
+
+        const proxy = {};
+        Object.defineProperty(proxy, 'focus', { value: () => opened.focus() });
+        Object.defineProperty(proxy, 'close', { value: () => opened.close() });
+        Object.defineProperty(proxy, 'closed', { get: () => opened.closed });
+
+        return new Proxy(proxy, {
+            get: function (target, property) {
+                let ret = Reflect.get(proxy, property);
+                if (Reflect.has(proxy, property)) {
+                    return ret;
+                }
+                if (Reflect.has(opened, property)) {
+                    const blocked = warn(WARN_OPEN_API_LIMITED, property, win);
+                    if (!blocked) {
+                        ret = Reflect.get(opened, property);
+                    }
+                }
+                return ret;
+            },
+            set: function() {},
+        });
     }
 }
 

@@ -1,6 +1,8 @@
+const {console} = require('./natives');
+
 const WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
 const ERR_MARK_NEW_WINDOW_FAILED = 2;
-const WARN_OPEN_API_DISABLED = 3;
+const WARN_OPEN_API_LIMITED = 3;
 
 function warn(msg, a, b) {
     let bail;
@@ -14,11 +16,11 @@ function warn(msg, a, b) {
                 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.',
             );
             break;
-        case WARN_OPEN_API_DISABLED:
-            const args = a, win = b;
+        case WARN_OPEN_API_LIMITED:
+            const property = a, win = b;
             bail = true;
             console.warn('SNOW:',
-                'blocking open API call:', args, win, '.', '\n',
+                'blocking access to property:', `"${property}"`, 'of opened window: ', win, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
                 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.',
             );
@@ -54,5 +56,5 @@ module.exports = {
     warn, error,
     WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
     ERR_MARK_NEW_WINDOW_FAILED,
-    WARN_OPEN_API_DISABLED
+    WARN_OPEN_API_LIMITED
 };

@@ -9,6 +9,8 @@ function natively(win, cb) {
 function natives(win) {
     return natively(win, function(win) {
         const {
+            console,
+            Proxy,
             JSON,
             Attr,
             String,
@@ -19,6 +21,7 @@ function natives(win) {
             DocumentFragment,
             ShadowRoot,
             Object,
+            Reflect,
             Array,
             Element,
             HTMLElement,
@@ -29,6 +32,8 @@ function natives(win) {
             HTMLObjectElement,
         } = win;
         const bag = {
+            console,
+            Proxy,
             JSON,
             Attr,
             String,
@@ -39,6 +44,7 @@ function natives(win) {
             DocumentFragment,
             ShadowRoot,
             Object,
+            Reflect,
             Array,
             Element,
             HTMLElement,
@@ -59,6 +65,8 @@ function setup(win) {
     const bag = natives(win);
 
     const {
+        console,
+        Proxy,
         Function,
         Map,
         Node,
@@ -66,6 +74,7 @@ function setup(win) {
         DocumentFragment,
         ShadowRoot,
         Object,
+        Reflect,
         Array,
         Element,
         HTMLElement,
@@ -99,7 +108,10 @@ function setup(win) {
     });
 
     return {
+        console,
+        Proxy,
         Object,
+        Reflect,
         Function,
         Node,
         Element,

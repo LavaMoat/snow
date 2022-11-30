@@ -792,14 +792,25 @@ function hookOpen(win, cb) {
     const opened = Function.prototype.apply.call(realOpen, this, args);
     cb(opened);
     const proxy = {};
-    Object.defineProperty(proxy, 'focus', {
-      value: () => opened.focus()
+    Object.defineProperty(proxy, 'closed', {
+      get: function () {
+        return opened.closed;
+      }
     });
     Object.defineProperty(proxy, 'close', {
-      value: () => opened.close()
+      value: function () {
+        return opened.close();
+      }
     });
-    Object.defineProperty(proxy, 'closed', {
-      get: () => opened.closed
+    Object.defineProperty(proxy, 'focus', {
+      value: function () {
+        return opened.focus();
+      }
+    });
+    Object.defineProperty(proxy, 'postMessage', {
+      value: function (message, targetOrigin, transfer) {
+        return opened.postMessage(message, targetOrigin, transfer);
+      }
     });
     return new Proxy(proxy, {
       get: function (target, property) {
@@ -819,7 +830,7 @@ function hookOpen(win, cb) {
 
         return ret;
       },
-      set: () => {}
+      set: function () {}
     });
   };
 }

@@ -1,18 +1,35 @@
-const {slice, Function, Object,  Reflect, Proxy} = require('./natives');
+const {slice, Function, Object, Reflect, Proxy} = require('./natives');
 const {warn, WARN_OPEN_API_LIMITED} = require('./log');
 
 function hookOpen(win, cb) {
     const realOpen = win.open;
-    win.open = function() {
+    win.open = function () {
         const args = slice(arguments);
 
         const opened = Function.prototype.apply.call(realOpen, this, args);
         cb(opened);
 
         const proxy = {};
-        Object.defineProperty(proxy, 'focus', { value: () => opened.focus() });
-        Object.defineProperty(proxy, 'close', { value: () => opened.close() });
-        Object.defineProperty(proxy, 'closed', { get: () => opened.closed });
+        Object.defineProperty(proxy, 'closed', {
+            get: function () {
+                return opened.closed;
+            }
+        });
+        Object.defineProperty(proxy, 'close', {
+            value: function () {
+                return opened.close();
+            }
+        });
+        Object.defineProperty(proxy, 'focus', {
+            value: function () {
+                return opened.focus();
+            }
+        });
+        Object.defineProperty(proxy, 'postMessage', {
+            value: function (message, targetOrigin, transfer) {
+                return opened.postMessage(message, targetOrigin, transfer);
+            }
+        });
 
         return new Proxy(proxy, {
             get: function (target, property) {
@@ -28,7 +45,7 @@ function hookOpen(win, cb) {
                 }
                 return ret;
             },
-            set: function() {},
+            set: function () {},
         });
     }
 }

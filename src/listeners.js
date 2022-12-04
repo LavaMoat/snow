@@ -27,24 +27,24 @@ function getAddEventListener(win, cb) {
             }
             listener = handlers.get(handler);
         }
-        return addEventListener(this, type, listener, options);
+        return addEventListener(this || win, type, listener, options);
     }
 }
 
-function getRemoveEventListener() {
+function getRemoveEventListener(win) {
     return function(type, handler, options) {
         let listener = handler;
         if (type === 'load') {
             listener = handlers.get(handler);
             handlers.delete(handler);
         }
-        return removeEventListener(this, type, listener, options);
+        return removeEventListener(this || win, type, listener, options);
     }
 }
 
 function hookLoadSetters(win, cb) {
     Object.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getAddEventListener(win, cb) });
-    Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', { value: getRemoveEventListener() });
+    Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', { value: getRemoveEventListener(win) });
 }
 
 module.exports = hookLoadSetters;

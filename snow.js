@@ -386,11 +386,11 @@ function getAddEventListener(win, cb) {
       listener = handlers.get(handler);
     }
 
-    return addEventListener(this, type, listener, options);
+    return addEventListener(this || win, type, listener, options);
   };
 }
 
-function getRemoveEventListener() {
+function getRemoveEventListener(win) {
   return function (type, handler, options) {
     let listener = handler;
 
@@ -399,7 +399,7 @@ function getRemoveEventListener() {
       handlers.delete(handler);
     }
 
-    return removeEventListener(this, type, listener, options);
+    return removeEventListener(this || win, type, listener, options);
   };
 }
 
@@ -408,7 +408,7 @@ function hookLoadSetters(win, cb) {
     value: getAddEventListener(win, cb)
   });
   Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', {
-    value: getRemoveEventListener()
+    value: getRemoveEventListener(win)
   });
 }
 

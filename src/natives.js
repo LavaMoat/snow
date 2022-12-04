@@ -121,6 +121,8 @@ function setup(win) {
         Array,
         Map,
         getContentWindow,
+        stringToLowerCase,
+        stringStartsWith,
         parse,
         stringify,
         slice,
@@ -154,6 +156,14 @@ function setup(win) {
             default:
                 return null;
         }
+    }
+
+    function stringToLowerCase(string) {
+        return bag.String.prototype.toLowerCase.call(string);
+    }
+
+    function stringStartsWith(string, find) {
+        return bag.String.prototype.startsWith.call(string, find);
     }
 
     function parse(text, reviver) {

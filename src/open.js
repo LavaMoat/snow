@@ -1,12 +1,20 @@
-const {slice, Function, Object, Reflect, Proxy} = require('./natives');
-const {warn, WARN_OPEN_API_LIMITED} = require('./log');
+const {stringToLowerCase, stringStartsWith, slice, Function, Object, Reflect, Proxy} = require('./natives');
+const {warn, WARN_OPEN_API_LIMITED, WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME} = require('./log');
 
 function hookOpen(win, cb) {
     const realOpen = win.open;
     win.open = function () {
         const args = slice(arguments);
+        const url = args[0] + '', target = args[1], windowFeatures = args[2];
 
-        const opened = Function.prototype.apply.call(realOpen, this, args);
+        if (stringStartsWith(stringToLowerCase(url), 'javascript')) {
+            const blocked = warn(WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url, win);
+            if (blocked) {
+                return null;
+            }
+        }
+
+        const opened = Function.prototype.call.call(realOpen, this, url, target, windowFeatures);
         cb(opened);
 
         const proxy = {};

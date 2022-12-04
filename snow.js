@@ -426,6 +426,7 @@ const {
 const WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
 const ERR_MARK_NEW_WINDOW_FAILED = 2;
 const WARN_OPEN_API_LIMITED = 3;
+const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 5;
 
 function warn(msg, a, b) {
   let bail;
@@ -438,11 +439,18 @@ function warn(msg, a, b) {
       console.warn('SNOW:', 'removing html string iframe onload attribute:', frame, "\"".concat(onload, "\""), '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
       break;
 
+    case WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:
+      const url2 = a,
+            win2 = b;
+      bail = true;
+      console.warn('SNOW:', bail ? '' : 'NOT', 'blocking open attempt to "javascript:" url:', url2, 'by window: ', win2, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
+      break;
+
     case WARN_OPEN_API_LIMITED:
       const property = a,
-            win = b;
+            win3 = b;
       bail = true;
-      console.warn('SNOW:', 'blocking access to property:', "\"".concat(property, "\""), 'of opened window: ', win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
+      console.warn('SNOW:', 'blocking access to property:', "\"".concat(property, "\""), 'of opened window: ', win3, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
       break;
 
     default:
@@ -475,7 +483,8 @@ module.exports = {
   error,
   WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
   ERR_MARK_NEW_WINDOW_FAILED,
-  WARN_OPEN_API_LIMITED
+  WARN_OPEN_API_LIMITED,
+  WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
 };
 
 /***/ }),
@@ -652,6 +661,8 @@ function setup(win) {
     Array,
     Map,
     getContentWindow,
+    stringToLowerCase,
+    stringStartsWith,
     parse,
     stringify,
     slice,
@@ -689,6 +700,14 @@ function setup(win) {
       default:
         return null;
     }
+  }
+
+  function stringToLowerCase(string) {
+    return bag.String.prototype.toLowerCase.call(string);
+  }
+
+  function stringStartsWith(string, find) {
+    return bag.String.prototype.startsWith.call(string, find);
   }
 
   function parse(text, reviver) {
@@ -772,6 +791,8 @@ module.exports = setup(top);
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
+  stringToLowerCase,
+  stringStartsWith,
   slice,
   Function,
   Object,
@@ -781,7 +802,8 @@ const {
 
 const {
   warn,
-  WARN_OPEN_API_LIMITED
+  WARN_OPEN_API_LIMITED,
+  WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
 } = __webpack_require__(312);
 
 function hookOpen(win, cb) {
@@ -789,7 +811,19 @@ function hookOpen(win, cb) {
 
   win.open = function () {
     const args = slice(arguments);
-    const opened = Function.prototype.apply.call(realOpen, this, args);
+    const url = args[0] + '',
+          target = args[1],
+          windowFeatures = args[2];
+
+    if (stringStartsWith(stringToLowerCase(url), 'javascript')) {
+      const blocked = warn(WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url, win);
+
+      if (blocked) {
+        return null;
+      }
+    }
+
+    const opened = Function.prototype.call.call(realOpen, this, url, target, windowFeatures);
     cb(opened);
     const proxy = {};
     Object.defineProperty(proxy, 'closed', {

@@ -1,6 +1,7 @@
 function natively(win, cb) {
     const ifr = win.document.createElement('iframe');
-    win.document.head.appendChild(ifr);
+    const parent = win.document.head || win.document.documentElement;
+    parent.appendChild(ifr);
     const ret = cb(ifr.contentWindow);
     ifr.parentElement.removeChild(ifr);
     return ret;

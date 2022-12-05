@@ -1,6 +1,6 @@
 const hook = require('./hook');
 const hookOpen = require('./open');
-const hookLoadSetters = require('./listeners');
+const hookEventListenersSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
 const {securely, addEventListener, getFrameElement} = require('./natives');
@@ -22,7 +22,7 @@ function shouldRun(win) {
 
 function applyHooks(win, hookWin, securely, cb) {
     hookOpen(win, hookWin);
-    hookLoadSetters(win, hookWin);
+    hookEventListenersSetters(win, 'load', hookWin);
     hookDOMInserters(win, hookWin);
     hookShadowDOM(win, hookWin);
     cb(win, securely);

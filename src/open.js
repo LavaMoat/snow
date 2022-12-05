@@ -1,9 +1,50 @@
 const {stringToLowerCase, stringStartsWith, slice, Function, Object, Reflect, Proxy} = require('./natives');
 const {warn, WARN_OPEN_API_LIMITED, WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME} = require('./log');
 
-function hookOpen(win, cb) {
-    const realOpen = win.open;
-    win.open = function () {
+function proxy(win, opened) {
+    const target = {};
+
+    Object.defineProperty(target, 'closed', {
+        get: function () {
+            return opened.closed;
+        }
+    });
+    Object.defineProperty(target, 'close', {
+        value: function () {
+            return opened.close();
+        }
+    });
+    Object.defineProperty(target, 'focus', {
+        value: function () {
+            return opened.focus();
+        }
+    });
+    Object.defineProperty(target, 'postMessage', {
+        value: function (message, targetOrigin, transfer) {
+            return opened.postMessage(message, targetOrigin, transfer);
+        }
+    });
+
+    return new Proxy(target, {
+        get: function (target, property) {
+            let ret = Reflect.get(target, property);
+            if (Reflect.has(target, property)) {
+                return ret;
+            }
+            if (Reflect.has(opened, property)) {
+                const blocked = warn(WARN_OPEN_API_LIMITED, property, win);
+                if (!blocked) {
+                    ret = Reflect.get(opened, property);
+                }
+            }
+            return ret;
+        },
+        set: function () {},
+    });
+}
+
+function hook(win, realOpen, cb) {
+    return function open() {
         const args = slice(arguments);
         const url = args[0] + '', target = args[1], windowFeatures = args[2];
 
@@ -16,46 +57,13 @@ function hookOpen(win, cb) {
 
         const opened = Function.prototype.call.call(realOpen, this, url, target, windowFeatures);
         cb(opened);
+        return proxy(win, opened);
+    };
+}
 
-        const proxy = {};
-        Object.defineProperty(proxy, 'closed', {
-            get: function () {
-                return opened.closed;
-            }
-        });
-        Object.defineProperty(proxy, 'close', {
-            value: function () {
-                return opened.close();
-            }
-        });
-        Object.defineProperty(proxy, 'focus', {
-            value: function () {
-                return opened.focus();
-            }
-        });
-        Object.defineProperty(proxy, 'postMessage', {
-            value: function (message, targetOrigin, transfer) {
-                return opened.postMessage(message, targetOrigin, transfer);
-            }
-        });
-
-        return new Proxy(proxy, {
-            get: function (target, property) {
-                let ret = Reflect.get(proxy, property);
-                if (Reflect.has(proxy, property)) {
-                    return ret;
-                }
-                if (Reflect.has(opened, property)) {
-                    const blocked = warn(WARN_OPEN_API_LIMITED, property, win);
-                    if (!blocked) {
-                        ret = Reflect.get(opened, property);
-                    }
-                }
-                return ret;
-            },
-            set: function () {},
-        });
-    }
+function hookOpen(win, cb) {
+    const realOpen = win.open;
+    win.open = hook(win, realOpen, cb);
 }
 
 module.exports = hookOpen;

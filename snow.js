@@ -202,7 +202,7 @@ const hook = __webpack_require__(228);
 
 const hookOpen = __webpack_require__(583);
 
-const hookLoadSetters = __webpack_require__(459);
+const hookEventListenersSetters = __webpack_require__(459);
 
 const hookDOMInserters = __webpack_require__(58);
 
@@ -244,7 +244,7 @@ function shouldRun(win) {
 
 function applyHooks(win, hookWin, securely, cb) {
   hookOpen(win, hookWin);
-  hookLoadSetters(win, hookWin);
+  hookEventListenersSetters(win, 'load', hookWin);
   hookDOMInserters(win, hookWin);
   hookShadowDOM(win, hookWin);
   cb(win, securely);
@@ -360,26 +360,26 @@ const {
 
 const handlers = new Map();
 
-function callOnload(that, onload, args) {
-  if (onload) {
-    if (onload.handleEvent) {
-      return onload.handleEvent.apply(onload, args);
+function fire(that, listener, args) {
+  if (listener) {
+    if (listener.handleEvent) {
+      return listener.handleEvent.apply(listener, args);
     } else {
-      return onload.apply(that, args);
+      return listener.apply(that, args);
     }
   }
 }
 
-function getAddEventListener(win, cb) {
+function getAddEventListener(win, event, cb) {
   return function (type, handler, options) {
     let listener = handler;
 
-    if (type === 'load') {
+    if (type === event) {
       if (!handlers.has(handler)) {
         handlers.set(handler, function () {
           hook(win, [this], cb);
           const args = slice(arguments);
-          callOnload(this, handler, args);
+          fire(this, handler, args);
         });
       }
 
@@ -390,11 +390,11 @@ function getAddEventListener(win, cb) {
   };
 }
 
-function getRemoveEventListener(win) {
+function getRemoveEventListener(win, event) {
   return function (type, handler, options) {
     let listener = handler;
 
-    if (type === 'load') {
+    if (type === event) {
       listener = handlers.get(handler);
       handlers.delete(handler);
     }
@@ -403,16 +403,16 @@ function getRemoveEventListener(win) {
   };
 }
 
-function hookLoadSetters(win, cb) {
+function hookEventListenersSetters(win, event, cb) {
   Object.defineProperty(win.EventTarget.prototype, 'addEventListener', {
-    value: getAddEventListener(win, cb)
+    value: getAddEventListener(win, event, cb)
   });
   Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', {
-    value: getRemoveEventListener(win)
+    value: getRemoveEventListener(win, event)
   });
 }
 
-module.exports = hookLoadSetters;
+module.exports = hookEventListenersSetters;
 
 /***/ }),
 
@@ -426,7 +426,7 @@ const {
 const WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
 const ERR_MARK_NEW_WINDOW_FAILED = 2;
 const WARN_OPEN_API_LIMITED = 3;
-const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 5;
+const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 4;
 
 function warn(msg, a, b) {
   let bail;
@@ -806,10 +806,52 @@ const {
   WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
 } = __webpack_require__(312);
 
-function hookOpen(win, cb) {
-  const realOpen = win.open;
+function proxy(win, opened) {
+  const target = {};
+  Object.defineProperty(target, 'closed', {
+    get: function () {
+      return opened.closed;
+    }
+  });
+  Object.defineProperty(target, 'close', {
+    value: function () {
+      return opened.close();
+    }
+  });
+  Object.defineProperty(target, 'focus', {
+    value: function () {
+      return opened.focus();
+    }
+  });
+  Object.defineProperty(target, 'postMessage', {
+    value: function (message, targetOrigin, transfer) {
+      return opened.postMessage(message, targetOrigin, transfer);
+    }
+  });
+  return new Proxy(target, {
+    get: function (target, property) {
+      let ret = Reflect.get(target, property);
 
-  win.open = function () {
+      if (Reflect.has(target, property)) {
+        return ret;
+      }
+
+      if (Reflect.has(opened, property)) {
+        const blocked = warn(WARN_OPEN_API_LIMITED, property, win);
+
+        if (!blocked) {
+          ret = Reflect.get(opened, property);
+        }
+      }
+
+      return ret;
+    },
+    set: function () {}
+  });
+}
+
+function hook(win, realOpen, cb) {
+  return function open() {
     const args = slice(arguments);
     const url = args[0] + '',
           target = args[1],
@@ -825,48 +867,13 @@ function hookOpen(win, cb) {
 
     const opened = Function.prototype.call.call(realOpen, this, url, target, windowFeatures);
     cb(opened);
-    const proxy = {};
-    Object.defineProperty(proxy, 'closed', {
-      get: function () {
-        return opened.closed;
-      }
-    });
-    Object.defineProperty(proxy, 'close', {
-      value: function () {
-        return opened.close();
-      }
-    });
-    Object.defineProperty(proxy, 'focus', {
-      value: function () {
-        return opened.focus();
-      }
-    });
-    Object.defineProperty(proxy, 'postMessage', {
-      value: function (message, targetOrigin, transfer) {
-        return opened.postMessage(message, targetOrigin, transfer);
-      }
-    });
-    return new Proxy(proxy, {
-      get: function (target, property) {
-        let ret = Reflect.get(proxy, property);
-
-        if (Reflect.has(proxy, property)) {
-          return ret;
-        }
-
-        if (Reflect.has(opened, property)) {
-          const blocked = warn(WARN_OPEN_API_LIMITED, property, win);
-
-          if (!blocked) {
-            ret = Reflect.get(opened, property);
-          }
-        }
-
-        return ret;
-      },
-      set: function () {}
-    });
+    return proxy(win, opened);
   };
+}
+
+function hookOpen(win, cb) {
+  const realOpen = win.open;
+  win.open = hook(win, realOpen, cb);
 }
 
 module.exports = hookOpen;

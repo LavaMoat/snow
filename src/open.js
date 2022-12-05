@@ -69,6 +69,10 @@ function hook(win, native, cb) {
         }
 
         const opened = Function.prototype.call.call(native, this, url, target, windowFeatures);
+        if (!opened) {
+            return null;
+        }
+
         cb(opened);
         const p = proxy(win, opened);
         openeds.set(opened, p);

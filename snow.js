@@ -797,7 +797,8 @@ const {
   Function,
   Object,
   Reflect,
-  Proxy
+  Proxy,
+  Map
 } = __webpack_require__(14);
 
 const {
@@ -805,6 +806,20 @@ const {
   WARN_OPEN_API_LIMITED,
   WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
 } = __webpack_require__(312);
+
+const openeds = new Map();
+
+function patchMessageEvent(win) {
+  const desc = Object.getOwnPropertyDescriptor(win.MessageEvent.prototype, 'source');
+  const get = desc.get;
+
+  desc.get = function () {
+    const source = get.call(this);
+    return openeds.get(source) || source;
+  };
+
+  Object.defineProperty(win.MessageEvent.prototype, 'source', desc);
+}
 
 function proxy(win, opened) {
   const target = {};
@@ -867,11 +882,14 @@ function hook(win, realOpen, cb) {
 
     const opened = Function.prototype.call.call(realOpen, this, url, target, windowFeatures);
     cb(opened);
-    return proxy(win, opened);
+    const p = proxy(win, opened);
+    openeds.set(opened, p);
+    return p;
   };
 }
 
 function hookOpen(win, cb) {
+  patchMessageEvent(win);
   const realOpen = win.open;
   win.open = hook(win, realOpen, cb);
 }

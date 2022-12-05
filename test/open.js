@@ -39,6 +39,9 @@ describe('window.open API', () => {
             {
                 onmessage = (a) => {
                     const x = a.source;
+                    if (!x || !x.location) {
+                        return bypass([top]); // give up
+                    }
                     x.location.href = 'https://example.com/';
                     setTimeout(() => {
                         bypass([x]);
@@ -56,6 +59,9 @@ describe('window.open API', () => {
             {
                 addEventListener('message', a => {
                     const x = a.source;
+                    if (!x || !x.location) {
+                        return bypass([top]); // give up
+                    }
                     x.location.href = 'https://example.com/';
                     setTimeout(() => {
                         bypass([x]);

@@ -809,7 +809,7 @@ const {
 
 const openeds = new Map();
 
-function patchMessageEvent(win) {
+function hookMessageEvent(win) {
   const desc = Object.getOwnPropertyDescriptor(win.MessageEvent.prototype, 'source');
   const get = desc.get;
 
@@ -865,11 +865,12 @@ function proxy(win, opened) {
   });
 }
 
-function hook(win, realOpen, cb) {
+function hook(win, native, cb) {
   return function open() {
     const args = slice(arguments);
     const url = args[0] + '',
-          target = args[1],
+          // open accepts non strings too
+    target = args[1],
           windowFeatures = args[2];
 
     if (stringStartsWith(stringToLowerCase(url), 'javascript')) {
@@ -880,7 +881,7 @@ function hook(win, realOpen, cb) {
       }
     }
 
-    const opened = Function.prototype.call.call(realOpen, this, url, target, windowFeatures);
+    const opened = Function.prototype.call.call(native, this, url, target, windowFeatures);
     cb(opened);
     const p = proxy(win, opened);
     openeds.set(opened, p);
@@ -889,9 +890,8 @@ function hook(win, realOpen, cb) {
 }
 
 function hookOpen(win, cb) {
-  patchMessageEvent(win);
-  const realOpen = win.open;
-  win.open = hook(win, realOpen, cb);
+  hookMessageEvent(win);
+  win.open = hook(win, win.open, cb);
 }
 
 module.exports = hookOpen;

@@ -3,7 +3,7 @@ const {warn, WARN_OPEN_API_LIMITED, WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME} = r
 
 const openeds = new Map();
 
-function patchMessageEvent(win) {
+function hookMessageEvent(win) {
     const desc = Object.getOwnPropertyDescriptor(win.MessageEvent.prototype, 'source');
     const get = desc.get;
     desc.get = function() {
@@ -58,7 +58,8 @@ function proxy(win, opened) {
 function hook(win, native, cb) {
     return function open() {
         const args = slice(arguments);
-        const url = args[0] + '', target = args[1], windowFeatures = args[2];
+        const url = args[0] + '', // open accepts non strings too
+            target = args[1], windowFeatures = args[2];
 
         if (stringStartsWith(stringToLowerCase(url), 'javascript')) {
             const blocked = warn(WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url, win);
@@ -76,9 +77,8 @@ function hook(win, native, cb) {
 }
 
 function hookOpen(win, cb) {
-    patchMessageEvent(win);
-    const native = win.open;
-    win.open = hook(win, native, cb);
+    hookMessageEvent(win);
+    win.open = hook(win, win.open, cb);
 }
 
 module.exports = hookOpen;

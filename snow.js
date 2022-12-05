@@ -202,7 +202,7 @@ const hook = __webpack_require__(228);
 
 const hookOpen = __webpack_require__(583);
 
-const hookLoadSetters = __webpack_require__(459);
+const hookEventListenersSetters = __webpack_require__(459);
 
 const hookDOMInserters = __webpack_require__(58);
 
@@ -244,7 +244,7 @@ function shouldRun(win) {
 
 function applyHooks(win, hookWin, securely, cb) {
   hookOpen(win, hookWin);
-  hookLoadSetters(win, hookWin);
+  hookEventListenersSetters(win, 'load', hookWin);
   hookDOMInserters(win, hookWin);
   hookShadowDOM(win, hookWin);
   cb(win, securely);
@@ -360,26 +360,26 @@ const {
 
 const handlers = new Map();
 
-function callOnload(that, onload, args) {
-  if (onload) {
-    if (onload.handleEvent) {
-      return onload.handleEvent.apply(onload, args);
+function fire(that, listener, args) {
+  if (listener) {
+    if (listener.handleEvent) {
+      return listener.handleEvent.apply(listener, args);
     } else {
-      return onload.apply(that, args);
+      return listener.apply(that, args);
     }
   }
 }
 
-function getAddEventListener(win, cb) {
+function getAddEventListener(win, event, cb) {
   return function (type, handler, options) {
     let listener = handler;
 
-    if (type === 'load') {
+    if (type === event) {
       if (!handlers.has(handler)) {
         handlers.set(handler, function () {
           hook(win, [this], cb);
           const args = slice(arguments);
-          callOnload(this, handler, args);
+          fire(this, handler, args);
         });
       }
 
@@ -390,11 +390,11 @@ function getAddEventListener(win, cb) {
   };
 }
 
-function getRemoveEventListener(win) {
+function getRemoveEventListener(win, event) {
   return function (type, handler, options) {
     let listener = handler;
 
-    if (type === 'load') {
+    if (type === event) {
       listener = handlers.get(handler);
       handlers.delete(handler);
     }
@@ -403,25 +403,30 @@ function getRemoveEventListener(win) {
   };
 }
 
-function hookLoadSetters(win, cb) {
+function hookEventListenersSetters(win, event, cb) {
   Object.defineProperty(win.EventTarget.prototype, 'addEventListener', {
-    value: getAddEventListener(win, cb)
+    value: getAddEventListener(win, event, cb)
   });
   Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', {
-    value: getRemoveEventListener(win)
+    value: getRemoveEventListener(win, event)
   });
 }
 
-module.exports = hookLoadSetters;
+module.exports = hookEventListenersSetters;
 
 /***/ }),
 
 /***/ 312:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const {
+  console
+} = __webpack_require__(14);
 
 const WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
 const ERR_MARK_NEW_WINDOW_FAILED = 2;
-const WARN_OPEN_API_DISABLED = 3;
+const WARN_OPEN_API_LIMITED = 3;
+const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 4;
 
 function warn(msg, a, b) {
   let bail;
@@ -434,11 +439,18 @@ function warn(msg, a, b) {
       console.warn('SNOW:', 'removing html string iframe onload attribute:', frame, "\"".concat(onload, "\""), '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
       break;
 
-    case WARN_OPEN_API_DISABLED:
-      const args = a,
-            win = b;
+    case WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:
+      const url2 = a,
+            win2 = b;
       bail = true;
-      console.warn('SNOW:', 'blocking open API call:', args, win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
+      console.warn('SNOW:', bail ? '' : 'NOT', 'blocking open attempt to "javascript:" url:', url2, 'by window: ', win2, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
+      break;
+
+    case WARN_OPEN_API_LIMITED:
+      const property = a,
+            win3 = b;
+      bail = true;
+      console.warn('SNOW:', 'blocking access to property:', "\"".concat(property, "\""), 'of opened window: ', win3, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
       break;
 
     default:
@@ -471,7 +483,8 @@ module.exports = {
   error,
   WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
   ERR_MARK_NEW_WINDOW_FAILED,
-  WARN_OPEN_API_DISABLED
+  WARN_OPEN_API_LIMITED,
+  WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
 };
 
 /***/ }),
@@ -539,6 +552,8 @@ function natively(win, cb) {
 function natives(win) {
   return natively(win, function (win) {
     const {
+      console,
+      Proxy,
       JSON,
       Attr,
       String,
@@ -549,6 +564,7 @@ function natives(win) {
       DocumentFragment,
       ShadowRoot,
       Object,
+      Reflect,
       Array,
       Element,
       HTMLElement,
@@ -559,6 +575,8 @@ function natives(win) {
       HTMLObjectElement
     } = win;
     const bag = {
+      console,
+      Proxy,
       JSON,
       Attr,
       String,
@@ -569,6 +587,7 @@ function natives(win) {
       DocumentFragment,
       ShadowRoot,
       Object,
+      Reflect,
       Array,
       Element,
       HTMLElement,
@@ -588,6 +607,8 @@ function natives(win) {
 function setup(win) {
   const bag = natives(win);
   const {
+    console,
+    Proxy,
     Function,
     Map,
     Node,
@@ -595,6 +616,7 @@ function setup(win) {
     DocumentFragment,
     ShadowRoot,
     Object,
+    Reflect,
     Array,
     Element,
     HTMLElement,
@@ -626,7 +648,10 @@ function setup(win) {
     getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get
   });
   return {
+    console,
+    Proxy,
     Object,
+    Reflect,
     Function,
     Node,
     Element,
@@ -636,6 +661,8 @@ function setup(win) {
     Array,
     Map,
     getContentWindow,
+    stringToLowerCase,
+    stringStartsWith,
     parse,
     stringify,
     slice,
@@ -673,6 +700,14 @@ function setup(win) {
       default:
         return null;
     }
+  }
+
+  function stringToLowerCase(string) {
+    return bag.String.prototype.toLowerCase.call(string);
+  }
+
+  function stringStartsWith(string, find) {
+    return bag.String.prototype.startsWith.call(string, find);
   }
 
   function parse(text, reviver) {
@@ -756,30 +791,112 @@ module.exports = setup(top);
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
+  stringToLowerCase,
+  stringStartsWith,
   slice,
-  Function
+  Function,
+  Object,
+  Reflect,
+  Proxy,
+  Map
 } = __webpack_require__(14);
 
 const {
   warn,
-  WARN_OPEN_API_DISABLED
+  WARN_OPEN_API_LIMITED,
+  WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
 } = __webpack_require__(312);
 
-function hookOpen(win, cb) {
-  const realOpen = win.open;
+const openeds = new Map();
 
-  win.open = function () {
+function hookMessageEvent(win) {
+  const desc = Object.getOwnPropertyDescriptor(win.MessageEvent.prototype, 'source');
+  const get = desc.get;
+
+  desc.get = function () {
+    const source = get.call(this);
+    return openeds.get(source) || source;
+  };
+
+  Object.defineProperty(win.MessageEvent.prototype, 'source', desc);
+}
+
+function proxy(win, opened) {
+  const target = {};
+  Object.defineProperty(target, 'closed', {
+    get: function () {
+      return opened.closed;
+    }
+  });
+  Object.defineProperty(target, 'close', {
+    value: function () {
+      return opened.close();
+    }
+  });
+  Object.defineProperty(target, 'focus', {
+    value: function () {
+      return opened.focus();
+    }
+  });
+  Object.defineProperty(target, 'postMessage', {
+    value: function (message, targetOrigin, transfer) {
+      return opened.postMessage(message, targetOrigin, transfer);
+    }
+  });
+  return new Proxy(target, {
+    get: function (target, property) {
+      let ret = Reflect.get(target, property);
+
+      if (Reflect.has(target, property)) {
+        return ret;
+      }
+
+      if (Reflect.has(opened, property)) {
+        const blocked = warn(WARN_OPEN_API_LIMITED, property, win);
+
+        if (!blocked) {
+          ret = Reflect.get(opened, property);
+        }
+      }
+
+      return ret;
+    },
+    set: function () {}
+  });
+}
+
+function hook(win, native, cb) {
+  return function open() {
     const args = slice(arguments);
-    const blocked = warn(WARN_OPEN_API_DISABLED, args, win);
+    const url = args[0] + '',
+          // open accepts non strings too
+    target = args[1],
+          windowFeatures = args[2];
 
-    if (blocked) {
+    if (stringStartsWith(stringToLowerCase(url), 'javascript')) {
+      const blocked = warn(WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url, win);
+
+      if (blocked) {
+        return null;
+      }
+    }
+
+    const opened = Function.prototype.call.call(native, this, url, target, windowFeatures);
+
+    if (!opened) {
       return null;
     }
 
-    const opened = Function.prototype.apply.call(realOpen, this, args);
     cb(opened);
-    return opened;
+    const p = proxy(win, opened);
+    openeds.set(opened, p);
+    return p;
   };
+}
+
+function hookOpen(win, cb) {
+  hookMessageEvent(win);
+  win.open = hook(win, win.open, cb);
 }
 
 module.exports = hookOpen;

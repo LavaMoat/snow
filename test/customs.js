@@ -7,7 +7,7 @@ describe('test custom elements', async () => {
 
     it('should fail to use atob of an iframe that is loaded via onload attribute under a custom element', async () => {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win || top).atob('WA==')).join(','));
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             {
                 window.n = window.n ?? 0;
                 window.n++;

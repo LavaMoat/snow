@@ -3,26 +3,26 @@ const {removeEventListener, addEventListener, slice, Map, Object} = require('./n
 
 const handlers = new Map();
 
-function callOnload(that, onload, args) {
-    if (onload) {
-        if (onload.handleEvent) {
-            return onload.handleEvent.apply(onload, args);
+function fire(that, listener, args) {
+    if (listener) {
+        if (listener.handleEvent) {
+            return listener.handleEvent.apply(listener, args);
         }
         else {
-            return onload.apply(that, args);
+            return listener.apply(that, args);
         }
     }
 }
 
-function getAddEventListener(win, cb) {
+function getAddEventListener(win, event, cb) {
     return function(type, handler, options) {
         let listener = handler;
-        if (type === 'load') {
+        if (type === event) {
             if (!handlers.has(handler)) {
                 handlers.set(handler, function () {
                     hook(win, [this], cb);
                     const args = slice(arguments);
-                    callOnload(this, handler, args);
+                    fire(this, handler, args);
                 });
             }
             listener = handlers.get(handler);
@@ -31,10 +31,10 @@ function getAddEventListener(win, cb) {
     }
 }
 
-function getRemoveEventListener(win) {
+function getRemoveEventListener(win, event) {
     return function(type, handler, options) {
         let listener = handler;
-        if (type === 'load') {
+        if (type === event) {
             listener = handlers.get(handler);
             handlers.delete(handler);
         }
@@ -42,9 +42,9 @@ function getRemoveEventListener(win) {
     }
 }
 
-function hookLoadSetters(win, cb) {
-    Object.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getAddEventListener(win, cb) });
-    Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', { value: getRemoveEventListener(win) });
+function hookEventListenersSetters(win, event, cb) {
+    Object.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getAddEventListener(win, event, cb) });
+    Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', { value: getRemoveEventListener(win, event) });
 }
 
-module.exports = hookLoadSetters;
+module.exports = hookEventListenersSetters;

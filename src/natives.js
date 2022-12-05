@@ -10,6 +10,8 @@ function natively(win, cb) {
 function natives(win) {
     return natively(win, function(win) {
         const {
+            console,
+            Proxy,
             JSON,
             Attr,
             String,
@@ -20,6 +22,7 @@ function natives(win) {
             DocumentFragment,
             ShadowRoot,
             Object,
+            Reflect,
             Array,
             Element,
             HTMLElement,
@@ -30,6 +33,8 @@ function natives(win) {
             HTMLObjectElement,
         } = win;
         const bag = {
+            console,
+            Proxy,
             JSON,
             Attr,
             String,
@@ -40,6 +45,7 @@ function natives(win) {
             DocumentFragment,
             ShadowRoot,
             Object,
+            Reflect,
             Array,
             Element,
             HTMLElement,
@@ -60,6 +66,8 @@ function setup(win) {
     const bag = natives(win);
 
     const {
+        console,
+        Proxy,
         Function,
         Map,
         Node,
@@ -67,6 +75,7 @@ function setup(win) {
         DocumentFragment,
         ShadowRoot,
         Object,
+        Reflect,
         Array,
         Element,
         HTMLElement,
@@ -100,7 +109,10 @@ function setup(win) {
     });
 
     return {
+        console,
+        Proxy,
         Object,
+        Reflect,
         Function,
         Node,
         Element,
@@ -110,6 +122,8 @@ function setup(win) {
         Array,
         Map,
         getContentWindow,
+        stringToLowerCase,
+        stringStartsWith,
         parse,
         stringify,
         slice,
@@ -143,6 +157,14 @@ function setup(win) {
             default:
                 return null;
         }
+    }
+
+    function stringToLowerCase(string) {
+        return bag.String.prototype.toLowerCase.call(string);
+    }
+
+    function stringStartsWith(string, find) {
+        return bag.String.prototype.startsWith.call(string, find);
     }
 
     function parse(text, reviver) {

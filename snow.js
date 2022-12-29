@@ -152,7 +152,7 @@ function dropOnLoadAttributes(frames) {
     }
   }
 }
-function handleHTML(win, args) {
+function handleHTML(win, args, isSrcDoc) {
   for (let i = 0; i < args.length; i++) {
     const html = args[i];
     const template = createElement(document, 'template');
@@ -161,6 +161,9 @@ function handleHTML(win, args) {
     if (frames.length) {
       dropOnLoadAttributes(frames);
       args[i] = getInnerHTML(template);
+    }
+    if (isSrcDoc) {
+      args[i] = '<script>top.SNOW_CB(null, window)</script>' + args[i];
     }
   }
 }
@@ -179,7 +182,7 @@ const {
   hookShadowDOM
 } = __webpack_require__(373);
 const {
-  securely,
+  Object,
   addEventListener,
   getFrameElement
 } = __webpack_require__(14);
@@ -189,6 +192,7 @@ const {
 } = __webpack_require__(111);
 const {
   error,
+  ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
   ERR_MARK_NEW_WINDOW_FAILED
 } = __webpack_require__(312);
 function shouldRun(win) {
@@ -203,12 +207,12 @@ function shouldRun(win) {
   }
   return shouldRun(win);
 }
-function applyHooks(win, hookWin, securely, cb) {
+function applyHooks(win, hookWin, cb) {
   hookOpen(win, hookWin);
   hookEventListenersSetters(win, 'load', hookWin);
   hookDOMInserters(win, hookWin);
   hookShadowDOM(win, hookWin);
-  cb(win, securely);
+  cb(win);
 }
 function onWin(cb, win) {
   function hookWin(contentWindow) {
@@ -220,15 +224,24 @@ function onWin(cb, win) {
     });
   }
   if (shouldRun(win)) {
-    applyHooks(win, hookWin, securely, cb);
+    applyHooks(win, hookWin, cb);
   }
 }
-let used = false;
-module.exports = function (cb, win) {
-  if (!used) {
-    used = true;
-    onWin(cb, win || window);
+let callback;
+module.exports = function snow(cb, win) {
+  if (!callback) {
+    if (typeof cb !== 'function') {
+      const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
+      if (bail) {
+        return;
+      }
+    }
+    Object.defineProperty(top, 'SNOW_CB', {
+      value: snow
+    });
+    callback = cb;
   }
+  onWin(callback, win || top);
 };
 
 /***/ }),
@@ -260,14 +273,14 @@ const map = {
   ShadowRoot: ['innerHTML'],
   HTMLIFrameElement: ['srcdoc']
 };
-function getHook(win, native, cb) {
+function getHook(win, native, cb, isSrcDoc) {
   return function () {
     const args = slice(arguments);
     const element = getParentElement(this) || this;
     resetOnloadAttributes(win, args, cb);
     resetOnloadAttributes(win, shadows, cb);
-    handleHTML(win, args);
-    handleHTML(win, shadows);
+    handleHTML(win, args, isSrcDoc);
+    handleHTML(win, shadows, isSrcDoc);
     const ret = Function.prototype.apply.call(native, this, args);
     const frames = getFramesArray(element, false);
     hook(win, frames, cb);
@@ -283,7 +296,7 @@ function hookDOMInserters(win, cb) {
       const func = funcs[i];
       const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
       const prop = desc.set ? 'set' : 'value';
-      desc[prop] = getHook(win, desc[prop], cb);
+      desc[prop] = getHook(win, desc[prop], cb, func === 'srcdoc');
       Object.defineProperty(win[proto].prototype, func, desc);
     }
   }
@@ -361,6 +374,7 @@ const WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
 const ERR_MARK_NEW_WINDOW_FAILED = 2;
 const WARN_OPEN_API_LIMITED = 3;
 const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 4;
+const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 5;
 function warn(msg, a, b) {
   let bail;
   switch (msg) {
@@ -396,6 +410,11 @@ function error(msg, a, b) {
       bail = true;
       console.error('SNOW:', 'failed to mark new window:', win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', '\n', 'in order to maintain a bulletproof defense mechanism, failing to mark a new window typically causes an infinite loop', '.', '\n', 'error caught:', '\n', err);
       break;
+    case ERR_PROVIDED_CB_IS_NOT_A_FUNCTION:
+      const cb = a;
+      bail = true;
+      console.error('SNOW:', 'first argument must be of type "function", instead got:', cb, '.', '\n', 'therefore, snow bailed and is not applied to the page until this is fixed.');
+      break;
     default:
       break;
   }
@@ -407,7 +426,8 @@ module.exports = {
   WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
   ERR_MARK_NEW_WINDOW_FAILED,
   WARN_OPEN_API_LIMITED,
-  WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
+  WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
+  ERR_PROVIDED_CB_IS_NOT_A_FUNCTION
 };
 
 /***/ }),
@@ -1020,7 +1040,7 @@ var __webpack_exports__ = {};
   Object.defineProperty(win, 'SNOW', {
     value: (_src_index__WEBPACK_IMPORTED_MODULE_0___default())
   });
-})(window);
+})(top);
 })();
 
 /******/ })()

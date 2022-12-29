@@ -130,5 +130,3 @@ Funded by [Consensys 💙](https://github.com/consensys)
 Maintained and developed by [MetaMask 🦊](https://github.com/MetaMask)
 
 Invented and developed by [Gal Weizman 👋🏻](https://weizman.github.io/)
-
-Runs on [Securely 🔒](https://github.com/lavamoat/securely)

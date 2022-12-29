@@ -4,6 +4,7 @@ const WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
 const ERR_MARK_NEW_WINDOW_FAILED = 2;
 const WARN_OPEN_API_LIMITED = 3;
 const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 4;
+const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 5;
 
 function warn(msg, a, b) {
     let bail;
@@ -57,6 +58,14 @@ function error(msg, a, b) {
                 err,
             );
             break;
+        case ERR_PROVIDED_CB_IS_NOT_A_FUNCTION:
+            const cb = a;
+            bail = true;
+            console.error('SNOW:',
+                'first argument must be of type "function", instead got:', cb, '.', '\n',
+                'therefore, snow bailed and is not applied to the page until this is fixed.',
+            );
+            break;
         default:
             break;
     }
@@ -69,4 +78,5 @@ module.exports = {
     ERR_MARK_NEW_WINDOW_FAILED,
     WARN_OPEN_API_LIMITED,
     WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
+    ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
 };

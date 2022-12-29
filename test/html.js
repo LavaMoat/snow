@@ -3,14 +3,27 @@ const setup = require('./index');
 describe('test HTML injections', async () => {
     beforeEach(setup);
 
-    it('should fail to use atob of an iframe created by srcdoc', async () => {
+    it('should fail to use atob of an iframe created by srcdoc (before)', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 top.bypass = bypass;
-                ifr.srcdoc = `<script>top.bypass([this]);</script>`
+                ifr.srcdoc = `<script>top.bypass([this]);</script>`;
                 testdiv.appendChild(ifr);
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an iframe created by srcdoc (after)', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                const ifr = document.createElement('iframe');
+                top.bypass = bypass;
+                testdiv.appendChild(ifr);
+                ifr.srcdoc = `<script>top.bypass([this]);</script>`;
             }());
         });
         expect(result).toBe('V');

@@ -22,7 +22,6 @@ function getHook(win, native, cb, isSrcDoc) {
         resetOnloadAttributes(win, shadows, cb);
         handleSrcDoc(args, isSrcDoc);
         handleHTML(args);
-        handleHTML(shadows);
         const ret = Function.prototype.apply.call(native, this, args);
         const frames = getFramesArray(element, false);
         hook(win, frames, cb);

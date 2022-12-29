@@ -11,7 +11,7 @@ describe('test marking mechanism is safe', async () => {
                 Object.defineProperty(Map.prototype, 'get', {value:1});
                 Object.defineProperty(Map.prototype, 'set', {value:1});
                 const ifr = document.createElement('iframe');
-                ifr.src = '//y.com';
+                ifr.src = '//example.com';
                 let once = false;
                 ifr.addEventListener('load', () => {
                     if (once) {

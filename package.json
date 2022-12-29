@@ -13,6 +13,7 @@
     "babel-loader": "^8.2.2",
     "chromedriver": "^107.0.0",
     "wdio-chromedriver-service": "7.0.0",
+    "wdio-safaridriver-service": "^2.0.0",
     "webpack": "^5.33.2",
     "webpack-cli": "^4.6.0"
   },
@@ -22,8 +23,9 @@
     "build-dev": "webpack --config ./webpack.config.js && yarn use-strict-dev",
     "build-prod": "webpack --config ./webpack.prod.config.js && yarn use-strict-prod",
     "build": "yarn build-prod & yarn build-dev",
-    "test": "./node_modules/.bin/wdio run wdio.conf.js",
-    "build-test": "yarn build && yarn test"
+    "test-chrome": "./node_modules/.bin/wdio run chrome.wdio.conf.js",
+    "test-safari": "./node_modules/.bin/wdio run safari.wdio.conf.js",
+    "build-test": "yarn build && yarn test-chrome & yarn test-safari"
   },
   "repository": {
     "type": "git",

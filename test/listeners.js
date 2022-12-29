@@ -6,13 +6,13 @@ describe('test listeners', async () => {
     it('should fail to use atob of an iframe added load event listener', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
-            {
+            (function(){
                 const ifr = document.createElement('iframe');
                 ifr.addEventListener('load', () => {
                     bypass([ifr.contentWindow]);
                 });
                 testdiv.appendChild(ifr);
-            }
+            }());
         });
         expect(result).toBe('V');
     });
@@ -20,7 +20,7 @@ describe('test listeners', async () => {
     it('should attach same load event listener only once', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
-            {
+            (function(){
                 const ifr = document.createElement('iframe');
                 let count = 0;
                 const cb = () => {
@@ -32,7 +32,7 @@ describe('test listeners', async () => {
                 ifr.addEventListener('load', cb);
                 testdiv.appendChild(ifr);
                 setTimeout(() => done(count));
-            }
+            }());
         });
         expect(result).toBe(1);
     });
@@ -40,7 +40,7 @@ describe('test listeners', async () => {
     it('should successfully remove a load event listener', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
-            {
+            (function(){
                 const ifr = document.createElement('iframe');
                 const cb = () => {
                     done('load event called');
@@ -53,7 +53,7 @@ describe('test listeners', async () => {
                 ifr.removeEventListener('load', cb);
                 testdiv.appendChild(ifr);
                 setTimeout(() => done('load event not called'));
-            }
+            }());
         });
         expect(result).toBe('load event not called');
     });
@@ -61,7 +61,7 @@ describe('test listeners', async () => {
     it('should successfully add a load event listener more than once when options are different', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
-            {
+            (function(){
                 const ifr = document.createElement('iframe');
                 let count = 0;
                 const cb = () => {
@@ -81,7 +81,7 @@ describe('test listeners', async () => {
                 ifr.addEventListener('load', cb, {capture: true, once: true, passive: true});
                 testdiv.appendChild(ifr);
                 setTimeout(() => done(count));
-            }
+            }());
         });
         expect(result).toBe(2);
     });

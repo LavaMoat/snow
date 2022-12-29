@@ -2,7 +2,7 @@ const {protectShadows} = require('./shadow');
 const resetOnloadAttributes = require('./attributes');
 const {getFramesArray, shadows} = require('./utils');
 const {getParentElement, slice, Object, Function} = require('./natives');
-const handleHTML = require('./html');
+const {handleHTML, handleSrcDoc} = require('./html');
 const hook = require('./hook');
 
 const map = {
@@ -20,8 +20,9 @@ function getHook(win, native, cb, isSrcDoc) {
         const element = getParentElement(this) || this;
         resetOnloadAttributes(win, args, cb);
         resetOnloadAttributes(win, shadows, cb);
-        handleHTML(win, args, isSrcDoc);
-        handleHTML(win, shadows, isSrcDoc);
+        handleSrcDoc(args, isSrcDoc);
+        handleHTML(args);
+        handleHTML(shadows);
         const ret = Function.prototype.apply.call(native, this, args);
         const frames = getFramesArray(element, false);
         hook(win, frames, cb);

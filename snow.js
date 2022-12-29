@@ -152,7 +152,7 @@ function dropOnLoadAttributes(frames) {
     }
   }
 }
-function handleHTML(win, args, isSrcDoc) {
+function handleHTML(args) {
   for (let i = 0; i < args.length; i++) {
     const html = args[i];
     const template = createElement(document, 'template');
@@ -162,12 +162,17 @@ function handleHTML(win, args, isSrcDoc) {
       dropOnLoadAttributes(frames);
       args[i] = getInnerHTML(template);
     }
-    if (isSrcDoc) {
-      args[i] = '<script>top.SNOW_CB(null, window)</script>' + args[i];
-    }
   }
 }
-module.exports = handleHTML;
+function handleSrcDoc(args, isSrcDoc) {
+  if (isSrcDoc) {
+    args[0] = '<script>top.SNOW_CB(null, window)</script>' + args[0];
+  }
+}
+module.exports = {
+  handleHTML,
+  handleSrcDoc
+};
 
 /***/ }),
 
@@ -263,7 +268,10 @@ const {
   Object,
   Function
 } = __webpack_require__(14);
-const handleHTML = __webpack_require__(328);
+const {
+  handleHTML,
+  handleSrcDoc
+} = __webpack_require__(328);
 const hook = __webpack_require__(228);
 const map = {
   DocumentFragment: ['replaceChildren', 'append', 'prepend'],
@@ -279,8 +287,9 @@ function getHook(win, native, cb, isSrcDoc) {
     const element = getParentElement(this) || this;
     resetOnloadAttributes(win, args, cb);
     resetOnloadAttributes(win, shadows, cb);
-    handleHTML(win, args, isSrcDoc);
-    handleHTML(win, shadows, isSrcDoc);
+    handleSrcDoc(args, isSrcDoc);
+    handleHTML(args);
+    handleHTML(shadows);
     const ret = Function.prototype.apply.call(native, this, args);
     const frames = getFramesArray(element, false);
     hook(win, frames, cb);

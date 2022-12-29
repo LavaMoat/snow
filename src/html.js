@@ -13,7 +13,7 @@ function dropOnLoadAttributes(frames) {
     }
 }
 
-function handleHTML(win, args, isSrcDoc) {
+function handleHTML(args) {
     for (let i = 0; i < args.length; i++) {
         const html = args[i];
         const template = createElement(document, 'template');
@@ -23,10 +23,13 @@ function handleHTML(win, args, isSrcDoc) {
             dropOnLoadAttributes(frames);
             args[i] = getInnerHTML(template);
         }
-        if (isSrcDoc) {
-            args[i] = '<script>top.SNOW_CB(null, window)</script>' + args[i];
-        }
     }
 }
 
-module.exports = handleHTML;
+function handleSrcDoc(args, isSrcDoc) {
+    if (isSrcDoc) {
+        args[0] = '<script>top.SNOW_CB(null, window)</script>' + args[0];
+    }
+}
+
+module.exports = {handleHTML, handleSrcDoc};

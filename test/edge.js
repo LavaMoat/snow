@@ -48,6 +48,9 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an embed that was cross origin and then same origin', async () => {
+        if (global.BROWSER === 'SAFARI') {
+            return; // redirecting EMBED by updating src does not work in safari
+        }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

@@ -1,3 +1,4 @@
+global.BROWSER = 'SAFARI';
 exports.config = {
     //
     // ====================
@@ -29,7 +30,6 @@ exports.config = {
     // Patterns to exclude.
     exclude: [
         './test/index.js',
-        './test/customs.js', // extending iframes not supported in safari
     ],
     //
     // ============

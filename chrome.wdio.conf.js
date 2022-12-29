@@ -1,3 +1,4 @@
+global.BROWSER = 'CHROME';
 exports.config = {
     //
     // ====================
@@ -59,7 +60,10 @@ exports.config = {
         // 5 instances get started at a time.
         maxInstances: 5,
         //
-        browserName: 'safari',
+        browserName: 'chrome',
+        'goog:chromeOptions': {
+            args: ['--headless', 'disable-gpu'],
+        },
         acceptInsecureCerts: true
         // If outputDir is provided WebdriverIO can capture driver session logs
         // it is possible to configure which logTypes to include/exclude.

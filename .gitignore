@@ -1,3 +1,4 @@
+logs/
 node_modules/
 .idea
 yarn.lock

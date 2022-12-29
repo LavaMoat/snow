@@ -25,7 +25,10 @@
     "build": "yarn build-prod & yarn build-dev",
     "test-chrome": "./node_modules/.bin/wdio run chrome.wdio.conf.js",
     "test-safari": "./node_modules/.bin/wdio run safari.wdio.conf.js",
-    "build-test": "yarn build && yarn test-chrome & yarn test-safari"
+    "test": "yarn test-chrome && yarn test-safari",
+    "build-test-chrome": "yarn build && yarn test-chrome",
+    "build-test-safari": "yarn build && yarn test-safari",
+    "build-test": "yarn build && yarn test"
   },
   "repository": {
     "type": "git",

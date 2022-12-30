@@ -1,3 +1,3 @@
-import onWin from "./src/index";
+import snow from "./src/index";
 
-( function(win) { Object.defineProperty(win, 'SNOW', { value: onWin }); }( window ) );
+( function(win) { Object.defineProperty(win, 'SNOW', { value: snow }); }( top ) );

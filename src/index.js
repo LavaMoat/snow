@@ -3,9 +3,9 @@ const hookOpen = require('./open');
 const hookEventListenersSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
-const {securely, addEventListener, getFrameElement} = require('./natives');
+const {Object, addEventListener, getFrameElement} = require('./natives');
 const {isMarked, mark} = require('./mark');
-const {error, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
+const {error, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
 function shouldRun(win) {
     try {
@@ -20,12 +20,12 @@ function shouldRun(win) {
     return shouldRun(win);
 }
 
-function applyHooks(win, hookWin, securely, cb) {
+function applyHooks(win, hookWin, cb) {
     hookOpen(win, hookWin);
     hookEventListenersSetters(win, 'load', hookWin);
     hookDOMInserters(win, hookWin);
     hookShadowDOM(win, hookWin);
-    cb(win, securely);
+    cb(win);
 }
 
 function onWin(cb, win) {
@@ -39,15 +39,22 @@ function onWin(cb, win) {
     }
 
     if (shouldRun(win)) {
-        applyHooks(win, hookWin, securely, cb);
+        applyHooks(win, hookWin, cb);
     }
 }
 
-let used = false;
+let callback;
 
-module.exports = function(cb, win) {
-    if (!used) {
-        used = true;
-        onWin(cb, win || window);
+module.exports = function snow(cb, win) {
+    if (!callback) {
+        if (typeof cb !== 'function') {
+            const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
+            if (bail) {
+                return;
+            }
+        }
+        Object.defineProperty(top, 'SNOW_CB', { value: snow });
+        callback = cb;
     }
+    onWin(callback, win || top);
 }

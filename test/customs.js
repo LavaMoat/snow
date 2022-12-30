@@ -6,6 +6,9 @@ describe('test custom elements', async () => {
     // reference: https://github.com/LavaMoat/snow/issues/12
 
     it('should fail to use atob of an iframe that is loaded via onload attribute under a custom element', async () => {
+        if (global.BROWSER === 'SAFARI') {
+            return; // extending iframes is not supported in safari
+        }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

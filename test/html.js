@@ -3,14 +3,27 @@ const setup = require('./index');
 describe('test HTML injections', async () => {
     beforeEach(setup);
 
-    it('should fail to use atob of an iframe created by srcdoc', async () => {
+    it('should fail to use atob of an iframe created by srcdoc (before)', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 top.bypass = bypass;
-                ifr.srcdoc = `<script>top.bypass([this]);</script>`
+                ifr.srcdoc = `<script>top.bypass([this]);</script>`;
                 testdiv.appendChild(ifr);
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an iframe created by srcdoc (after)', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                const ifr = document.createElement('iframe');
+                top.bypass = bypass;
+                testdiv.appendChild(ifr);
+                ifr.srcdoc = `<script>top.bypass([this]);</script>`;
             }());
         });
         expect(result).toBe('V');
@@ -103,6 +116,9 @@ describe('test HTML injections', async () => {
 
     it('should fail to use atob by leveraging a TrustedHTML node (with onload)', async () => {
         // reference: https://github.com/LavaMoat/snow/issues/16
+        if (global.BROWSER === 'SAFARI') {
+            return; // TrustedHTML is not a thing in safari
+        }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -119,6 +135,9 @@ describe('test HTML injections', async () => {
 
     it('should fail to use atob by leveraging a TrustedHTML node', async () => {
         // reference: https://github.com/LavaMoat/snow/issues/16
+        if (global.BROWSER === 'SAFARI') {
+            return; // TrustedHTML is not a thing in safari
+        }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

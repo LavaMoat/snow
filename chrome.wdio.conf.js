@@ -1,3 +1,4 @@
+global.BROWSER = 'CHROME';
 exports.config = {
     //
     // ====================

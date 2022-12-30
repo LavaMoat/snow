@@ -80,6 +80,8 @@ Until `snow` becomes a platform builtin API, we have to attempt to overcome seve
 Currently `snow` is written to support chromium based browsers only, it was
 never tested on anything else.
 
+> *Snow should now support Safari too [#42](https://github.com/LavaMoat/snow/pull/42)*  
+
 ### Performance
 
 Achieving an hermetic solution costs in performance. Injecting this script into some major

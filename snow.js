@@ -155,6 +155,7 @@ const {
   removeAttribute,
   getAttribute,
   getTemplateContent,
+  getChildElementCount,
   createElement,
   getInnerHTML,
   setInnerHTML
@@ -182,24 +183,25 @@ function handleHTML(args) {
     const html = args[i];
     const template = createElement(document, 'template');
     setInnerHTML(template, html);
-    const frames = getFramesArray(getTemplateContent(template), false);
+    const content = getTemplateContent(template);
+
+    if (!getChildElementCount(content)) {
+      continue;
+    }
+
+    const frames = getFramesArray(content, false);
 
     if (frames.length) {
       dropOnLoadAttributes(frames);
       args[i] = getInnerHTML(template);
     }
-  }
-}
 
-function handleSrcDoc(args, isSrcDoc) {
-  if (isSrcDoc) {
-    args[0] = '<script>top.SNOW_CB(null, window)</script>' + args[0];
+    args[i] = '<script>top.SNOW_CB(null, window)</script>' + args[i];
   }
 }
 
 module.exports = {
-  handleHTML,
-  handleSrcDoc
+  handleHTML
 };
 
 /***/ }),
@@ -320,8 +322,7 @@ const {
 } = __webpack_require__(14);
 
 const {
-  handleHTML,
-  handleSrcDoc
+  handleHTML
 } = __webpack_require__(328);
 
 const hook = __webpack_require__(228);
@@ -335,13 +336,12 @@ const map = {
   HTMLIFrameElement: ['srcdoc']
 };
 
-function getHook(win, native, cb, isSrcDoc) {
+function getHook(win, native, cb) {
   return function () {
     const args = slice(arguments);
     const element = getParentElement(this) || this;
     resetOnloadAttributes(win, args, cb);
     resetOnloadAttributes(win, shadows, cb);
-    handleSrcDoc(args, isSrcDoc);
     handleHTML(args);
     const ret = Function.prototype.apply.call(native, this, args);
     const frames = getFramesArray(element, false);
@@ -360,7 +360,7 @@ function hookDOMInserters(win, cb) {
       const func = funcs[i];
       const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
       const prop = desc.set ? 'set' : 'value';
-      desc[prop] = getHook(win, desc[prop], cb, func === 'srcdoc');
+      desc[prop] = getHook(win, desc[prop], cb);
       Object.defineProperty(win[proto].prototype, func, desc);
     }
   }
@@ -678,6 +678,7 @@ function setup(win) {
     addEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'addEventListener').value,
     removeEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'removeEventListener').value,
     getTemplateContent: Object.getOwnPropertyDescriptor(HTMLTemplateElement.prototype, 'content').get,
+    getChildElementCount: Object.getOwnPropertyDescriptor(DocumentFragment.prototype, 'childElementCount').get,
     getFrameElement: Object.getOwnPropertyDescriptor(win, 'frameElement').get,
     getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get
   });
@@ -713,6 +714,7 @@ function setup(win) {
     getInnerHTML,
     setInnerHTML,
     getTemplateContent,
+    getChildElementCount,
     getFrameElement,
     getParentElement
   };
@@ -806,6 +808,10 @@ function setup(win) {
 
   function getTemplateContent(template) {
     return bag.getTemplateContent.call(template);
+  }
+
+  function getChildElementCount(element) {
+    return bag.getChildElementCount.call(element);
   }
 
   function getFrameElement(win) {

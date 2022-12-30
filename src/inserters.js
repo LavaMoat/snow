@@ -2,7 +2,7 @@ const {protectShadows} = require('./shadow');
 const resetOnloadAttributes = require('./attributes');
 const {getFramesArray, shadows} = require('./utils');
 const {getParentElement, slice, Object, Function} = require('./natives');
-const {handleHTML, handleSrcDoc} = require('./html');
+const {handleHTML} = require('./html');
 const hook = require('./hook');
 
 const map = {
@@ -14,13 +14,12 @@ const map = {
     HTMLIFrameElement: ['srcdoc'],
 };
 
-function getHook(win, native, cb, isSrcDoc) {
+function getHook(win, native, cb) {
     return function() {
         const args = slice(arguments);
         const element = getParentElement(this) || this;
         resetOnloadAttributes(win, args, cb);
         resetOnloadAttributes(win, shadows, cb);
-        handleSrcDoc(args, isSrcDoc);
         handleHTML(args);
         const ret = Function.prototype.apply.call(native, this, args);
         const frames = getFramesArray(element, false);
@@ -38,7 +37,7 @@ function hookDOMInserters(win, cb) {
             const func = funcs[i];
             const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
             const prop = desc.set ? 'set' : 'value';
-            desc[prop] = getHook(win, desc[prop], cb, func === 'srcdoc');
+            desc[prop] = getHook(win, desc[prop], cb);
             Object.defineProperty(win[proto].prototype, func, desc);
         }
     }

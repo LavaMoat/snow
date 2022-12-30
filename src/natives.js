@@ -104,6 +104,7 @@ function setup(win) {
         addEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'addEventListener').value,
         removeEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'removeEventListener').value,
         getTemplateContent: Object.getOwnPropertyDescriptor(HTMLTemplateElement.prototype, 'content').get,
+        getChildElementCount: Object.getOwnPropertyDescriptor(DocumentFragment.prototype, 'childElementCount').get,
         getFrameElement: Object.getOwnPropertyDescriptor(win, 'frameElement').get,
         getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get,
     });
@@ -140,6 +141,7 @@ function setup(win) {
         getInnerHTML,
         setInnerHTML,
         getTemplateContent,
+        getChildElementCount,
         getFrameElement,
         getParentElement,
     };
@@ -229,6 +231,10 @@ function setup(win) {
 
     function getTemplateContent(template) {
         return bag.getTemplateContent.call(template);
+    }
+
+    function getChildElementCount(element) {
+        return bag.getChildElementCount.call(element);
     }
 
     function getFrameElement(win) {

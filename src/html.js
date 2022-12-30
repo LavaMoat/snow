@@ -1,5 +1,5 @@
 const {getFramesArray} = require('./utils');
-const {removeAttribute, getAttribute, getTemplateContent, createElement, getInnerHTML, setInnerHTML} = require('./natives');
+const {removeAttribute, getAttribute, getTemplateContent, getChildElementCount, createElement, getInnerHTML, setInnerHTML} = require('./natives');
 const {warn, WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED} = require('./log');
 
 function dropOnLoadAttributes(frames) {
@@ -18,18 +18,17 @@ function handleHTML(args) {
         const html = args[i];
         const template = createElement(document, 'template');
         setInnerHTML(template, html);
-        const frames = getFramesArray(getTemplateContent(template), false);
+        const content = getTemplateContent(template);
+        if (!getChildElementCount(content)) {
+            continue;
+        }
+        const frames = getFramesArray(content, false);
         if (frames.length) {
             dropOnLoadAttributes(frames);
             args[i] = getInnerHTML(template);
         }
+        args[i] = '<script>top.SNOW_CB(null, window)</script>' + args[i];
     }
 }
 
-function handleSrcDoc(args, isSrcDoc) {
-    if (isSrcDoc) {
-        args[0] = '<script>top.SNOW_CB(null, window)</script>' + args[0];
-    }
-}
-
-module.exports = {handleHTML, handleSrcDoc};
+module.exports = {handleHTML};

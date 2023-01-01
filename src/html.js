@@ -27,7 +27,7 @@ function handleHTML(args) {
             dropOnLoadAttributes(frames);
             args[i] = getInnerHTML(template);
         }
-        args[i] = '<script>top.SNOW_CB(null, window)</script>' + args[i];
+        args[i] = '<script>top.SNOW_CB(null, window);document.currentScript.remove();</script>' + args[i];
     }
 }
 

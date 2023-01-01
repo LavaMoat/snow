@@ -13,7 +13,7 @@ function dropOnLoadAttributes(frames) {
     }
 }
 
-function handleHTML(args) {
+function handleHTML(args, callHook) {
     for (let i = 0; i < args.length; i++) {
         const html = args[i];
         const template = createElement(document, 'template');
@@ -27,7 +27,9 @@ function handleHTML(args) {
             dropOnLoadAttributes(frames);
             args[i] = getInnerHTML(template);
         }
-        args[i] = '<script>top.SNOW_CB(null, window)</script>' + args[i];
+        if (callHook) {
+            args[i] = '<script>top.SNOW_CB(null, window)</script>' + args[i];
+        }
     }
 }
 

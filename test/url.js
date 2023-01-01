@@ -5,7 +5,7 @@ describe('test url', async () => {
 
     // reference: https://github.com/LavaMoat/snow/issues/43
 
-    it('should fail to use atob of an iframe that is loading a blob url', async () => {
+    it('should fail to use atob of an iframe that is loading a blob url (text)', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -18,7 +18,7 @@ describe('test url', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loading a blob url', async () => {
+    it('should fail to use atob of an iframe that is loading a blob url (binary)', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -35,7 +35,7 @@ describe('test url', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loading a file url', async () => {
+    it('should fail to use atob of an iframe that is loading a file url (text)', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -48,7 +48,7 @@ describe('test url', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loading a file url', async () => {
+    it('should fail to use atob of an iframe that is loading a file url (binary)', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

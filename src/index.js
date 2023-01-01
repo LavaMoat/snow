@@ -53,7 +53,9 @@ module.exports = function snow(cb, win) {
                 return;
             }
         }
-        Object.defineProperty(top, 'SNOW_CB', { value: snow });
+        const desc = Object.create(null);
+        desc.value = snow;
+        Object.defineProperty(top, 'SNOW_CB', desc);
         callback = cb;
     }
     onWin(callback, win || top);

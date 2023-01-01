@@ -291,9 +291,9 @@ module.exports = function snow(cb, win) {
       }
     }
 
-    Object.defineProperty(top, 'SNOW_CB', {
-      value: snow
-    });
+    const desc = Object.create(null);
+    desc.value = snow;
+    Object.defineProperty(top, 'SNOW_CB', desc);
     callback = cb;
   }
 
@@ -558,11 +558,12 @@ function isMarked(win) {
 
 function mark(win) {
   const key = new Array();
-  Object.defineProperty(win, 'SNOW_ID', {
-    configurable: false,
-    writable: false,
-    value: s => s === secret && key
-  });
+  const desc = Object.create(null);
+  desc.writable = desc.configurable = false;
+
+  desc.value = s => s === secret && key;
+
+  Object.defineProperty(win, 'SNOW_ID', desc);
   wins.set(win, key);
 }
 
@@ -864,7 +865,7 @@ function hookMessageEvent(win) {
 }
 
 function proxy(win, opened) {
-  const target = {};
+  const target = new Object(null);
   Object.defineProperty(target, 'closed', {
     get: function () {
       return opened.closed;

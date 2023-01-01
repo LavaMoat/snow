@@ -14,7 +14,7 @@ function hookMessageEvent(win) {
 }
 
 function proxy(win, opened) {
-    const target = {};
+    const target = new Object(null);
 
     Object.defineProperty(target, 'closed', {
         get: function () {

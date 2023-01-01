@@ -1041,7 +1041,7 @@ function hook(win, createObjectURL, revokeObjectURL, Blob, File) {
 
     const content = syncFetch(url);
     const contents = new Array(content);
-    handleHTML(contents);
+    handleHTML(contents, true);
 
     if (contents[0] !== content) {
       revokeObjectURL(url);

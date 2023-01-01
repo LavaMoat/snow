@@ -64,4 +64,21 @@ describe('test url', async () => {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe that is loading a file url (webkitURL)', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                const enc = new TextEncoder();
+                const by = enc.encode("<script>top.bypass([window])</script>");
+                const file = new File([by], 'aaa.txt', {type: 'text/html'});
+                const url = webkitURL.createObjectURL(file);
+                const ifr = document.createElement('iframe');
+                document.body.append(ifr);
+                ifr.src = url;
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

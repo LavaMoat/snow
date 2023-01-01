@@ -6,7 +6,10 @@ const xhr = new XMLHttpRequest();
 function syncFetch(url) {
     xhr.open('GET', url, false);
     xhr.send(null);
-    return xhr.responseText;
+    return {
+        content: xhr.responseText,
+        type: xhr.getResponseHeader('Content-Type'),
+    };
 }
 
 function hookObject(win, prop) {
@@ -24,22 +27,28 @@ function hook(win, createObjectURL, revokeObjectURL, Blob, File) {
         if (!object.Blob && !object.File) {
             return url;
         }
-        const content = syncFetch(url);
-        const contents = new Array(content);
-        handleHTML(contents, true);
-        if (contents[0] !== content) {
-            revokeObjectURL(url);
-            const opts = {
-                type: object.type,
-                lastModified:  object.lastModified,
-            }
-            if (object.File) {
-                url = createObjectURL(new File(contents, object.name, opts));
-            }
-            if (object.Blob) {
-                url = createObjectURL(new Blob(contents, opts));
-            }
+
+        const {content, type} = syncFetch(url);
+        if (type !== 'text/html') {
+            return url;
         }
+
+        const opts = {
+            type: 'text/html',
+            lastModified:  object.lastModified,
+        }
+
+        const html = new Array(content);
+        handleHTML(html, true);
+        revokeObjectURL(url);
+
+        if (object.File) {
+            url = createObjectURL(new File(html, object.name, opts));
+        }
+        if (object.Blob) {
+            url = createObjectURL(new Blob(html, opts));
+        }
+
         return url;
     };
 }

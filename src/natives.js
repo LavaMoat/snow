@@ -69,6 +69,7 @@ function setup(win) {
         console,
         Proxy,
         Function,
+        String,
         Map,
         Node,
         Document,
@@ -92,6 +93,7 @@ function setup(win) {
         objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElement.prototype, 'contentWindow').get,
         createElement: Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value,
         slice: Object.getOwnPropertyDescriptor(Array.prototype, 'slice').value,
+        split: Object.getOwnPropertyDescriptor(String.prototype, 'split').value,
         nodeType: Object.getOwnPropertyDescriptor(Node.prototype, 'nodeType').get,
         tagName: Object.getOwnPropertyDescriptor(Element.prototype, 'tagName').get,
         getInnerHTML: Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML').get,
@@ -129,6 +131,7 @@ function setup(win) {
         parse,
         stringify,
         slice,
+        split,
         nodeType,
         tagName,
         toString,
@@ -181,6 +184,10 @@ function setup(win) {
 
     function slice(arr, start, end) {
         return bag.slice.call(arr, start, end);
+    }
+
+    function split(string, delimiter) {
+        return bag.split.call(string, delimiter);
     }
 
     function nodeType(node) {

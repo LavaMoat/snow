@@ -1,7 +1,7 @@
 const isCrossOrigin = require('is-cross-origin');
 const workaroundChromiumBug = require('./chromium_bug_workaround');
-const {shadows, getFramesArray, getFrameTag} = require('./utils');
-const {getContentWindow, Object, getFrameElement} = require('./natives');
+const {shadows, getFramesArray, getContentWindowOfFrame} = require('./utils');
+const {Object, getFrameElement} = require('./natives');
 
 function findWin(win, frameElement) {
     let i = -1;
@@ -18,7 +18,7 @@ function findWin(win, frameElement) {
         const frames = getFramesArray(shadow, false);
         for (let j = 0; j < frames.length; j++) {
             if (frames[j] === frameElement) {
-                return getContentWindow(frames[j], getFrameTag(frames[j]));
+                return getContentWindowOfFrame(frames[j]);
             }
         }
     }

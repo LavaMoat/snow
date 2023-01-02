@@ -100,6 +100,7 @@ function setup(win) {
         getOnload: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'onload').get,
         setOnload: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'onload').set,
         getAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'getAttribute').value,
+        setAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'setAttribute').value,
         removeAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'removeAttribute').value,
         addEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'addEventListener').value,
         removeEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'removeEventListener').value,
@@ -135,6 +136,7 @@ function setup(win) {
         setOnload,
         removeAttribute,
         getAttribute,
+        setAttribute,
         addEventListener,
         removeEventListener,
         createElement,
@@ -207,6 +209,10 @@ function setup(win) {
 
     function getAttribute(element, attribute) {
         return bag.getAttribute.call(element, attribute);
+    }
+
+    function setAttribute(element, attribute, value) {
+        return bag.setAttribute.call(element, attribute, value);
     }
 
     function addEventListener(element, event, listener, options) {

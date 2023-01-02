@@ -151,4 +151,51 @@ describe('test HTML injections', async () => {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe through onload as html', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                testdiv1.innerHTML = ('<iframe id="temp_id" src="/" onload="top.bypass([temp_id.contentWindow]);"/></iframe>');
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an frame through onload as html', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                document.write(`<frameset><frame id='temp_id' src='/' onload='top.bypass([temp_id.contentWindow]);'/></frame></frameset>`);
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an object through onload as html', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                testdiv1.innerHTML = ('<object id="temp_id" data="/" onload="top.bypass([temp_id.contentWindow]);"/>');
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an embed through onload as html', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                testdiv1.innerHTML = ('<embed id="temp_id" type="text/html" src="/" onload="top.bypass([temp_id.contentWindow]);">');
+                if (window[0].frameElement !== temp_id) {
+                    throw 'failed to obtain frame element real window';
+                }
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

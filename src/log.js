@@ -5,10 +5,20 @@ const ERR_MARK_NEW_WINDOW_FAILED = 2;
 const WARN_OPEN_API_LIMITED = 3;
 const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 4;
 const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 5;
+const WARN_DECLARATIVE_SHADOWS = 6;
 
 function warn(msg, a, b) {
     let bail;
     switch (msg) {
+        case WARN_DECLARATIVE_SHADOWS:
+            const shadow = a, html = b;
+            bail = false;
+            console.warn('SNOW:',
+                'removing html string representing a declarative shadow:', shadow, `"${html}"`, '.', '\n',
+                'if this prevents your application from running correctly, please visit/report at',
+                'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.',
+            );
+            break;
         case WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED:
             const frame = a, onload = b;
             bail = false;
@@ -79,4 +89,5 @@ module.exports = {
     WARN_OPEN_API_LIMITED,
     WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
     ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
+    WARN_DECLARATIVE_SHADOWS,
 };

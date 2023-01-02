@@ -152,19 +152,32 @@ const {
 } = __webpack_require__(648);
 
 const {
+  remove,
   removeAttribute,
   getAttribute,
   getTemplateContent,
   getChildElementCount,
   createElement,
   getInnerHTML,
-  setInnerHTML
+  setInnerHTML,
+  DocumentFragment
 } = __webpack_require__(14);
 
 const {
   warn,
-  WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED
+  WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
+  WARN_DECLARATIVE_SHADOWS
 } = __webpack_require__(312);
+
+const querySelectorAll = DocumentFragment.prototype.querySelectorAll;
+
+function dropDeclarativeShadows(declarativeShadows, html) {
+  for (let i = 0; i < declarativeShadows.length; i++) {
+    const shadow = declarativeShadows[i];
+    warn(WARN_DECLARATIVE_SHADOWS, shadow, html);
+    remove(shadow);
+  }
+}
 
 function dropOnLoadAttributes(frames) {
   for (let i = 0; i < frames.length; i++) {
@@ -187,6 +200,13 @@ function handleHTML(args, callHook) {
 
     if (!getChildElementCount(content)) {
       continue;
+    }
+
+    const declarativeShadows = querySelectorAll.call(content, 'template[shadowroot]');
+
+    if (declarativeShadows.length) {
+      dropDeclarativeShadows(declarativeShadows, html);
+      args[i] = getInnerHTML(template);
     }
 
     const frames = getFramesArray(content, false);
@@ -455,11 +475,19 @@ const ERR_MARK_NEW_WINDOW_FAILED = 2;
 const WARN_OPEN_API_LIMITED = 3;
 const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 4;
 const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 5;
+const WARN_DECLARATIVE_SHADOWS = 6;
 
 function warn(msg, a, b) {
   let bail;
 
   switch (msg) {
+    case WARN_DECLARATIVE_SHADOWS:
+      const shadow = a,
+            html = b;
+      bail = false;
+      console.warn('SNOW:', 'removing html string representing a declarative shadow:', shadow, "\"".concat(html, "\""), '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
+      break;
+
     case WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED:
       const frame = a,
             onload = b;
@@ -519,7 +547,8 @@ module.exports = {
   ERR_MARK_NEW_WINDOW_FAILED,
   WARN_OPEN_API_LIMITED,
   WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
-  ERR_PROVIDED_CB_IS_NOT_A_FUNCTION
+  ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
+  WARN_DECLARATIVE_SHADOWS
 };
 
 /***/ }),
@@ -678,6 +707,7 @@ function setup(win) {
     setOnload: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'onload').set,
     getAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'getAttribute').value,
     removeAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'removeAttribute').value,
+    remove: Object.getOwnPropertyDescriptor(Element.prototype, 'remove').value,
     addEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'addEventListener').value,
     removeEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'removeEventListener').value,
     getTemplateContent: Object.getOwnPropertyDescriptor(HTMLTemplateElement.prototype, 'content').get,
@@ -709,6 +739,7 @@ function setup(win) {
     toString,
     getOnload,
     setOnload,
+    remove,
     removeAttribute,
     getAttribute,
     addEventListener,
@@ -779,6 +810,10 @@ function setup(win) {
 
   function setOnload(element, onload) {
     return bag.setOnload.call(element, onload);
+  }
+
+  function remove(element) {
+    return bag.remove.call(element);
   }
 
   function removeAttribute(element, attribute) {

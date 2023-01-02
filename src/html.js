@@ -1,6 +1,16 @@
 const {getFramesArray} = require('./utils');
-const {removeAttribute, getAttribute, getTemplateContent, getChildElementCount, createElement, getInnerHTML, setInnerHTML} = require('./natives');
-const {warn, WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED} = require('./log');
+const {remove, removeAttribute, getAttribute, getTemplateContent, getChildElementCount, createElement, getInnerHTML, setInnerHTML, DocumentFragment} = require('./natives');
+const {warn, WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED, WARN_DECLARATIVE_SHADOWS} = require('./log');
+
+const querySelectorAll = DocumentFragment.prototype.querySelectorAll;
+
+function dropDeclarativeShadows(declarativeShadows, html) {
+    for (let i = 0; i < declarativeShadows.length; i++) {
+        const shadow = declarativeShadows[i];
+        warn(WARN_DECLARATIVE_SHADOWS, shadow, html);
+        remove(shadow);
+    }
+}
 
 function dropOnLoadAttributes(frames) {
     for (let i = 0; i < frames.length; i++) {
@@ -21,6 +31,11 @@ function handleHTML(args, callHook) {
         const content = getTemplateContent(template);
         if (!getChildElementCount(content)) {
             continue;
+        }
+        const declarativeShadows = querySelectorAll.call(content, 'template[shadowroot]');
+        if (declarativeShadows.length) {
+            dropDeclarativeShadows(declarativeShadows, html);
+            args[i] = getInnerHTML(template);
         }
         const frames = getFramesArray(content, false);
         if (frames.length) {

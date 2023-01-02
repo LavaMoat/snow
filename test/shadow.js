@@ -8,7 +8,7 @@ describe('test shadow DOM', async () => {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
-                const s = a.attachShadow({mode: 'open'});
+                const s = a.attachShadow({mode: 'closed'});
                 s.innerHTML = '<iframe></iframe>';
                 testdiv.append(a);
                 bypass([s.firstChild.contentWindow]);
@@ -22,10 +22,10 @@ describe('test shadow DOM', async () => {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
-                const s = a.attachShadow({mode: 'open'});
+                const s = a.attachShadow({mode: 'closed'});
                 const d = document.createElement('div');
                 s.appendChild(d);
-                const s2 = d.attachShadow({mode: 'open'});
+                const s2 = d.attachShadow({mode: 'closed'});
                 s2.innerHTML = '<iframe></iframe>';
                 testdiv.append(a);
                 bypass([s2.firstChild.contentWindow]);
@@ -39,7 +39,7 @@ describe('test shadow DOM', async () => {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
-                const s = a.attachShadow({mode: 'open'});
+                const s = a.attachShadow({mode: 'closed'});
                 s.appendChild(document.createElement('iframe'));
                 testdiv.append(a);
                 bypass([s.firstChild.contentWindow]);
@@ -53,7 +53,7 @@ describe('test shadow DOM', async () => {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
-                const s = a.attachShadow({mode: 'open'});
+                const s = a.attachShadow({mode: 'closed'});
                 const ifr = document.createElement('iframe');
                 ifr.addEventListener('load', () => {
                     bypass([ifr.contentWindow]);
@@ -70,7 +70,7 @@ describe('test shadow DOM', async () => {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
-                const s = a.attachShadow({mode: 'open'});
+                const s = a.attachShadow({mode: 'closed'});
                 const ifr = document.createElement('iframe');
                 ifr.onload = () => {
                     bypass([ifr.contentWindow]);
@@ -87,7 +87,7 @@ describe('test shadow DOM', async () => {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
-                const s = a.attachShadow({mode: 'open'});
+                const s = a.attachShadow({mode: 'closed'});
                 s.innerHTML = '<iframe id="xxx" onload="top.myatob = this.contentWindow.atob.bind(top); top.myalert = this.contentWindow.alert.bind(top);"></iframe>';
                 testdiv.append(a);
                 bypass([{atob: top.myatob || atob, alert: top.myalert || alert}]);
@@ -101,7 +101,7 @@ describe('test shadow DOM', async () => {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
-                const s = a.attachShadow({mode: 'open'});
+                const s = a.attachShadow({mode: 'closed'});
                 testdiv.append(a);
                 s.innerHTML = '<iframe id="xxx" onload="top.myatob = this.contentWindow.atob.bind(top); top.myalert = this.contentWindow.alert.bind(top);"></iframe>';
                 bypass([{atob: top.myatob || atob, alert: top.myalert || alert}]);

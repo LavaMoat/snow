@@ -6,6 +6,13 @@ const {hookShadowDOM} = require('./shadow');
 const {Object, addEventListener, getFrameElement} = require('./natives');
 const {isMarked, mark} = require('./mark');
 const {error, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
+const {getContentWindowOfFrame} = require('./utils');
+
+function setTopUtil(prop, val) {
+    const desc = Object.create(null);
+    desc.value = val;
+    Object.defineProperty(top, prop, desc);
+}
 
 function shouldRun(win) {
     try {
@@ -53,9 +60,8 @@ module.exports = function snow(cb, win) {
                 return;
             }
         }
-        const desc = Object.create(null);
-        desc.value = snow;
-        Object.defineProperty(top, 'SNOW_CB', desc);
+        setTopUtil('SNOW_CB', snow);
+        setTopUtil('SNOW_FRAME_TO_WINDOW', getContentWindowOfFrame);
         callback = cb;
     }
     onWin(callback, win || top);

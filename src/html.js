@@ -1,14 +1,21 @@
 const {getFramesArray} = require('./utils');
-const {removeAttribute, getAttribute, getTemplateContent, getChildElementCount, createElement, getInnerHTML, setInnerHTML} = require('./natives');
-const {warn, WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED} = require('./log');
+const {getAttribute, setAttribute, getTemplateContent, getChildElementCount, createElement, getInnerHTML, setInnerHTML} = require('./natives');
 
-function dropOnLoadAttributes(frames) {
+function applyHookByString(str, argument, asHtml) {
+    let hook = `top.SNOW_CB(null, ${argument});`;
+    if (asHtml) {
+        hook = '<script>' + hook + 'document.currentScript.remove();' + '</script>';
+    }
+    return hook + str;
+}
+
+function hookOnLoadAttributes(frames) {
     for (let i = 0; i < frames.length; i++) {
         const frame = frames[i];
-        const onload = getAttribute(frame, 'onload');
+        let onload = getAttribute(frame, 'onload');
         if (onload) {
-            warn(WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED, frame, onload);
-            removeAttribute(frame, 'onload');
+            onload = applyHookByString(onload, 'top.SNOW_FRAME_TO_WINDOW(this)', false);
+            setAttribute(frame, 'onload', onload);
         }
     }
 }
@@ -24,11 +31,11 @@ function handleHTML(args, callHook) {
         }
         const frames = getFramesArray(content, false);
         if (frames.length) {
-            dropOnLoadAttributes(frames);
+            hookOnLoadAttributes(frames);
             args[i] = getInnerHTML(template);
         }
         if (callHook) {
-            args[i] = '<script>top.SNOW_CB(null, window)</script>' + args[i];
+            args[i] = applyHookByString(args[i], 'window', true);
         }
     }
 }

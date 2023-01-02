@@ -1,23 +1,13 @@
 const {console} = require('./natives');
 
-const WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
-const ERR_MARK_NEW_WINDOW_FAILED = 2;
-const WARN_OPEN_API_LIMITED = 3;
-const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 4;
-const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 5;
+const ERR_MARK_NEW_WINDOW_FAILED = 1;
+const WARN_OPEN_API_LIMITED = 2;
+const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
+const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 
 function warn(msg, a, b) {
     let bail;
     switch (msg) {
-        case WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED:
-            const frame = a, onload = b;
-            bail = false;
-            console.warn('SNOW:',
-                'removing html string iframe onload attribute:', frame, `"${onload}"`, '.', '\n',
-                'if this prevents your application from running correctly, please visit/report at',
-                'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.',
-            );
-            break;
         case WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:
             const url2 = a, win2 = b;
             bail = true;
@@ -74,7 +64,6 @@ function error(msg, a, b) {
 
 module.exports = {
     warn, error,
-    WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
     ERR_MARK_NEW_WINDOW_FAILED,
     WARN_OPEN_API_LIMITED,
     WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,

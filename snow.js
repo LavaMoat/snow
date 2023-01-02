@@ -92,11 +92,10 @@ const workaroundChromiumBug = __webpack_require__(750);
 const {
   shadows,
   getFramesArray,
-  getFrameTag
+  getContentWindowOfFrame
 } = __webpack_require__(648);
 
 const {
-  getContentWindow,
   Object,
   getFrameElement
 } = __webpack_require__(14);
@@ -120,7 +119,7 @@ function findWin(win, frameElement) {
 
     for (let j = 0; j < frames.length; j++) {
       if (frames[j] === frameElement) {
-        return getContentWindow(frames[j], getFrameTag(frames[j]));
+        return getContentWindowOfFrame(frames[j]);
       }
     }
   }
@@ -152,8 +151,8 @@ const {
 } = __webpack_require__(648);
 
 const {
-  removeAttribute,
   getAttribute,
+  setAttribute,
   getTemplateContent,
   getChildElementCount,
   createElement,
@@ -161,19 +160,24 @@ const {
   setInnerHTML
 } = __webpack_require__(14);
 
-const {
-  warn,
-  WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED
-} = __webpack_require__(312);
+function applyHookByString(str, argument, asHtml) {
+  let hook = "top.SNOW_CB(null, ".concat(argument, ");");
+
+  if (asHtml) {
+    hook = '<script>' + hook + 'document.currentScript.remove();' + '</script>';
+  }
+
+  return hook + str;
+}
 
 function dropOnLoadAttributes(frames) {
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i];
-    const onload = getAttribute(frame, 'onload');
+    let onload = getAttribute(frame, 'onload');
 
     if (onload) {
-      warn(WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED, frame, onload);
-      removeAttribute(frame, 'onload');
+      onload = applyHookByString(onload, 'top.SNOW_FRAME_TO_WINDOW(this)', false);
+      setAttribute(frame, 'onload', onload);
     }
   }
 }
@@ -197,7 +201,7 @@ function handleHTML(args, callHook) {
     }
 
     if (callHook) {
-      args[i] = '<script>top.SNOW_CB(null, window)</script>' + args[i];
+      args[i] = applyHookByString(args[i], 'window', true);
     }
   }
 }
@@ -239,6 +243,16 @@ const {
   ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
   ERR_MARK_NEW_WINDOW_FAILED
 } = __webpack_require__(312);
+
+const {
+  getContentWindowOfFrame
+} = __webpack_require__(648);
+
+function setTopUtil(prop, val) {
+  const desc = Object.create(null);
+  desc.value = val;
+  Object.defineProperty(top, prop, desc);
+}
 
 function shouldRun(win) {
   try {
@@ -291,9 +305,8 @@ module.exports = function snow(cb, win) {
       }
     }
 
-    const desc = Object.create(null);
-    desc.value = snow;
-    Object.defineProperty(top, 'SNOW_CB', desc);
+    setTopUtil('SNOW_CB', snow);
+    setTopUtil('SNOW_FRAME_TO_WINDOW', getContentWindowOfFrame);
     callback = cb;
   }
 
@@ -450,23 +463,15 @@ const {
   console
 } = __webpack_require__(14);
 
-const WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED = 1;
-const ERR_MARK_NEW_WINDOW_FAILED = 2;
-const WARN_OPEN_API_LIMITED = 3;
-const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 4;
-const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 5;
+const ERR_MARK_NEW_WINDOW_FAILED = 1;
+const WARN_OPEN_API_LIMITED = 2;
+const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
+const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 
 function warn(msg, a, b) {
   let bail;
 
   switch (msg) {
-    case WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED:
-      const frame = a,
-            onload = b;
-      bail = false;
-      console.warn('SNOW:', 'removing html string iframe onload attribute:', frame, "\"".concat(onload, "\""), '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
-      break;
-
     case WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:
       const url2 = a,
             win2 = b;
@@ -515,7 +520,6 @@ function error(msg, a, b) {
 module.exports = {
   warn,
   error,
-  WARN_IFRAME_ONLOAD_ATTRIBUTE_REMOVED,
   ERR_MARK_NEW_WINDOW_FAILED,
   WARN_OPEN_API_LIMITED,
   WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
@@ -677,6 +681,7 @@ function setup(win) {
     getOnload: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'onload').get,
     setOnload: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'onload').set,
     getAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'getAttribute').value,
+    setAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'setAttribute').value,
     removeAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'removeAttribute').value,
     addEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'addEventListener').value,
     removeEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'removeEventListener').value,
@@ -711,6 +716,7 @@ function setup(win) {
     setOnload,
     removeAttribute,
     getAttribute,
+    setAttribute,
     addEventListener,
     removeEventListener,
     createElement,
@@ -787,6 +793,10 @@ function setup(win) {
 
   function getAttribute(element, attribute) {
     return bag.getAttribute.call(element, attribute);
+  }
+
+  function setAttribute(element, attribute, value) {
+    return bag.setAttribute.call(element, attribute, value);
   }
 
   function addEventListener(element, event, listener, options) {
@@ -1011,7 +1021,8 @@ const {
   Document,
   DocumentFragment,
   Element,
-  ShadowRoot
+  ShadowRoot,
+  getContentWindow
 } = __webpack_require__(14);
 
 const shadows = new Array();
@@ -1067,6 +1078,10 @@ function getFrameTag(element) {
   return tag;
 }
 
+function getContentWindowOfFrame(iframe) {
+  return getContentWindow(iframe, getFrameTag(iframe));
+}
+
 function canNodeRunQuerySelector(node) {
   if (isShadow(node)) {
     return true;
@@ -1112,6 +1127,7 @@ function fillArrayUniques(arr, items) {
 }
 
 module.exports = {
+  getContentWindowOfFrame,
   getFramesArray,
   getFrameTag,
   shadows

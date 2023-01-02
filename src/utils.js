@@ -1,5 +1,6 @@
 const {tagName, nodeType, slice, Array, parse, stringify,
-    Node, Document, DocumentFragment, Element, ShadowRoot} = require('./natives');
+    Node, Document, DocumentFragment, Element, ShadowRoot, getContentWindow
+} = require('./natives');
 
 const shadows = new Array();
 
@@ -49,6 +50,10 @@ function getFrameTag(element) {
     return tag;
 }
 
+function getContentWindowOfFrame(iframe) {
+    return getContentWindow(iframe, getFrameTag(iframe));
+}
+
 function canNodeRunQuerySelector(node) {
     if (isShadow(node)) {
         return true;
@@ -96,4 +101,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {getFramesArray, getFrameTag, shadows};
+module.exports = {getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};

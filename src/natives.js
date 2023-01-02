@@ -69,6 +69,7 @@ function setup(win) {
         console,
         Proxy,
         Function,
+        String,
         Map,
         Node,
         Document,
@@ -92,6 +93,7 @@ function setup(win) {
         objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElement.prototype, 'contentWindow').get,
         createElement: Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value,
         slice: Object.getOwnPropertyDescriptor(Array.prototype, 'slice').value,
+        split: Object.getOwnPropertyDescriptor(String.prototype, 'split').value,
         nodeType: Object.getOwnPropertyDescriptor(Node.prototype, 'nodeType').get,
         tagName: Object.getOwnPropertyDescriptor(Element.prototype, 'tagName').get,
         getInnerHTML: Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML').get,
@@ -100,6 +102,7 @@ function setup(win) {
         getOnload: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'onload').get,
         setOnload: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'onload').set,
         getAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'getAttribute').value,
+        setAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'setAttribute').value,
         removeAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'removeAttribute').value,
         remove: Object.getOwnPropertyDescriptor(Element.prototype, 'remove').value,
         addEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'addEventListener').value,
@@ -129,6 +132,7 @@ function setup(win) {
         parse,
         stringify,
         slice,
+        split,
         nodeType,
         tagName,
         toString,
@@ -137,6 +141,7 @@ function setup(win) {
         remove,
         removeAttribute,
         getAttribute,
+        setAttribute,
         addEventListener,
         removeEventListener,
         createElement,
@@ -183,6 +188,10 @@ function setup(win) {
         return bag.slice.call(arr, start, end);
     }
 
+    function split(string, delimiter) {
+        return bag.split.call(string, delimiter);
+    }
+
     function nodeType(node) {
         return bag.nodeType.call(node);
     }
@@ -213,6 +222,10 @@ function setup(win) {
 
     function getAttribute(element, attribute) {
         return bag.getAttribute.call(element, attribute);
+    }
+
+    function setAttribute(element, attribute, value) {
+        return bag.setAttribute.call(element, attribute, value);
     }
 
     function addEventListener(element, event, listener, options) {

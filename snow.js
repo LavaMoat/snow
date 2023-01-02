@@ -151,6 +151,9 @@ const {
 } = __webpack_require__(648);
 
 const {
+  Array,
+  stringToLowerCase,
+  split,
   getAttribute,
   setAttribute,
   getTemplateContent,
@@ -170,23 +173,40 @@ function applyHookByString(str, argument, asHtml) {
   return hook + str;
 }
 
-function dropOnLoadAttributes(frames) {
-  for (let i = 0; i < frames.length; i++) {
-    const frame = frames[i];
-    let onload = getAttribute(frame, 'onload');
+function hookOnLoadAttributes(frame) {
+  let onload = getAttribute(frame, 'onload');
 
-    if (onload) {
-      onload = applyHookByString(onload, 'top.SNOW_FRAME_TO_WINDOW(this)', false);
-      setAttribute(frame, 'onload', onload);
-    }
+  if (onload) {
+    onload = applyHookByString(onload, 'top.SNOW_FRAME_TO_WINDOW(this)', false);
+    setAttribute(frame, 'onload', onload);
+  }
+}
+
+function hookJavaScriptURI(frame) {
+  let src = getAttribute(frame, 'src') || '';
+  const [scheme, js] = split(src, ':');
+
+  if (stringToLowerCase(scheme) === 'javascript') {
+    src = 'javascript:' + applyHookByString(js, 'window', false);
+    setAttribute(frame, 'src', src);
+  }
+}
+
+function hookSrcDoc(frame) {
+  let srcdoc = getAttribute(frame, 'srcdoc');
+
+  if (srcdoc) {
+    srcdoc = applyHookByString(srcdoc, 'window', true);
+    const html = new Array(srcdoc);
+    handleHTML(html, true);
+    setAttribute(frame, 'srcdoc', html[0]);
   }
 }
 
 function handleHTML(args, callHook) {
   for (let i = 0; i < args.length; i++) {
-    const html = args[i];
     const template = createElement(document, 'template');
-    setInnerHTML(template, html);
+    setInnerHTML(template, args[i]);
     const content = getTemplateContent(template);
 
     if (!getChildElementCount(content)) {
@@ -195,10 +215,14 @@ function handleHTML(args, callHook) {
 
     const frames = getFramesArray(content, false);
 
-    if (frames.length) {
-      dropOnLoadAttributes(frames);
-      args[i] = getInnerHTML(template);
+    for (let j = 0; j < frames.length; j++) {
+      const frame = frames[j];
+      hookOnLoadAttributes(frame);
+      hookJavaScriptURI(frame);
+      hookSrcDoc(frame);
     }
+
+    args[i] = getInnerHTML(template);
 
     if (callHook) {
       args[i] = applyHookByString(args[i], 'window', true);
@@ -651,6 +675,7 @@ function setup(win) {
     console,
     Proxy,
     Function,
+    String,
     Map,
     Node,
     Document,
@@ -673,6 +698,7 @@ function setup(win) {
     objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElement.prototype, 'contentWindow').get,
     createElement: Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value,
     slice: Object.getOwnPropertyDescriptor(Array.prototype, 'slice').value,
+    split: Object.getOwnPropertyDescriptor(String.prototype, 'split').value,
     nodeType: Object.getOwnPropertyDescriptor(Node.prototype, 'nodeType').get,
     tagName: Object.getOwnPropertyDescriptor(Element.prototype, 'tagName').get,
     getInnerHTML: Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML').get,
@@ -709,6 +735,7 @@ function setup(win) {
     parse,
     stringify,
     slice,
+    split,
     nodeType,
     tagName,
     toString,
@@ -765,6 +792,10 @@ function setup(win) {
 
   function slice(arr, start, end) {
     return bag.slice.call(arr, start, end);
+  }
+
+  function split(string, delimiter) {
+    return bag.split.call(string, delimiter);
   }
 
   function nodeType(node) {

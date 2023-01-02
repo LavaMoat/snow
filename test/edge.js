@@ -157,4 +157,39 @@ describe('special cases', () => {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe of javascript: URI created with srcdoc', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                const f = document.createElement('iframe');
+                f.srcdoc = '<iframe src="javasCript\:top.bypass([window])"></iframe>';
+                testdiv.appendChild(f);
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an iframe of javascript: URI created with srcdoc with innerHTML', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                testdiv.innerHTML = ('<iframe srcdoc="<iframe src=\'javascript:top.bypass([window])\'</iframe>"></iframe>');
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an iframe of javascript: URI created with srcdoc with document.write', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                document.write('<iframe srcdoc="<iframe src=\'javascript:top.bypass([window])\'</iframe>"></iframe>');
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

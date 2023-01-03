@@ -13,7 +13,7 @@ function warn(msg, a, b) {
             const shadow = a, html = b;
             bail = false;
             console.warn('SNOW:',
-                'removing html string representing a declarative shadow:', shadow, `"${html}"`, '.', '\n',
+                'removing html string representing a declarative shadow:', shadow, '\n', `"${html}"`, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
                 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.',
             );

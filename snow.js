@@ -522,7 +522,7 @@ function warn(msg, a, b) {
       const shadow = a,
             html = b;
       bail = false;
-      console.warn('SNOW:', 'removing html string representing a declarative shadow:', shadow, "\"".concat(html, "\""), '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
+      console.warn('SNOW:', 'removing html string representing a declarative shadow:', shadow, '\n', "\"".concat(html, "\""), '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
       break;
 
     case WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:

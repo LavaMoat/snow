@@ -27,7 +27,6 @@ function isMarked(win) {
 function mark(win) {
     const key = new Array();
     const desc = Object.create(null);
-    desc.writable = desc.configurable = false;
     desc.value = s => s === secret && key;
     Object.defineProperty(win, 'SNOW_ID', desc);
     wins.set(win, key);

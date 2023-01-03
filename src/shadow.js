@@ -24,6 +24,7 @@ function getHook(win, native, cb) {
 
 function hookShadowDOM(win, cb) {
     const desc = Object.getOwnPropertyDescriptor(win.Element.prototype, 'attachShadow');
+    desc.configurable = desc.writable = true;
     const val = desc.value;
     desc.value = getHook(win, val, cb);
     Object.defineProperty(win.Element.prototype, 'attachShadow', desc);

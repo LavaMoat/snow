@@ -25,7 +25,7 @@ function warn(msg, a, b) {
                 bail ? '' : 'NOT',
                 'blocking open attempt to "javascript:" url:', url2, 'by window: ', win2, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
-                'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.',
+                'https://github.com/LavaMoat/snow/issues/44#issuecomment-1369687802', '.',
             );
             break;
         case WARN_OPEN_API_LIMITED:

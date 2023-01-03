@@ -109,4 +109,44 @@ describe('test shadow DOM', async () => {
         });
         expect(result).toBe('V');
     });
+
+    it.only('should fail to use atob of an iframe that is attached via declarative shadow DOM through srcdoc and javascript URI', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                const f = document.createElement('iframe');
+                f.srcdoc = `
+                    <my-element>
+                    <script>setTimeout(() => top.bypass([window]), 500)</script>
+                    <template id="x" shadowroot="closed">
+                    <iframe src="javascript:top.bypass([window])"></iframe>
+                    </template>
+                    </my-element>
+                `;
+                document.body.appendChild(f);
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it.only('should fail to use atob of an iframe that is attached via declarative shadow DOM through srcdoc', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                const f = document.createElement('iframe');
+                f.srcdoc = `
+                    <my-element>
+                    <script>setTimeout(() => top.bypass([window]), 500)</script>
+                    <template id="x" shadowroot="closed">
+                    <iframe onload="this.contentWindow.alert.call(top, top.origin)"></iframe>
+                    </template>
+                    </my-element>
+                `;
+                document.body.appendChild(f);
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

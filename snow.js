@@ -6,24 +6,23 @@
 /***/ 586:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const hook = __webpack_require__(228);
-const {
-  getFramesArray,
-  getFrameTag
-} = __webpack_require__(648);
 const {
   getOnload,
   setOnload,
   removeAttribute,
-  addEventListener
+  addEventListener,
+  getAttribute,
+  setAttribute,
+  split,
+  stringToLowerCase,
+  Array
 } = __webpack_require__(14);
-function resetOnloadAttribute(win, frame, cb) {
-  if (!getFrameTag(frame)) {
-    return;
-  }
-  addEventListener(frame, 'load', function () {
-    hook(win, [this], cb);
-  });
+const {
+  applyHookByString,
+  getFramesArray
+} = __webpack_require__(648);
+function resetOnloadHandler(frame, cb) {
+  addEventListener(frame, 'load', cb);
   const onload = getOnload(frame);
   if (onload) {
     setOnload(frame, null);
@@ -31,17 +30,46 @@ function resetOnloadAttribute(win, frame, cb) {
     setOnload(frame, onload);
   }
 }
-function resetOnloadAttributes(win, args, cb) {
-  for (let i = 0; i < args.length; i++) {
-    const element = args[i];
-    const frames = getFramesArray(element, true);
-    for (let i = 0; i < frames.length; i++) {
-      const frame = frames[i];
-      resetOnloadAttribute(win, frame, cb);
+function hookOnLoadAttributes(frame) {
+  let onload = getAttribute(frame, 'onload');
+  if (onload) {
+    onload = applyHookByString(onload, 'top.SNOW_FRAME_TO_WINDOW(this)', false);
+    setAttribute(frame, 'onload', onload);
+  }
+}
+function hookJavaScriptURI(frame) {
+  let src = getAttribute(frame, 'src') || '';
+  const [scheme, js] = split(src, ':');
+  if (stringToLowerCase(scheme) === 'javascript') {
+    src = 'javascript:' + applyHookByString(js, 'window', false);
+    setAttribute(frame, 'src', src);
+  }
+}
+function hookSrcDoc(frame, cb) {
+  let srcdoc = getAttribute(frame, 'srcdoc');
+  if (srcdoc) {
+    srcdoc = applyHookByString(srcdoc, 'window', true);
+    const html = new Array(srcdoc);
+    if (cb) cb(html);
+    setAttribute(frame, 'srcdoc', html[0]);
+  }
+}
+function hookAttributes(elements, includingParent, cb) {
+  for (let i = 0; i < elements.length; i++) {
+    const element = elements[i];
+    const frames = getFramesArray(element, includingParent);
+    for (let j = 0; j < frames.length; j++) {
+      const frame = frames[j];
+      resetOnloadHandler(frame, cb);
+      hookOnLoadAttributes(frame);
+      hookJavaScriptURI(frame);
+      hookSrcDoc(frame, cb);
     }
   }
 }
-module.exports = resetOnloadAttributes;
+module.exports = {
+  hookAttributes
+};
 
 /***/ }),
 
@@ -127,14 +155,10 @@ module.exports = hook;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
-  getFramesArray
+  applyHookByString
 } = __webpack_require__(648);
 const {
   Array,
-  stringToLowerCase,
-  split,
-  getAttribute,
-  setAttribute,
   getTemplateContent,
   getChildElementCount,
   createElement,
@@ -144,44 +168,16 @@ const {
   DocumentFragment
 } = __webpack_require__(14);
 const {
+  hookAttributes
+} = __webpack_require__(586);
+const {
   warn,
   WARN_DECLARATIVE_SHADOWS
 } = __webpack_require__(312);
 const querySelectorAll = DocumentFragment.prototype.querySelectorAll;
-function applyHookByString(str, argument, asHtml) {
-  let hook = `top.SNOW_CB(null, ${argument});`;
-  if (asHtml) {
-    hook = '<script>' + hook + 'document.currentScript.remove();' + '</script>';
-  }
-  return hook + str;
-}
 function dropDeclarativeShadows(shadow, html) {
   warn(WARN_DECLARATIVE_SHADOWS, shadow, html);
   remove(shadow);
-}
-function hookOnLoadAttributes(frame) {
-  let onload = getAttribute(frame, 'onload');
-  if (onload) {
-    onload = applyHookByString(onload, 'top.SNOW_FRAME_TO_WINDOW(this)', false);
-    setAttribute(frame, 'onload', onload);
-  }
-}
-function hookJavaScriptURI(frame) {
-  let src = getAttribute(frame, 'src') || '';
-  const [scheme, js] = split(src, ':');
-  if (stringToLowerCase(scheme) === 'javascript') {
-    src = 'javascript:' + applyHookByString(js, 'window', false);
-    setAttribute(frame, 'src', src);
-  }
-}
-function hookSrcDoc(frame) {
-  let srcdoc = getAttribute(frame, 'srcdoc');
-  if (srcdoc) {
-    srcdoc = applyHookByString(srcdoc, 'window', true);
-    const html = new Array(srcdoc);
-    handleHTML(html, true);
-    setAttribute(frame, 'srcdoc', html[0]);
-  }
 }
 function handleHTML(args, callHook) {
   for (let i = 0; i < args.length; i++) {
@@ -196,13 +192,9 @@ function handleHTML(args, callHook) {
       const shadow = declarativeShadows[j];
       dropDeclarativeShadows(shadow, args[i]);
     }
-    const frames = getFramesArray(content, false);
-    for (let j = 0; j < frames.length; j++) {
-      const frame = frames[j];
-      hookOnLoadAttributes(frame);
-      hookJavaScriptURI(frame);
-      hookSrcDoc(frame);
-    }
+    hookAttributes(new Array(content), false, function (html) {
+      handleHTML(html, true);
+    });
     args[i] = getInnerHTML(template);
     if (callHook) {
       args[i] = applyHookByString(args[i], 'window', true);
@@ -303,7 +295,9 @@ module.exports = function snow(cb, win) {
 const {
   protectShadows
 } = __webpack_require__(373);
-const resetOnloadAttributes = __webpack_require__(586);
+const {
+  hookAttributes
+} = __webpack_require__(586);
 const {
   getFramesArray,
   shadows
@@ -330,8 +324,11 @@ function getHook(win, native, cb, callHook) {
   return function () {
     const args = slice(arguments);
     const element = getParentElement(this) || this;
-    resetOnloadAttributes(win, args, cb);
-    resetOnloadAttributes(win, shadows, cb);
+    const xx = function () {
+      hook(win, [this], cb);
+    };
+    hookAttributes(args, true, xx);
+    hookAttributes(shadows, false, xx);
     handleHTML(args, callHook);
     const ret = Function.prototype.apply.call(native, this, args);
     const frames = getFramesArray(element, false);
@@ -942,6 +939,13 @@ function isTrustedHTML(node) {
   // normal nodes will parse into objects whereas trusted htmls into strings
   return typeof parse(stringify(node, replacer)) === 'string';
 }
+function applyHookByString(str, argument, asHtml) {
+  let hook = `top.SNOW_CB(null, ${argument});`;
+  if (asHtml) {
+    hook = '<script>' + hook + 'document.currentScript.remove();' + '</script>';
+  }
+  return hook + str;
+}
 function getPrototype(node) {
   if (isShadow(node)) {
     return ShadowRoot;
@@ -1010,7 +1014,7 @@ function fillArrayUniques(arr, items) {
 module.exports = {
   getContentWindowOfFrame,
   getFramesArray,
-  getFrameTag,
+  applyHookByString,
   shadows
 };
 

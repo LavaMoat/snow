@@ -14,6 +14,14 @@ function isTrustedHTML(node) {
     return typeof parse(stringify(node, replacer)) === 'string';
 }
 
+function applyHookByString(str, argument, asHtml) {
+    let hook = `top.SNOW_CB(null, ${argument});`;
+    if (asHtml) {
+        hook = '<script>' + hook + 'document.currentScript.remove();' + '</script>';
+    }
+    return hook + str;
+}
+
 function getPrototype(node) {
     if (isShadow(node)) {
         return ShadowRoot;
@@ -101,4 +109,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};
+module.exports = {getContentWindowOfFrame, getFramesArray, applyHookByString, shadows};

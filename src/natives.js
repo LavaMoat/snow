@@ -104,6 +104,7 @@ function setup(win) {
         getAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'getAttribute').value,
         setAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'setAttribute').value,
         removeAttribute: Object.getOwnPropertyDescriptor(Element.prototype, 'removeAttribute').value,
+        remove: Object.getOwnPropertyDescriptor(Element.prototype, 'remove').value,
         addEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'addEventListener').value,
         removeEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'removeEventListener').value,
         getTemplateContent: Object.getOwnPropertyDescriptor(HTMLTemplateElement.prototype, 'content').get,
@@ -137,6 +138,7 @@ function setup(win) {
         toString,
         getOnload,
         setOnload,
+        remove,
         removeAttribute,
         getAttribute,
         setAttribute,
@@ -208,6 +210,10 @@ function setup(win) {
 
     function setOnload(element, onload) {
         return bag.setOnload.call(element, onload);
+    }
+
+    function remove(element) {
+        return bag.remove.call(element);
     }
 
     function removeAttribute(element, attribute) {

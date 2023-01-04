@@ -247,7 +247,6 @@ const {
   ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
   ERR_MARK_NEW_WINDOW_FAILED
 } = __webpack_require__(312);
-let callback;
 function setTopUtil(prop, val) {
   const desc = Object.create(null);
   desc.value = val;
@@ -285,6 +284,7 @@ function onWin(win) {
     callback(win);
   }
 }
+let callback;
 module.exports = function snow(cb, win) {
   if (!callback) {
     if (typeof cb !== 'function') {
@@ -364,6 +364,10 @@ function hookDOMInserters(win) {
       const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
       const prop = desc.set ? 'set' : 'value';
       desc[prop] = getHook(desc[prop], func === 'srcdoc');
+      desc.configurable = true;
+      if (prop === 'value') {
+        desc.writable = true;
+      }
       Object.defineProperty(win[proto].prototype, func, desc);
     }
   }
@@ -421,9 +425,13 @@ function getRemoveEventListener(win, event) {
 }
 function hookEventListenersSetters(win, event) {
   Object.defineProperty(win.EventTarget.prototype, 'addEventListener', {
+    configurable: true,
+    writable: true,
     value: getAddEventListener(win, event)
   });
   Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', {
+    configurable: true,
+    writable: true,
     value: getRemoveEventListener(win, event)
   });
 }
@@ -527,7 +535,6 @@ function isMarked(win) {
 function mark(win) {
   const key = new Array();
   const desc = Object.create(null);
-  desc.writable = desc.configurable = false;
   desc.value = s => s === secret && key;
   Object.defineProperty(win, 'SNOW_ID', desc);
   wins.set(win, key);
@@ -922,6 +929,7 @@ function getHook(win, native) {
 }
 function hookShadowDOM(win) {
   const desc = Object.getOwnPropertyDescriptor(win.Element.prototype, 'attachShadow');
+  desc.configurable = desc.writable = true;
   const val = desc.value;
   desc.value = getHook(win, val);
   Object.defineProperty(win.Element.prototype, 'attachShadow', desc);

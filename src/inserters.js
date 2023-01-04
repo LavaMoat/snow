@@ -46,6 +46,10 @@ function hookDOMInserters(win) {
             const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
             const prop = desc.set ? 'set' : 'value';
             desc[prop] = getHook(desc[prop], func === 'srcdoc');
+            desc.configurable = true;
+            if (prop === 'value') {
+                desc.writable = true;
+            }
             Object.defineProperty(win[proto].prototype, func, desc);
         }
     }

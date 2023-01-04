@@ -1,5 +1,6 @@
 const {tagName, nodeType, slice, Array, parse, stringify,
-    Node, Document, DocumentFragment, Element, ShadowRoot, getContentWindow
+    Node, Document, DocumentFragment, Element, ShadowRoot, getContentWindow,
+    getDefaultView, getOwnerDocument,
 } = require('./natives');
 
 const shadows = new Array();
@@ -50,8 +51,19 @@ function getFrameTag(element) {
     return tag;
 }
 
+function toArray(item) {
+    if (!Array.isArray(item)) {
+        item = new Array(item);
+    }
+    return item;
+}
+
 function getContentWindowOfFrame(iframe) {
     return getContentWindow(iframe, getFrameTag(iframe));
+}
+
+function getOwnerWindowOfFrame(iframe) {
+    return getDefaultView(getOwnerDocument(iframe));
 }
 
 function canNodeRunQuerySelector(node) {
@@ -82,7 +94,7 @@ function getFramesArray(element, includingParent) {
 
     fillArrayUniques(frames, slice(list));
     if (includingParent) {
-        fillArrayUniques(frames, [element]);
+        fillArrayUniques(frames, toArray(element));
     }
 
     return frames;
@@ -101,4 +113,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};
+module.exports = {toArray, getOwnerWindowOfFrame, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};

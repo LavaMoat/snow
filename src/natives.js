@@ -111,6 +111,8 @@ function setup(win) {
         getChildElementCount: Object.getOwnPropertyDescriptor(DocumentFragment.prototype, 'childElementCount').get,
         getFrameElement: Object.getOwnPropertyDescriptor(win, 'frameElement').get,
         getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get,
+        getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
+        getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
     });
 
     return {
@@ -151,6 +153,8 @@ function setup(win) {
         getChildElementCount,
         getFrameElement,
         getParentElement,
+        getOwnerDocument,
+        getDefaultView,
     };
 
     function getContentWindow(element, tag) {
@@ -262,6 +266,14 @@ function setup(win) {
 
     function getParentElement(element) {
         return bag.getParentElement.call(element);
+    }
+
+    function getOwnerDocument(node) {
+        return bag.getOwnerDocument.call(node);
+    }
+
+    function getDefaultView(document) {
+        return bag.getDefaultView.call(document);
     }
 }
 

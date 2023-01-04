@@ -14,30 +14,38 @@ const map = {
     HTMLIFrameElement: ['srcdoc'],
 };
 
-function getHook(win, native, cb, callHook) {
+function getHook(native, callHook) {
+    function before(args) {
+        resetOnloadAttributes(args);
+        resetOnloadAttributes(shadows);
+        handleHTML(args, callHook);
+    }
+
+    function after(args, element) {
+        const frames = getFramesArray(element, false);
+        hook(frames);
+        hook(args);
+        protectShadows(true);
+    }
+
     return function() {
         const args = slice(arguments);
         const element = getParentElement(this) || this;
-        resetOnloadAttributes(win, args, cb);
-        resetOnloadAttributes(win, shadows, cb);
-        handleHTML(args, callHook);
+        before(args);
         const ret = Function.prototype.apply.call(native, this, args);
-        const frames = getFramesArray(element, false);
-        hook(win, frames, cb);
-        hook(win, args, cb);
-        protectShadows(win, cb, true);
+        after(args, element);
         return ret;
     };
 }
 
-function hookDOMInserters(win, cb) {
+function hookDOMInserters(win) {
     for (const proto in map) {
         const funcs = map[proto];
         for (let i = 0; i < funcs.length; i++) {
             const func = funcs[i];
             const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
             const prop = desc.set ? 'set' : 'value';
-            desc[prop] = getHook(win, desc[prop], cb, func === 'srcdoc');
+            desc[prop] = getHook(desc[prop], func === 'srcdoc');
             desc.configurable = true;
             if (prop === 'value') {
                 desc.writable = true;

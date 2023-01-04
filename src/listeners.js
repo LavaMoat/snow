@@ -43,8 +43,14 @@ function getRemoveEventListener(win, event) {
 }
 
 function hookEventListenersSetters(win, event, cb) {
-    Object.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getAddEventListener(win, event, cb) });
-    Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', { value: getRemoveEventListener(win, event) });
+    Object.defineProperty(win.EventTarget.prototype, 'addEventListener', {
+        configurable: true, writable: true,
+        value: getAddEventListener(win, event, cb),
+    });
+    Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', {
+        configurable: true, writable: true,
+        value: getRemoveEventListener(win, event),
+    });
 }
 
 module.exports = hookEventListenersSetters;

@@ -349,6 +349,10 @@ function hookDOMInserters(win, cb) {
       const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
       const prop = desc.set ? 'set' : 'value';
       desc[prop] = getHook(win, desc[prop], cb, func === 'srcdoc');
+      desc.configurable = true;
+      if (prop === 'value') {
+        desc.writable = true;
+      }
       Object.defineProperty(win[proto].prototype, func, desc);
     }
   }
@@ -406,9 +410,13 @@ function getRemoveEventListener(win, event) {
 }
 function hookEventListenersSetters(win, event, cb) {
   Object.defineProperty(win.EventTarget.prototype, 'addEventListener', {
+    configurable: true,
+    writable: true,
     value: getAddEventListener(win, event, cb)
   });
   Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', {
+    configurable: true,
+    writable: true,
     value: getRemoveEventListener(win, event)
   });
 }
@@ -512,7 +520,6 @@ function isMarked(win) {
 function mark(win) {
   const key = new Array();
   const desc = Object.create(null);
-  desc.writable = desc.configurable = false;
   desc.value = s => s === secret && key;
   Object.defineProperty(win, 'SNOW_ID', desc);
   wins.set(win, key);
@@ -897,6 +904,7 @@ function getHook(win, native, cb) {
 }
 function hookShadowDOM(win, cb) {
   const desc = Object.getOwnPropertyDescriptor(win.Element.prototype, 'attachShadow');
+  desc.configurable = desc.writable = true;
   const val = desc.value;
   desc.value = getHook(win, val, cb);
   Object.defineProperty(win.Element.prototype, 'attachShadow', desc);

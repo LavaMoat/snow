@@ -112,10 +112,11 @@ function findWin(win, frameElement) {
     }
     const frames = getFramesArray(shadow, false);
     for (let j = 0; j < frames.length; j++) {
-      const win = getContentWindowOfFrame(frames[j]);
-      // if (frames[j] === frameElement) {
-      //     return win;
-      // }
+      const frame = frames[j];
+      const win = getContentWindowOfFrame(frame);
+      if (frame === frameElement) {
+        return win;
+      }
       const found = findWin(win, frameElement);
       if (found) {
         return found;

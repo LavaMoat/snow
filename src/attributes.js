@@ -2,13 +2,13 @@ const hook = require('./hook');
 const {getFramesArray, getFrameTag} = require('./utils');
 const {getOnload, setOnload, removeAttribute, addEventListener} = require('./natives');
 
-function resetOnloadAttribute(win, frame, cb) {
+function resetOnloadAttribute(frame) {
     if (!getFrameTag(frame)) {
         return;
     }
 
     addEventListener(frame, 'load', function() {
-        hook(win, [this], cb);
+        hook(frame);
     });
 
     const onload = getOnload(frame);
@@ -19,13 +19,13 @@ function resetOnloadAttribute(win, frame, cb) {
     }
 }
 
-function resetOnloadAttributes(win, args, cb) {
+function resetOnloadAttributes(args) {
     for (let i = 0; i < args.length; i++) {
         const element = args[i];
         const frames = getFramesArray(element, true);
         for (let i = 0; i < frames.length; i++) {
             const frame = frames[i];
-            resetOnloadAttribute(win, frame, cb);
+            resetOnloadAttribute(frame);
         }
     }
 }

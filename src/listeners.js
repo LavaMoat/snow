@@ -14,13 +14,13 @@ function fire(that, listener, args) {
     }
 }
 
-function getAddEventListener(win, event, cb) {
+function getAddEventListener(win, event) {
     return function(type, handler, options) {
         let listener = handler;
         if (type === event) {
             if (!handlers.has(handler)) {
                 handlers.set(handler, function () {
-                    hook(win, [this], cb);
+                    hook(this);
                     const args = slice(arguments);
                     fire(this, handler, args);
                 });
@@ -42,8 +42,8 @@ function getRemoveEventListener(win, event) {
     }
 }
 
-function hookEventListenersSetters(win, event, cb) {
-    Object.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getAddEventListener(win, event, cb) });
+function hookEventListenersSetters(win, event) {
+    Object.defineProperty(win.EventTarget.prototype, 'addEventListener', { value: getAddEventListener(win, event) });
     Object.defineProperty(win.EventTarget.prototype, 'removeEventListener', { value: getRemoveEventListener(win, event) });
 }
 

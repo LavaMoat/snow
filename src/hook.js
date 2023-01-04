@@ -1,9 +1,11 @@
 const isCrossOrigin = require('is-cross-origin');
 const workaroundChromiumBug = require('./chromium_bug_workaround');
-const {shadows, getFramesArray, getContentWindowOfFrame} = require('./utils');
+const {shadows, toArray, getFramesArray, getContentWindowOfFrame, getOwnerWindowOfFrame} = require('./utils');
 const {Object, getFrameElement} = require('./natives');
 
-function findWin(win, frameElement) {
+function findWin(frameElement) {
+    workaroundChromiumBug(frameElement);
+    const win = getOwnerWindowOfFrame(frameElement);
     let i = -1;
     while (win[++i]) {
         const cross = isCrossOrigin(win[i], win, Object);
@@ -25,14 +27,18 @@ function findWin(win, frameElement) {
     return null;
 }
 
-function hook(win, frames, cb) {
+function hook(frames) {
+    frames = toArray(frames);
     for (let i = 0; i < frames.length; i++) {
         const frame = frames[i];
-        workaroundChromiumBug(frame);
-        const contentWindow = findWin(win, frame);
-        if (contentWindow) {
-            cb(contentWindow);
+        if (typeof frame !== 'object') {
+            continue;
         }
+        const contentWindow = findWin(frame);
+        if (!contentWindow) {
+            continue;
+        }
+        top['SNOW_WINDOW'](contentWindow);
     }
 }
 

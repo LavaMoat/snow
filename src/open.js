@@ -55,7 +55,7 @@ function proxy(win, opened) {
     });
 }
 
-function hook(win, native, cb) {
+function hook(win, native) {
     return function open() {
         const args = slice(arguments);
         const url = args[0] + '', // open accepts non strings too
@@ -73,16 +73,16 @@ function hook(win, native, cb) {
             return null;
         }
 
-        cb(opened);
+        top['SNOW_WINDOW'](opened);
         const p = proxy(win, opened);
         openeds.set(opened, p);
         return p;
     };
 }
 
-function hookOpen(win, cb) {
+function hookOpen(win) {
     hookMessageEvent(win);
-    win.open = hook(win, win.open, cb);
+    win.open = hook(win, win.open);
 }
 
 module.exports = hookOpen;

@@ -6,7 +6,6 @@ const {hookShadowDOM} = require('./shadow');
 const {Object, addEventListener, getFrameElement} = require('./natives');
 const {isMarked, mark} = require('./mark');
 const {error, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
-const {getContentWindowOfFrame} = require('./utils');
 
 function setTopUtil(prop, val) {
     const desc = Object.create(null);
@@ -27,26 +26,24 @@ function shouldRun(win) {
     return shouldRun(win);
 }
 
-function applyHooks(win, hookWin, cb) {
-    hookOpen(win, hookWin);
-    hookEventListenersSetters(win, 'load', hookWin);
-    hookDOMInserters(win, hookWin);
-    hookShadowDOM(win, hookWin);
-    cb(win);
+function onLoad(win) {
+    const frame = getFrameElement(win);
+    const onload = function() { hook(frame) };
+    addEventListener(frame, 'load', onload);
 }
 
-function onWin(cb, win) {
-    function hookWin(contentWindow) {
-        onWin(cb, contentWindow);
-        addEventListener(getFrameElement(contentWindow), 'load', function() {
-            hook(win, [this], function() {
-                onWin(cb, contentWindow);
-            });
-        });
-    }
+function applyHooks(win) {
+    onLoad(win);
+    hookOpen(win);
+    hookEventListenersSetters(win, 'load');
+    hookDOMInserters(win);
+    hookShadowDOM(win);
+}
 
+function onWin(win) {
     if (shouldRun(win)) {
-        applyHooks(win, hookWin, cb);
+        applyHooks(win);
+        callback(win);
     }
 }
 
@@ -60,9 +57,14 @@ module.exports = function snow(cb, win) {
                 return;
             }
         }
-        setTopUtil('SNOW_CB', snow);
-        setTopUtil('SNOW_FRAME_TO_WINDOW', getContentWindowOfFrame);
+        setTopUtil('SNOW_WINDOW', function(win) {
+            onWin(win);
+        });
+        setTopUtil('SNOW_FRAME', function(frame) {
+            hook(frame);
+        });
         callback = cb;
     }
-    onWin(callback, win || top);
+
+    onWin(win || top);
 }

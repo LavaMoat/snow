@@ -1,26 +1,38 @@
 const isCrossOrigin = require('is-cross-origin');
 const workaroundChromiumBug = require('./chromium_bug_workaround');
-const {shadows, toArray, getFramesArray, getContentWindowOfFrame, getOwnerWindowOfFrame} = require('./utils');
+const {shadows, toArray, getFramesArray, getContentWindowOfFrame, getOwnerWindowOfNode} = require('./utils');
 const {Object, getFrameElement} = require('./natives');
 
-function findWin(frameElement) {
-    workaroundChromiumBug(frameElement);
-    const win = getOwnerWindowOfFrame(frameElement);
+function findWin(win, frameElement) {
     let i = -1;
     while (win[++i]) {
-        const cross = isCrossOrigin(win[i], win, Object);
-        if (!cross) {
-            if (getFrameElement(win[i]) === frameElement) {
-                return win[i];
-            }
+        if (isCrossOrigin(win[i], win, Object)) {
+            continue;
+        }
+        if (getFrameElement(win[i]) === frameElement) {
+            return win[i];
+        }
+        const found = findWin(win[i], frameElement);
+        if (found) {
+            return found;
         }
     }
     for (let i = 0; i < shadows.length; i++) {
         const shadow = shadows[i];
+        const owner = getOwnerWindowOfNode(shadow);
+        if (owner !== win) {
+            continue;
+        }
         const frames = getFramesArray(shadow, false);
         for (let j = 0; j < frames.length; j++) {
-            if (frames[j] === frameElement) {
-                return getContentWindowOfFrame(frames[j]);
+            const frame = frames[j];
+            const win = getContentWindowOfFrame(frame);
+            if (frame === frameElement) {
+                return win;
+            }
+            const found = findWin(win, frameElement);
+            if (found) {
+                return found;
             }
         }
     }
@@ -34,7 +46,8 @@ function hook(frames) {
         if (typeof frame !== 'object') {
             continue;
         }
-        const contentWindow = findWin(frame);
+        workaroundChromiumBug(frame);
+        const contentWindow = findWin(top, frame);
         if (!contentWindow) {
             continue;
         }

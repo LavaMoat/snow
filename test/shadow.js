@@ -34,6 +34,24 @@ describe('test shadow DOM', async () => {
         expect(result).toBe('V');
     });
 
+    it('should fail to use atob of an iframe attached as part of a shadow DOM inside another shadow DOM where both shadows belong to different realms', async () => {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                const a = document.createElement('div');
+                const s = a.attachShadow({mode: 'closed'});
+                const ifr = document.body.appendChild(document.createElement('iframe'));
+                const d = document.createElement('div');
+                s.appendChild(d);
+                const s2 = ifr.contentWindow.document.body.attachShadow.call(d, {mode: 'closed'});
+                s2.innerHTML = `<iframe srcdoc="<iframe onload='top.bypass([this.contentWindow])'></iframe>"></iframe>`;
+                testdiv.append(a);
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
     it('should fail to use atob of an iframe that is DOM inserted as part of a shadow DOM', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));

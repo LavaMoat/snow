@@ -84,30 +84,41 @@ const {
   toArray,
   getFramesArray,
   getContentWindowOfFrame,
-  getOwnerWindowOfFrame
+  getOwnerWindowOfNode
 } = __webpack_require__(648);
 const {
   Object,
   getFrameElement
 } = __webpack_require__(14);
-function findWin(frameElement) {
-  workaroundChromiumBug(frameElement);
-  const win = getOwnerWindowOfFrame(frameElement);
+function findWin(win, frameElement) {
   let i = -1;
   while (win[++i]) {
-    const cross = isCrossOrigin(win[i], win, Object);
-    if (!cross) {
-      if (getFrameElement(win[i]) === frameElement) {
-        return win[i];
-      }
+    if (isCrossOrigin(win[i], win, Object)) {
+      continue;
+    }
+    if (getFrameElement(win[i]) === frameElement) {
+      return win[i];
+    }
+    const found = findWin(win[i], frameElement);
+    if (found) {
+      return found;
     }
   }
   for (let i = 0; i < shadows.length; i++) {
     const shadow = shadows[i];
+    const owner = getOwnerWindowOfNode(shadow);
+    if (owner !== win) {
+      continue;
+    }
     const frames = getFramesArray(shadow, false);
     for (let j = 0; j < frames.length; j++) {
-      if (frames[j] === frameElement) {
-        return getContentWindowOfFrame(frames[j]);
+      const win = getContentWindowOfFrame(frames[j]);
+      // if (frames[j] === frameElement) {
+      //     return win;
+      // }
+      const found = findWin(win, frameElement);
+      if (found) {
+        return found;
       }
     }
   }
@@ -120,7 +131,8 @@ function hook(frames) {
     if (typeof frame !== 'object') {
       continue;
     }
-    const contentWindow = findWin(frame);
+    workaroundChromiumBug(frame);
+    const contentWindow = findWin(top, frame);
     if (!contentWindow) {
       continue;
     }
@@ -1007,7 +1019,7 @@ function toArray(item) {
 function getContentWindowOfFrame(iframe) {
   return getContentWindow(iframe, getFrameTag(iframe));
 }
-function getOwnerWindowOfFrame(iframe) {
+function getOwnerWindowOfNode(iframe) {
   return getDefaultView(getOwnerDocument(iframe));
 }
 function canNodeRunQuerySelector(node) {
@@ -1045,7 +1057,7 @@ function fillArrayUniques(arr, items) {
 }
 module.exports = {
   toArray,
-  getOwnerWindowOfFrame,
+  getOwnerWindowOfNode,
   getContentWindowOfFrame,
   getFramesArray,
   getFrameTag,

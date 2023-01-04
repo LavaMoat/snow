@@ -62,7 +62,7 @@ function getContentWindowOfFrame(iframe) {
     return getContentWindow(iframe, getFrameTag(iframe));
 }
 
-function getOwnerWindowOfFrame(iframe) {
+function getOwnerWindowOfNode(iframe) {
     return getDefaultView(getOwnerDocument(iframe));
 }
 
@@ -113,4 +113,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {toArray, getOwnerWindowOfFrame, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};
+module.exports = {toArray, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};

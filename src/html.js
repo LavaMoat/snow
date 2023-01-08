@@ -4,44 +4,51 @@ const {warn, WARN_DECLARATIVE_SHADOWS} = require('./log');
 
 const querySelectorAll = DocumentFragment.prototype.querySelectorAll;
 
-function applyHookByString(str, asFrame, asHtml) {
+function makeStringHook(asFrame, asHtml) {
     let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(this);';
     if (asHtml) {
         hook = '<script>' + hook + 'document.currentScript.remove();' + '</script>';
     }
-    return hook + str;
+    return hook;
 }
 
 function dropDeclarativeShadows(shadow, html) {
     warn(WARN_DECLARATIVE_SHADOWS, shadow, html);
     remove(shadow);
+    return true;
 }
 
 function hookOnLoadAttributes(frame) {
     let onload = getAttribute(frame, 'onload');
     if (onload) {
-        onload = applyHookByString(onload, true, false);
+        onload = makeStringHook(true, false) + onload;
         setAttribute(frame, 'onload', onload);
+        return true;
     }
+    return false;
 }
 
 function hookJavaScriptURI(frame) {
     let src = getAttribute(frame, 'src') || '';
     const [scheme, js] = split(src, ':');
     if (stringToLowerCase(scheme) === 'javascript') {
-        src = 'javascript:' + applyHookByString(js, false, false);
+        src = 'javascript:' + makeStringHook(false, false) + js;
         setAttribute(frame, 'src', src);
+        return true;
     }
+    return false;
 }
 
 function hookSrcDoc(frame) {
     let srcdoc = getAttribute(frame, 'srcdoc');
     if (srcdoc) {
-        srcdoc = applyHookByString(srcdoc, false, true);
+        srcdoc = makeStringHook(false, true) + srcdoc;
         const html = new Array(srcdoc);
         handleHTML(html, true);
         setAttribute(frame, 'srcdoc', html[0]);
+        return true;
     }
+    return false;
 }
 
 function handleHTML(args, callHook) {
@@ -52,21 +59,27 @@ function handleHTML(args, callHook) {
         if (!getChildElementCount(content)) {
             continue;
         }
+        let modified = false;
+        if (callHook) {
+            const script = createElement(document, 'script');
+            script.textContent = makeStringHook(false, false);
+            content.insertBefore(script, content.firstChild);
+            modified = true;
+        }
         const declarativeShadows = querySelectorAll.call(content, 'template[shadowroot]');
         for (let j = 0; j < declarativeShadows.length; j++) {
             const shadow = declarativeShadows[j];
-            dropDeclarativeShadows(shadow, args[i]);
+            modified = dropDeclarativeShadows(shadow, args[i]) || modified;
         }
         const frames = getFramesArray(content, false);
         for (let j = 0; j < frames.length; j++) {
             const frame = frames[j];
-            hookOnLoadAttributes(frame);
-            hookJavaScriptURI(frame);
-            hookSrcDoc(frame);
+            modified = hookOnLoadAttributes(frame) || modified;
+            modified = hookJavaScriptURI(frame) || modified;
+            modified = hookSrcDoc(frame) || modified;
         }
-        args[i] = getInnerHTML(template);
-        if (callHook) {
-            args[i] = applyHookByString(args[i], false, true);
+        if (modified) {
+            args[i] = getInnerHTML(template);
         }
     }
 }

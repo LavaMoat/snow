@@ -1,4 +1,5 @@
 const hook = require('./hook');
+const hookCustoms = require('./customs');
 const hookOpen = require('./open');
 const hookEventListenersSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
@@ -34,6 +35,7 @@ function onLoad(win) {
 
 function applyHooks(win) {
     onLoad(win);
+    hookCustoms(win);
     hookOpen(win);
     hookEventListenersSetters(win, 'load');
     hookDOMInserters(win);

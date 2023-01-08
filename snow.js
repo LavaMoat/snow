@@ -74,6 +74,47 @@ module.exports = workaroundChromiumBug;
 
 /***/ }),
 
+/***/ 832:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const {
+  Object,
+  Function,
+  toString
+} = __webpack_require__(14);
+const {
+  isTagFramable
+} = __webpack_require__(648);
+const {
+  error,
+  ERR_EXTENDING_FRAMABLES_BLOCKED
+} = __webpack_require__(312);
+function getHook(win, native) {
+  return function (name, constructor, options) {
+    let opts = options;
+    if (options) {
+      const extend = options.extends;
+      if (isTagFramable(toString(extend))) {
+        const blocked = error(ERR_EXTENDING_FRAMABLES_BLOCKED, name, options);
+        if (blocked) {
+          opts = undefined;
+        }
+      }
+    }
+    return Function.prototype.call.call(native, this, name, constructor, opts);
+  };
+}
+function hookCustoms(win) {
+  const desc = Object.getOwnPropertyDescriptor(win.CustomElementRegistry.prototype, 'define');
+  desc.configurable = desc.writable = true;
+  const val = desc.value;
+  desc.value = getHook(win, val);
+  Object.defineProperty(win.CustomElementRegistry.prototype, 'define', desc);
+}
+module.exports = hookCustoms;
+
+/***/ }),
+
 /***/ 228:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -253,6 +294,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const hook = __webpack_require__(228);
+const hookCustoms = __webpack_require__(832);
 const hookOpen = __webpack_require__(583);
 const hookEventListenersSetters = __webpack_require__(459);
 const hookDOMInserters = __webpack_require__(58);
@@ -299,6 +341,7 @@ function onLoad(win) {
 }
 function applyHooks(win) {
   onLoad(win);
+  hookCustoms(win);
   hookOpen(win);
   hookEventListenersSetters(win, 'load');
   hookDOMInserters(win);
@@ -476,6 +519,7 @@ const WARN_OPEN_API_LIMITED = 2;
 const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
 const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
+const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
 function warn(msg, a, b) {
   let bail;
   switch (msg) {
@@ -505,6 +549,12 @@ function warn(msg, a, b) {
 function error(msg, a, b) {
   let bail;
   switch (msg) {
+    case ERR_EXTENDING_FRAMABLES_BLOCKED:
+      const name = a,
+        options = b;
+      bail = true;
+      console.error('SNOW:', `"${name}"`, 'extending attempt', 'of framable elements such as provided', options, 'is blocked to prevent bypass', '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/56#issuecomment-1374899809', '.', '\n');
+      break;
     case ERR_MARK_NEW_WINDOW_FAILED:
       const win = a,
         err = b;
@@ -528,7 +578,8 @@ module.exports = {
   WARN_OPEN_API_LIMITED,
   WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
   ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
-  WARN_DECLARATIVE_SHADOWS
+  WARN_DECLARATIVE_SHADOWS,
+  ERR_EXTENDING_FRAMABLES_BLOCKED
 };
 
 /***/ }),
@@ -984,7 +1035,8 @@ const {
   ShadowRoot,
   getContentWindow,
   getDefaultView,
-  getOwnerDocument
+  getOwnerDocument,
+  stringToLowerCase
 } = __webpack_require__(14);
 const shadows = new Array();
 function isShadow(node) {
@@ -1008,6 +1060,10 @@ function getPrototype(node) {
       return Element;
   }
 }
+function isTagFramable(t) {
+  const tag = stringToLowerCase(t);
+  return tag === 'iframe' || tag === 'frame' || tag === 'object' || tag === 'embed';
+}
 function getFrameTag(element) {
   if (!element || typeof element !== 'object') {
     return null;
@@ -1019,7 +1075,7 @@ function getFrameTag(element) {
     return null;
   }
   const tag = tagName(element);
-  if (tag !== 'IFRAME' && tag !== 'FRAME' && tag !== 'OBJECT' && tag !== 'EMBED') {
+  if (!isTagFramable(tag)) {
     return null;
   }
   return tag;
@@ -1071,6 +1127,7 @@ function fillArrayUniques(arr, items) {
 }
 module.exports = {
   toArray,
+  isTagFramable,
   getOwnerWindowOfNode,
   getContentWindowOfFrame,
   getFramesArray,

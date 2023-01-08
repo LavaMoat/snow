@@ -1,6 +1,6 @@
 const {tagName, nodeType, slice, Array, parse, stringify,
     Node, Document, DocumentFragment, Element, ShadowRoot, getContentWindow,
-    getDefaultView, getOwnerDocument,
+    getDefaultView, getOwnerDocument, stringToLowerCase,
 } = require('./natives');
 
 const shadows = new Array();
@@ -30,6 +30,11 @@ function getPrototype(node) {
     }
 }
 
+function isTagFramable(t) {
+    const tag = stringToLowerCase(t);
+    return tag === 'iframe' || tag === 'frame' || tag === 'object' || tag === 'embed';
+}
+
 function getFrameTag(element) {
     if (!element || typeof element !== 'object') {
         return null;
@@ -44,7 +49,7 @@ function getFrameTag(element) {
     }
 
     const tag = tagName(element);
-    if (tag !== 'IFRAME' && tag !== 'FRAME' && tag !== 'OBJECT' && tag !== 'EMBED') {
+    if (!isTagFramable(tag)) {
         return null;
     }
 
@@ -113,4 +118,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {toArray, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};
+module.exports = {toArray, isTagFramable, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};

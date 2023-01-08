@@ -12,6 +12,8 @@ describe('test custom elements', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                setTimeout(bypass, 100, [window]);
+
                 window.n = window.n ?? 0;
                 window.n++;
 
@@ -40,6 +42,8 @@ describe('test custom elements', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                setTimeout(bypass, 100, [window]);
+
                 window.n = window.n ?? 0;
                 window.n++;
 
@@ -69,6 +73,8 @@ describe('test custom elements', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                setTimeout(bypass, 100, [window]);
+
                 window.n = window.n ?? 0;
                 window.n++;
 
@@ -98,6 +104,8 @@ describe('test custom elements', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                setTimeout(bypass, 100, [window]);
+
                 window.n = window.n ?? 0;
                 window.n++;
 
@@ -127,6 +135,8 @@ describe('test custom elements', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                setTimeout(bypass, 100, [window]);
+
                 window.n = window.n ?? 0;
                 window.n++;
 
@@ -156,6 +166,8 @@ describe('test custom elements', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                setTimeout(bypass, 100, [window]);
+
                 window.n = window.n ?? 0;
                 window.n++;
 
@@ -183,6 +195,8 @@ describe('test custom elements', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                setTimeout(bypass, 100, [window]);
+
                 window.n = window.n ?? 0;
                 window.n++;
 
@@ -216,6 +230,8 @@ describe('test custom elements', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                setTimeout(bypass, 100, [window]);
+
                 window.n = window.n ?? 0;
                 window.n++;
 
@@ -247,6 +263,8 @@ describe('test custom elements', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                setTimeout(bypass, 100, [window]);
+
                 window.n = window.n ?? 0;
                 window.n++;
 

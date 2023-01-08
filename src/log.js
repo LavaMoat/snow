@@ -5,6 +5,7 @@ const WARN_OPEN_API_LIMITED = 2;
 const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
 const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
+const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
 
 function warn(msg, a, b) {
     let bail;
@@ -46,6 +47,15 @@ function warn(msg, a, b) {
 function error(msg, a, b) {
     let bail;
     switch (msg) {
+        case ERR_EXTENDING_FRAMABLES_BLOCKED:
+            const name = a, options = b;
+            bail = true;
+            console.error('SNOW:',
+                `"${name}"`, 'extending attempt', 'of framable elements such as provided', options, 'is blocked to prevent bypass', '.', '\n',
+                'if this prevents your application from running correctly, please visit/report at',
+                'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', '\n',
+            );
+            break;
         case ERR_MARK_NEW_WINDOW_FAILED:
             const win = a, err = b;
             bail = true;
@@ -79,4 +89,5 @@ module.exports = {
     WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
     ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
     WARN_DECLARATIVE_SHADOWS,
+    ERR_EXTENDING_FRAMABLES_BLOCKED,
 };

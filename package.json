@@ -12,8 +12,10 @@
     "@wdio/spec-reporter": "^7.5.3",
     "babel-loader": "^8.2.2",
     "chromedriver": "^107.0.0",
+    "geckodriver": "^3.2.0",
     "wdio-chromedriver-service": "7.0.0",
     "wdio-safaridriver-service": "^2.0.0",
+    "wdio-geckodriver-service": "^4.0.0",
     "webpack": "^5.33.2",
     "webpack-cli": "^4.6.0"
   },
@@ -25,9 +27,11 @@
     "build": "yarn build-prod & yarn build-dev",
     "test-chrome": "./node_modules/.bin/wdio run chrome.wdio.conf.js",
     "test-safari": "./node_modules/.bin/wdio run safari.wdio.conf.js",
-    "test": "yarn test-chrome && yarn test-safari",
+    "test-firefox": "./node_modules/.bin/wdio run firefox.wdio.conf.js",
+    "test": "yarn test-chrome && yarn test-firefox && yarn test-safari",
     "build-test-chrome": "yarn build && yarn test-chrome",
     "build-test-safari": "yarn build && yarn test-safari",
+    "build-test-firefox": "yarn build && yarn test-firefox",
     "build-test": "yarn build && yarn test"
   },
   "repository": {

@@ -79,8 +79,7 @@ module.exports = workaroundChromiumBug;
 
 const {
   Object,
-  Function,
-  toString
+  Function
 } = __webpack_require__(14);
 const {
   isTagFramable
@@ -94,7 +93,7 @@ function getHook(win, native) {
     let opts = options;
     if (options) {
       const extend = options.extends;
-      if (isTagFramable(toString(extend))) {
+      if (isTagFramable(extend + '')) {
         const blocked = error(ERR_EXTENDING_FRAMABLES_BLOCKED, name, options);
         if (blocked) {
           opts = undefined;

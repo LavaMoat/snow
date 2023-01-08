@@ -1,4 +1,4 @@
-const {Object, Function} = require('./natives');
+const {Object, Function, toString} = require('./natives');
 const {isTagFramable} = require('./utils');
 const {error, ERR_EXTENDING_FRAMABLES_BLOCKED} = require('./log');
 
@@ -7,7 +7,7 @@ function getHook(win, native) {
         let opts = options;
         if (options) {
             const extend = options.extends;
-            if (isTagFramable(extend)) {
+            if (isTagFramable(toString(extend))) {
                 const blocked = error(ERR_EXTENDING_FRAMABLES_BLOCKED, name, options);
                 if (blocked) {
                     opts = undefined;

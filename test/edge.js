@@ -114,6 +114,9 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an iframe that had its document written', async () => {
+        if (global.BROWSER === 'FIREFOX') {
+            return; // document.write API not working on Firefox automation
+        }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -127,6 +130,9 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an iframe that had its document written-ln', async () => {
+        if (global.BROWSER === 'FIREFOX') {
+            return; // document.write API not working on Firefox automation
+        }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -183,6 +189,9 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with document.write', async () => {
+        if (global.BROWSER === 'FIREFOX') {
+            return; // document.write API not working on Firefox automation
+        }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

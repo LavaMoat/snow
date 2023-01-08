@@ -187,15 +187,4 @@ describe('test HTML injections', async () => {
         });
         expect(result).toBe('V');
     });
-
-    it('should fail to use atob of an embed through onload as html', async () => {
-        const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
-            (function(){
-                top.bypass = bypass;
-                testdiv1.innerHTML = ('<embed id="temp_id" type="text/html" src="/" onload="top.bypass([temp_id.contentWindow]);">');
-            }());
-        });
-        expect(result).toBe('V');
-    });
 });

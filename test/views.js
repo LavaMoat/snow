@@ -42,11 +42,8 @@ describe('test different views', async () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                testdiv1.innerHTML = ('<embed id="temp_id" type="text/html" src="/">');
-                if (window[0].frameElement !== temp_id) {
-                    throw 'failed to obtain frame element real window';
-                }
-                bypass([window[0]]);
+                top.bypass = bypass;
+                testdiv1.innerHTML = ('<embed id="temp_id" type="text/html" src="/" onload="top.bypass([temp_id.contentWindow]);">');
             }());
         });
         expect(result).toBe('V');

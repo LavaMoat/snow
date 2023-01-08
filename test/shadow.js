@@ -169,6 +169,9 @@ describe('test shadow DOM', async () => {
     });
 
     it('should fail to use atob of an iframe that is attached via declarative shadow DOM through document.write', async () => {
+        if (global.BROWSER === 'FIREFOX') {
+            return; // document.write API not working on Firefox automation
+        }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

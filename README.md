@@ -77,10 +77,7 @@ Until `snow` becomes a platform builtin API, we have to attempt to overcome seve
 
 ### Support
 
-Currently `snow` is written to support chromium based browsers only, it was
-never tested on anything else.
-
-> *Snow should now support Safari too [#42](https://github.com/LavaMoat/snow/pull/42)*  
+`snow` should support Chrome, Firefox, Safari and all other Chromium based browsers (Opera, Edge, Brave, etc)
 
 ### Performance
 

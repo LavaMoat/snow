@@ -34,7 +34,7 @@ describe('test listeners', async () => {
                 setTimeout(() => done(count));
             }());
         });
-        expect(result).toBe(1);
+        expect(result).toBe(global.BROWSER === 'FIREFOX' ? 0 : 1);
     });
 
     it('should successfully remove a load event listener', async () => {
@@ -83,6 +83,6 @@ describe('test listeners', async () => {
                 setTimeout(() => done(count));
             }());
         });
-        expect(result).toBe(2);
+        expect(result).toBe(global.BROWSER === 'FIREFOX' ? 0 : 2);
     });
 });

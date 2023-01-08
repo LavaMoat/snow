@@ -591,7 +591,7 @@ const {
   Object,
   Array
 } = __webpack_require__(14);
-const secret = (Math.random() + 1).toString(36).substring(7);
+const secret = new Array();
 const wins = new Map();
 function isMarked(win) {
   if (!wins.has(win)) {

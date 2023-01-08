@@ -1,6 +1,6 @@
 const {Map, Object, Array} = require('./natives');
 
-const secret = (Math.random() + 1).toString(36).substring(7);
+const secret = new Array();
 const wins = new Map();
 
 function isMarked(win) {

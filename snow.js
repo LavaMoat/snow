@@ -634,6 +634,9 @@ function natively(win, cb) {
   return ret;
 }
 function natives(win) {
+  const {
+    EventTarget
+  } = win;
   return natively(win, function (win) {
     const {
       console,
@@ -653,7 +656,6 @@ function natives(win) {
       Element,
       HTMLElement,
       HTMLTemplateElement,
-      EventTarget,
       HTMLIFrameElement,
       HTMLFrameElement,
       HTMLObjectElement

@@ -8,7 +8,7 @@ function natively(win, cb) {
 }
 
 function natives(win) {
-    const {EventTarget} = win;
+    const {EventTarget} = win; // PR#62
     return natively(win, function(win) {
         const {
             console,

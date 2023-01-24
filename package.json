@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/snow",
-  "version": "1.4.2",
+  "version": "x.x.x",
   "description": "standardize how to recursively own newborn windows within a web app, from the context of the app itself",
   "main": "src/index.js",
   "devDependencies": {

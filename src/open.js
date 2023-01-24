@@ -83,6 +83,7 @@ function hook(win, native) {
 function hookOpen(win) {
     hookMessageEvent(win);
     win.open = hook(win, win.open);
+    win.document.open = hook(win, win.document.open);
 }
 
 module.exports = hookOpen;

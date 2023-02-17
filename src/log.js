@@ -54,7 +54,7 @@ function error(msg, a, b) {
             console.error('SNOW:',
                 `calling "URL.createObjectURL()" on a "${type}" object is forbidden under snow protection:`, object, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
-                'https://github.com/LavaMoat/snow/issues/xxx#issuecomment-xxx', '.', '\n',
+                'https://github.com/LavaMoat/snow/issues/43#issuecomment-1434063891', '.', '\n',
             );
             break;
         case ERR_EXTENDING_FRAMABLES_BLOCKED:

@@ -1,9 +1,9 @@
 const setup = require('./index');
 
-describe('test HTML injections', async () => {
+describe('test HTML injections', async function () {
     beforeEach(setup);
 
-    it('should fail to use atob of an iframe created by srcdoc (before)', async () => {
+    it('should fail to use atob of an iframe created by srcdoc (before)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -16,7 +16,7 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe created by srcdoc (after)', async () => {
+    it('should fail to use atob of an iframe created by srcdoc (after)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -29,7 +29,7 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe created by srcdoc with onload attribute of a nested iframe', async () => {
+    it('should fail to use atob of an iframe created by srcdoc with onload attribute of a nested iframe', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -45,7 +45,7 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe created by innerHTML', async () => {
+    it('should fail to use atob of an iframe created by innerHTML', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -59,7 +59,7 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe created by outerHTML', async () => {
+    it('should fail to use atob of an iframe created by outerHTML', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -73,7 +73,7 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe created by insertAdjacentHTML', async () => {
+    it('should fail to use atob of an iframe created by insertAdjacentHTML', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -87,7 +87,7 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of a div\'s child iframe created by innerHTML', async () => {
+    it('should fail to use atob of a div\'s child iframe created by innerHTML', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -101,7 +101,7 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of via js execution via innerHTML call', async () => {
+    it('should fail to use atob of via js execution via innerHTML call', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -114,10 +114,10 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob by leveraging a TrustedHTML node (with onload)', async () => {
+    it('should fail to use atob by leveraging a TrustedHTML node (with onload)', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/16
         if (global.BROWSER === 'SAFARI' || global.BROWSER === 'FIREFOX') {
-            return; // TrustedHTML is not a thing in safari/firefox
+            this.skip(); // TrustedHTML is not a thing in safari/firefox
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -133,10 +133,10 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob by leveraging a TrustedHTML node', async () => {
+    it('should fail to use atob by leveraging a TrustedHTML node', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/16
         if (global.BROWSER === 'SAFARI' || global.BROWSER === 'FIREFOX') {
-            return; // TrustedHTML is not a thing in safari/firefox
+            this.skip(); // TrustedHTML is not a thing in safari/firefox
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -152,7 +152,7 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe through onload as html', async () => {
+    it('should fail to use atob of an iframe through onload as html', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -163,9 +163,9 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an frame through onload as html', async () => {
+    it('should fail to use atob of an frame through onload as html', async function () {
         if (global.BROWSER === 'FIREFOX') {
-            return; // document.write API not working on Firefox automation
+            this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -177,7 +177,7 @@ describe('test HTML injections', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an object through onload as html', async () => {
+    it('should fail to use atob of an object through onload as html', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

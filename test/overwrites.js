@@ -1,9 +1,9 @@
 const setup = require('./index');
 
-describe('test overrides of native functions', async () => {
+describe('test overrides of native functions', async function () {
     beforeEach(setup);
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.concat override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.concat override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -16,7 +16,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.includes override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.includes override attempt', async function () {
         const result = await browser.execute(function() {
             return (function(){
                 const ifr = document.createElement('iframe');
@@ -29,7 +29,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.push override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.push override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -42,7 +42,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.slice override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Array.prototype.slice override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -55,7 +55,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Function.prototype.call override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Function.prototype.call override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -68,7 +68,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Element.prototype.parentElement override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Element.prototype.parentElement override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -80,7 +80,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Function.prototype.apply override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Function.prototype.apply override attempt', async function () {
         const result = await browser.execute(function() {
             return (function(){
                 Object.defineProperty(Function.prototype, 'apply', {value: () => 1});
@@ -92,7 +92,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Element.prototype.getElementsByTagName override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Element.prototype.getElementsByTagName override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -104,7 +104,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Object.getOwnPropertyDescriptor override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Object.getOwnPropertyDescriptor override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -116,7 +116,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Object.getPrototypeOf override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Object.getPrototypeOf override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -128,7 +128,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via window.Error override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via window.Error override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -140,7 +140,7 @@ describe('test overrides of native functions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Object.defineProperty override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Object.defineProperty override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

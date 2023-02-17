@@ -1,9 +1,9 @@
 const setup = require('./index');
 
-describe('test marking mechanism is safe', async () => {
+describe('test marking mechanism is safe', async function () {
     beforeEach(setup);
 
-    it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Map proto', async () => {
+    it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Map proto', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -27,7 +27,7 @@ describe('test marking mechanism is safe', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Object proto getOwnPropertyDescriptor prop', async () => {
+    it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Object proto getOwnPropertyDescriptor prop', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -49,7 +49,7 @@ describe('test marking mechanism is safe', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Object proto hasOwnProperty prop', async () => {
+    it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Object proto hasOwnProperty prop', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -71,7 +71,7 @@ describe('test marking mechanism is safe', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Object proto defineProperty prop', async () => {
+    it('should fail to use atob of an iframe that bypassed marking mechanism by redefining Object proto defineProperty prop', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

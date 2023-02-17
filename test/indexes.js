@@ -1,11 +1,11 @@
 const setup = require('./index');
 
-describe('test numeric indexes overrides', async () => {
+describe('test numeric indexes overrides', async function () {
     beforeEach(setup);
 
     // reference: https://github.com/LavaMoat/snow/issues/8
 
-    it('should fail to use atob of an iframe that was under sabotage attempt via Object.prototype property n override attempt', async () => {
+    it('should fail to use atob of an iframe that was under sabotage attempt via Object.prototype property n override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -32,7 +32,7 @@ describe('test numeric indexes overrides', async () => {
         expect(result).toBe('V');
     });
 
-    it('should crash snow via property n override attempt', async () => {
+    it('should crash snow via property n override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

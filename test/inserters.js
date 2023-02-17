@@ -1,9 +1,9 @@
 const setup = require('./index');
 
-describe('test DOM insertions', async () => {
+describe('test DOM insertions', async function () {
     beforeEach(setup);
 
-    it('should fail to use atob of an iframe added by Node.prototype.appendChild', async () => {
+    it('should fail to use atob of an iframe added by Node.prototype.appendChild', async function () {
         const result = await browser.executeAsync(function (done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -15,7 +15,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of multiple iframes added to DOM', async () => {
+    it('should fail to use atob of multiple iframes added to DOM', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -31,7 +31,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V,V,V');
     });
 
-    it('should fail to use atob of an iframe added by Node.prototype.insertBefore', async () => {
+    it('should fail to use atob of an iframe added by Node.prototype.insertBefore', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -43,7 +43,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe added by Node.prototype.replaceChild', async () => {
+    it('should fail to use atob of an iframe added by Node.prototype.replaceChild', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -55,7 +55,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe added by Element.prototype.replaceWith', async () => {
+    it('should fail to use atob of an iframe added by Element.prototype.replaceWith', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -67,7 +67,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe added by Element.prototype.insertAdjacentElement', async () => {
+    it('should fail to use atob of an iframe added by Element.prototype.insertAdjacentElement', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -79,7 +79,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe added by Element.prototype.append', async () => {
+    it('should fail to use atob of an iframe added by Element.prototype.append', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -91,7 +91,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe added by Element.prototype.before', async () => {
+    it('should fail to use atob of an iframe added by Element.prototype.before', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -103,7 +103,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe added by Element.prototype.prepend', async () => {
+    it('should fail to use atob of an iframe added by Element.prototype.prepend', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -115,7 +115,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe added by Element.prototype.after', async () => {
+    it('should fail to use atob of an iframe added by Element.prototype.after', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -127,7 +127,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe added by Element.prototype.replaceChildren', async () => {
+    it('should fail to use atob of an iframe added by Element.prototype.replaceChildren', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -139,7 +139,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe added by Document.prototype.append', async () => {
+    it('should fail to use atob of an iframe added by Document.prototype.append', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -155,7 +155,7 @@ describe('test DOM insertions', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe added by Document.prototype.prepend', async () => {
+    it('should fail to use atob of an iframe added by Document.prototype.prepend', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

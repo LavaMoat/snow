@@ -1,9 +1,9 @@
 const setup = require('./index');
 
-describe('test listeners', async () => {
+describe('test listeners', async function () {
     beforeEach(setup);
 
-    it('should fail to use atob of an iframe added load event listener', async () => {
+    it('should fail to use atob of an iframe added load event listener', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -17,7 +17,7 @@ describe('test listeners', async () => {
         expect(result).toBe('V');
     });
 
-    it('should attach same load event listener only once', async () => {
+    it('should attach same load event listener only once', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -37,7 +37,7 @@ describe('test listeners', async () => {
         expect(result).toBe(global.BROWSER === 'FIREFOX' ? 0 : 1);
     });
 
-    it('should successfully remove a load event listener', async () => {
+    it('should successfully remove a load event listener', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -58,7 +58,7 @@ describe('test listeners', async () => {
         expect(result).toBe('load event not called');
     });
 
-    it('should successfully add a load event listener more than once when options are different', async () => {
+    it('should successfully add a load event listener more than once when options are different', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

@@ -1,9 +1,9 @@
 const setup = require('./index');
 
-describe('test without Snow', async () => {
+describe('test without Snow', async function () {
     before(setup.bind(null, false));
 
-    it('should succeed to use top.atob normally', async () => {
+    it('should succeed to use top.atob normally', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -14,10 +14,10 @@ describe('test without Snow', async () => {
     });
 });
 
-describe('test normal cases', async () => {
+describe('test normal cases', async function () {
     beforeEach(setup);
 
-    it('should fail to use top.atob normally', async () => {
+    it('should fail to use top.atob normally', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

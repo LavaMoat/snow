@@ -1,11 +1,11 @@
 const setup = require('./index');
 
-describe('test url', async () => {
+describe('test url', async function () {
     beforeEach(setup);
 
     // reference: https://github.com/LavaMoat/snow/issues/43
 
-    it('should fail to use atob of an iframe that is loading a blob url (text)', async () => {
+    it('should fail to use atob of an iframe that is loading a blob url (text)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -19,7 +19,7 @@ describe('test url', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loading a blob url (binary)', async () => {
+    it('should fail to use atob of an iframe that is loading a blob url (binary)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -37,7 +37,7 @@ describe('test url', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loading a file url (text)', async () => {
+    it('should fail to use atob of an iframe that is loading a file url (text)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -51,7 +51,7 @@ describe('test url', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loading a file url (binary)', async () => {
+    it('should fail to use atob of an iframe that is loading a file url (binary)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -69,7 +69,7 @@ describe('test url', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loading a file url (webkitURL)', async () => {
+    it('should fail to use atob of an iframe that is loading a file url (webkitURL)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -87,7 +87,7 @@ describe('test url', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loading a blob url that was created in a web worker', async () => {
+    it('should fail to use atob of an iframe that is loading a blob url that was created in a web worker', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -107,7 +107,7 @@ describe('test url', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loading a blob url of an svg', async () => {
+    it('should fail to use atob of an iframe that is loading a blob url of an svg', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -122,7 +122,7 @@ describe('test url', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loading a blob url of an xml document', async () => {
+    it('should fail to use atob of an iframe that is loading a blob url of an xml document', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

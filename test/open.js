@@ -3,7 +3,7 @@ const setup = require('./index');
 describe('window.open API', () => {
     beforeEach(setup);
 
-    it('should fail to use atob of a window that was created via open API', async () => {
+    it('should fail to use atob of a window that was created via open API', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -14,7 +14,7 @@ describe('window.open API', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin', async () => {
+    it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -33,7 +33,7 @@ describe('window.open API', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin and leaked it via postMessage (onmessage)', async () => {
+    it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin and leaked it via postMessage (onmessage)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -53,7 +53,7 @@ describe('window.open API', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin and leaked it via postMessage (message)', async () => {
+    it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin and leaked it via postMessage (message)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -75,7 +75,7 @@ describe('window.open API', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of a window that was created via open API to javascript: scheme, leaked to opener and then changed to cross origin and back to same origin', async () => {
+    it('should fail to use atob of a window that was created via open API to javascript: scheme, leaked to opener and then changed to cross origin and back to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -98,7 +98,7 @@ describe('window.open API', () => {
 describe('document.open API', () => {
     beforeEach(setup);
 
-    it('should fail to use atob of a window that was created via document.open API', async () => {
+    it('should fail to use atob of a window that was created via document.open API', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -109,7 +109,7 @@ describe('document.open API', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin', async () => {
+    it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -128,7 +128,7 @@ describe('document.open API', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin and leaked it via postMessage (onmessage)', async () => {
+    it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin and leaked it via postMessage (onmessage)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -148,7 +148,7 @@ describe('document.open API', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin and leaked it via postMessage (message)', async () => {
+    it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin and leaked it via postMessage (message)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -170,7 +170,7 @@ describe('document.open API', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of a window that was created via document.open API to javascript: scheme, leaked to opener and then changed to cross origin and back to same origin', async () => {
+    it('should fail to use atob of a window that was created via document.open API to javascript: scheme, leaked to opener and then changed to cross origin and back to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

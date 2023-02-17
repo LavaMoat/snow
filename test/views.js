@@ -1,9 +1,9 @@
 const setup = require('./index');
 
-describe('test different views', async () => {
+describe('test different views', async function () {
     beforeEach(setup);
 
-    it('should fail to use atob of an iframe', async () => {
+    it('should fail to use atob of an iframe', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -15,7 +15,7 @@ describe('test different views', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an frame', async () => {
+    it('should fail to use atob of an frame', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -27,7 +27,7 @@ describe('test different views', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an object', async () => {
+    it('should fail to use atob of an object', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -38,7 +38,7 @@ describe('test different views', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an embed', async () => {
+    it('should fail to use atob of an embed', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

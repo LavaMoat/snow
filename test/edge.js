@@ -3,7 +3,7 @@ const setup = require('./index');
 describe('special cases', () => {
     beforeEach(setup);
 
-    it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin', async () => {
+    it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -22,7 +22,7 @@ describe('special cases', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin (complex)', async () => {
+    it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin (complex)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -47,9 +47,12 @@ describe('special cases', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an embed that was cross origin and then same origin', async () => {
+    it('should fail to use atob of an embed that was cross origin and then same origin', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // redirecting EMBED by updating src does not work in safari
+            this.skip(); // redirecting EMBED by updating src does not work in safari
+        }
+        if (global.BROWSER === 'FIREFOX') {
+            this.skip(); // requires a fix #59
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -71,9 +74,12 @@ describe('special cases', () => {
         expect(result).toBe('V,V');
     });
 
-    it('should fail to use atob of an object that was cross origin and then same origin', async () => {
+    it('should fail to use atob of an object that was cross origin and then same origin', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // redirecting EMBED by updating src does not work in safari
+            this.skip(); // redirecting EMBED by updating src does not work in safari
+        }
+        if (global.BROWSER === 'FIREFOX') {
+            this.skip(); // requires a fix #59
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -95,7 +101,7 @@ describe('special cases', () => {
         expect(result).toBe('V,V');
     });
 
-    it('should fail to use atob of an iframe that was reattached to dom', async () => {
+    it('should fail to use atob of an iframe that was reattached to dom', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -113,7 +119,7 @@ describe('special cases', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe within an iframe within an iframe', async () => {
+    it('should fail to use atob of an iframe within an iframe within an iframe', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -137,9 +143,9 @@ describe('special cases', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that had its document written', async () => {
+    it('should fail to use atob of an iframe that had its document written', async function () {
         if (global.BROWSER === 'FIREFOX') {
-            return; // document.write API not working on Firefox automation
+            this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -153,9 +159,9 @@ describe('special cases', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that had its document written-ln', async () => {
+    it('should fail to use atob of an iframe that had its document written-ln', async function () {
         if (global.BROWSER === 'FIREFOX') {
-            return; // document.write API not working on Firefox automation
+            this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -169,7 +175,7 @@ describe('special cases', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe when all element in DOM changed their own toString behaviour', async () => {
+    it('should fail to use atob of an iframe when all element in DOM changed their own toString behaviour', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/9
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -188,7 +194,7 @@ describe('special cases', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe of javascript: URI created with srcdoc', async () => {
+    it('should fail to use atob of an iframe of javascript: URI created with srcdoc', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -201,7 +207,7 @@ describe('special cases', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe of javascript: URI created with srcdoc with innerHTML', async () => {
+    it('should fail to use atob of an iframe of javascript: URI created with srcdoc with innerHTML', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -212,9 +218,9 @@ describe('special cases', () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe of javascript: URI created with srcdoc with document.write', async () => {
+    it('should fail to use atob of an iframe of javascript: URI created with srcdoc with document.write', async function () {
         if (global.BROWSER === 'FIREFOX') {
-            return; // document.write API not working on Firefox automation
+            this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));

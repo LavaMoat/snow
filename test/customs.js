@@ -1,13 +1,13 @@
 const setup = require('./index');
 
-describe('test custom elements', async () => {
+describe('test custom elements', async function () {
     beforeEach(setup);
 
     // reference: https://github.com/LavaMoat/snow/issues/12
 
-    it('should fail to use atob of an iframe that is loaded via a custom element with connectedCallback', async () => {
+    it('should fail to use atob of an iframe that is loaded via a custom element with connectedCallback', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // extending iframes is not supported in safari
+            this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -35,9 +35,9 @@ describe('test custom elements', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loaded via a custom element with connectedCallback (with src)', async () => {
+    it('should fail to use atob of an iframe that is loaded via a custom element with connectedCallback (with src)', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // extending iframes is not supported in safari
+            this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -66,9 +66,9 @@ describe('test custom elements', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an frame that is loaded via a custom element with connectedCallback', async () => {
+    it('should fail to use atob of an frame that is loaded via a custom element with connectedCallback', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // extending iframes is not supported in safari
+            this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -97,9 +97,9 @@ describe('test custom elements', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an object that is loaded via a custom element with connectedCallback', async () => {
+    it('should fail to use atob of an object that is loaded via a custom element with connectedCallback', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // extending iframes is not supported in safari
+            this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -128,9 +128,9 @@ describe('test custom elements', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an embed that is loaded via a custom element with connectedCallback', async () => {
+    it('should fail to use atob of an embed that is loaded via a custom element with connectedCallback', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // extending iframes is not supported in safari
+            this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -159,9 +159,9 @@ describe('test custom elements', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loaded via a custom element with connectedCallback through html', async () => {
+    it('should fail to use atob of an iframe that is loaded via a custom element with connectedCallback through html', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // extending iframes is not supported in safari
+            this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -188,9 +188,9 @@ describe('test custom elements', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loaded via a custom element with attributeChangedCallback', async () => {
+    it('should fail to use atob of an iframe that is loaded via a custom element with attributeChangedCallback', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // extending iframes is not supported in safari
+            this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -223,9 +223,9 @@ describe('test custom elements', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loaded via a custom element with adoptedCallback', async () => {
+    it('should fail to use atob of an iframe that is loaded via a custom element with adoptedCallback', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // extending iframes is not supported in safari
+            this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -256,9 +256,9 @@ describe('test custom elements', async () => {
         expect(result).toBe('V');
     });
 
-    it('should fail to use atob of an iframe that is loaded via a custom element with adoptedCallback through html', async () => {
+    it('should fail to use atob of an iframe that is loaded via a custom element with adoptedCallback through html', async function () {
         if (global.BROWSER === 'SAFARI') {
-            return; // extending iframes is not supported in safari
+            this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));

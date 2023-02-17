@@ -2,12 +2,16 @@
 
 > **S**ecuring **N**ested **O**wnership of **W**indows
 
-`Snow` aspires to standardize how to recursively own newborn windows (aka iframes/realms) within a browser web app, 
-from the context of the app itself, and ideally to achieve that goal as a browser builtin API in the future.
+*`Snow` aspires to standardize how to recursively own newborn windows (aka iframes/realms) within a browser web app, 
+from the context of the app itself, and ideally to achieve that goal as a browser builtin API in the future*
 
-Until then, it comes in the form of a shim that once applied to the page exposes an API that when is 
+Until then, it comes in the form of a JavaScript shim that once applied to the page exposes an API that when is 
 provided with a callback, will make sure to call it with every new window that is being 
 injected to DOM, before its creator gets a hold on it.
+
+<div align="center">
+<img width="1000" alt="❄️SNOW❄️" src="https://user-images.githubusercontent.com/13243797/219565727-12f00654-a709-4a39-87fc-5a60f643b308.png">
+</div>
 
 This ability exists for extensions (with the `all_frames: true` property), but `Snow` brings it
 to non extension javascript with the same privileges as the web app.

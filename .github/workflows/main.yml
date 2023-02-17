@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install Dependencies
-        run: yarn --frozen-lockfile --ignore-scripts
+        run: yarn
       - name: Test Chrome
         run: yarn build-test-chrome
       - name: Test FireFox

@@ -6,6 +6,7 @@ const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
 const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
+const ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN = 7;
 
 function warn(msg, a, b) {
     let bail;
@@ -47,6 +48,15 @@ function warn(msg, a, b) {
 function error(msg, a, b) {
     let bail;
     switch (msg) {
+        case ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN:
+            const type = a, object = b;
+            bail = true;
+            console.error('SNOW:',
+                `calling "URL.createObjectURL()" on a "${type}" object is forbidden under snow protection:`, object, '.', '\n',
+                'if this prevents your application from running correctly, please visit/report at',
+                'https://github.com/LavaMoat/snow/issues/xxx#issuecomment-xxx', '.', '\n',
+            );
+            break;
         case ERR_EXTENDING_FRAMABLES_BLOCKED:
             const name = a, options = b;
             bail = true;
@@ -90,4 +100,5 @@ module.exports = {
     ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
     WARN_DECLARATIVE_SHADOWS,
     ERR_EXTENDING_FRAMABLES_BLOCKED,
+    ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN,
 };

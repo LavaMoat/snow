@@ -293,6 +293,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const hook = __webpack_require__(228);
+const hookCreateObjectURL = __webpack_require__(716);
 const hookCustoms = __webpack_require__(832);
 const hookOpen = __webpack_require__(583);
 const hookEventListenersSetters = __webpack_require__(459);
@@ -340,6 +341,7 @@ function onLoad(win) {
 }
 function applyHooks(win) {
   onLoad(win);
+  hookCreateObjectURL(win);
   hookCustoms(win);
   hookOpen(win);
   hookEventListenersSetters(win, 'load');
@@ -519,6 +521,7 @@ const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
 const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
+const ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN = 7;
 function warn(msg, a, b) {
   let bail;
   switch (msg) {
@@ -548,6 +551,12 @@ function warn(msg, a, b) {
 function error(msg, a, b) {
   let bail;
   switch (msg) {
+    case ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN:
+      const type = a,
+        object = b;
+      bail = true;
+      console.error('SNOW:', `calling "URL.createObjectURL()" on a "${type}" object is forbidden under snow protection:`, object, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/xxx#issuecomment-xxx', '.', '\n');
+      break;
     case ERR_EXTENDING_FRAMABLES_BLOCKED:
       const name = a,
         options = b;
@@ -578,7 +587,8 @@ module.exports = {
   WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
   ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
   WARN_DECLARATIVE_SHADOWS,
-  ERR_EXTENDING_FRAMABLES_BLOCKED
+  ERR_EXTENDING_FRAMABLES_BLOCKED,
+  ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN
 };
 
 /***/ }),
@@ -1017,6 +1027,50 @@ module.exports = {
   hookShadowDOM,
   protectShadows
 };
+
+/***/ }),
+
+/***/ 716:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const {
+  Object
+} = __webpack_require__(14);
+const {
+  error,
+  ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN
+} = __webpack_require__(312);
+const BLOB = 'Blob',
+  FILE = 'File';
+function hookObject(win, prop) {
+  const native = win[prop];
+  return function (a, b, c) {
+    const ret = new native(a, b, c);
+    Object.defineProperty(ret, prop, {
+      value: true
+    });
+    return ret;
+  };
+}
+function hook(win, native) {
+  return function (object) {
+    const type = object[BLOB] ? BLOB : object[FILE] ? FILE : null;
+    if (type) {
+      if (error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, type, object)) {
+        return;
+      }
+    }
+    return native(object);
+  };
+}
+function hookCreateObjectURL(win) {
+  Object.defineProperty(win.URL, 'createObjectURL', {
+    value: hook(win, win.URL.createObjectURL)
+  });
+  win[BLOB] = hookObject(win, BLOB);
+  win[FILE] = hookObject(win, FILE);
+}
+module.exports = hookCreateObjectURL;
 
 /***/ }),
 

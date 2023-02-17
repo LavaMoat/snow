@@ -1,4 +1,5 @@
 const hook = require('./hook');
+const hookCreateObjectURL = require('./url');
 const hookCustoms = require('./customs');
 const hookOpen = require('./open');
 const hookEventListenersSetters = require('./listeners');
@@ -35,6 +36,7 @@ function onLoad(win) {
 
 function applyHooks(win) {
     onLoad(win);
+    hookCreateObjectURL(win);
     hookCustoms(win);
     hookOpen(win);
     hookEventListenersSetters(win, 'load');

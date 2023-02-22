@@ -12,7 +12,7 @@ const {error, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = r
 function setTopUtil(prop, val) {
     const desc = Object.create(null);
     desc.value = val;
-    Object.defineProperty(top, prop, desc);
+    Object.defineProperty(window, prop, desc);
 }
 
 function shouldRun(win) {
@@ -70,5 +70,5 @@ module.exports = function snow(cb, win) {
         callback = cb;
     }
 
-    onWin(win || top);
+    onWin(win || window);
 }

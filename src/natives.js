@@ -277,4 +277,4 @@ function setup(win) {
     }
 }
 
-module.exports = setup(top);
+module.exports = setup(window);

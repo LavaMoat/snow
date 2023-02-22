@@ -73,7 +73,7 @@ function hook(win, native) {
             return null;
         }
 
-        top['SNOW_WINDOW'](opened);
+        win['SNOW_WINDOW'](opened);
         const p = proxy(win, opened);
         openeds.set(opened, p);
         return p;

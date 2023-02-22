@@ -173,7 +173,7 @@ function hook(frames) {
       continue;
     }
     workaroundChromiumBug(frame);
-    const contentWindow = findWin(top, frame);
+    const contentWindow = findWin(window, frame);
     if (!contentWindow) {
       continue;
     }
@@ -318,7 +318,7 @@ const {
 function setTopUtil(prop, val) {
   const desc = Object.create(null);
   desc.value = val;
-  Object.defineProperty(top, prop, desc);
+  Object.defineProperty(window, prop, desc);
 }
 function shouldRun(win) {
   try {
@@ -371,7 +371,7 @@ module.exports = function snow(cb, win) {
     });
     callback = cb;
   }
-  onWin(win || top);
+  onWin(win || window);
 };
 
 /***/ }),
@@ -883,7 +883,7 @@ function setup(win) {
     return bag.getDefaultView.call(document);
   }
 }
-module.exports = setup(top);
+module.exports = setup(window);
 
 /***/ }),
 
@@ -971,7 +971,7 @@ function hook(win, native) {
     if (!opened) {
       return null;
     }
-    top['SNOW_WINDOW'](opened);
+    win['SNOW_WINDOW'](opened);
     const p = proxy(win, opened);
     openeds.set(opened, p);
     return p;

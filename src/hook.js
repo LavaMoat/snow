@@ -47,7 +47,7 @@ function hook(frames) {
             continue;
         }
         workaroundChromiumBug(frame);
-        const contentWindow = findWin(top, frame);
+        const contentWindow = findWin(window, frame);
         if (!contentWindow) {
             continue;
         }

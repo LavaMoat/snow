@@ -12,7 +12,7 @@
     <br/><br/>
 </div>
 
-Snow is the **most advanced** open sourced tool for securing same origin realms in runtime in the browser - super **secure**, super **easy to use**:
+> _Snow is the **most advanced** open sourced tool for securing same origin realms in runtime browser apps - **secured** and **easy to use**:_
 
 * Include Snow in your web app's loading html file (or by [requiring it as a module](#Install)):
 ```html

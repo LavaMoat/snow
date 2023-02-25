@@ -3,8 +3,69 @@
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❄️</text></svg>">
         <title> Snow </title>
         <script src="../snow.js"></script>
+        <style>
+            .msg {
+                opacity:1;
+                padding: 30px;
+                background-color:#fcd8db;
+                border: 10px #fb636f solid;
+                position:fixed;
+                width:50%;
+                height:50%;
+                top:25%;
+                left:25%;
+                z-index:1000;
+            }
+            li {
+                padding:3px 10px;
+            }
+        </style>
     </head>
     <body style="background-color: #eef3f5;">
+        <div id="msg" class="msg">
+            <a href="javascript:msg.remove()">X</a>
+            <div align="center" >
+                <h3>The Ultimate (self) XSS Challenge 😈</h3>
+                <i style="font-size: 24px">~ Can you pop an alert in this page?</i>
+                <p style="border: black solid; width: 40%; padding: 5px">
+                    Not your typical XSS challenge this time!
+                </p>
+            </div>
+            <div>
+                <ul>
+                    <u>Unlike your typical XSS challenges, this time the rules are a bit different:</u>
+                    <br><br>
+                    <li>
+                        Your mission is to pop an alert message by using the native <code>alert</code> API.
+                    </li>
+                    <li>
+                        You are welcome (even expected) to use <b>self XSS</b> for the task!
+                        <ul>
+                            <li>
+                                That's right! Open the console and <b>run any code you want!</b>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        The call for <code>alert</code> API must be applied to the origin of this app!
+                    </li>
+                </ul>
+            </div>
+            <div align="center" >
+                <p style="border: black solid; width: 40%; padding: 5px">
+                    Did you win? Prove it! Open an <a href="https://github.com/lavamoat/snow/issues/new?title=I+Bypassed+Snow!+-+Here%27s+how:">issue</a>
+                </p>
+            </div>
+            <div>
+                <h3>Hall of Fame</h3>
+                <p>1. </p>
+                <p>2. </p>
+                <p>3. </p>
+            </div>
+        </div>
+        <script>
+            !location.href.includes('self-xss-challenge-msg') && (msg.style.display = 'none');
+        </script>
         <div>
             <div id="testdiv">
                 <div id="testdiv1"></div>

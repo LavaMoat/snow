@@ -2,6 +2,11 @@
 
 > **S**ecuring **N**ested **O**wnership of **W**indows
 
+<img src="https://img.shields.io/bundlephobia/min/@lavamoat/snow"/>
+<img src="https://img.shields.io/npm/dw/@lavamoat/snow"/>
+<img src="https://img.shields.io/github/license/lavamoat/snow"/>
+<img src="https://img.shields.io/npm/v/@lavamoat/snow"/>
+
 *`Snow` aspires to standardize how to recursively own newborn windows (aka iframes/realms) within a browser web app, 
 from the context of the app itself, and ideally to achieve that goal as a browser builtin API in the future*
 

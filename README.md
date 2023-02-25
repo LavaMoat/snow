@@ -1,12 +1,30 @@
 <div align="center">
-<h1> Snow ❄️ </h1>
+    <h1> Snow JS ❄️ </h1>
     <i> ~ <b>S</b>ecuring <b>N</b>ested <b>O</b>wnership of <b>W</b>indows ~ </i>
-<br><br>
-<img src="https://img.shields.io/bundlephobia/min/@lavamoat/snow"/>
-<img src="https://img.shields.io/npm/dw/@lavamoat/snow"/>
-<img src="https://img.shields.io/github/license/lavamoat/snow"/>
-<img src="https://img.shields.io/npm/v/@lavamoat/snow"/>
+    <br><br>
+    <img src="https://img.shields.io/npm/v/@lavamoat/snow"/>
+    <img src="https://img.shields.io/bundlephobia/min/@lavamoat/snow"/>
+    <img src="https://badges.frapsoft.com/javascript/code/javascript.svg?v=101" width="113">
+    <img src="https://img.shields.io/npm/dw/@lavamoat/snow"/>
+    <img src="https://img.shields.io/github/license/lavamoat/snow"/>
+    <br><br>
 </div>
+
+Snow is the **most advanced** open sourced tool for securing same origin realms in the browser - super **secure**, super **easy to use**:
+
+* Include Snow in your web app's loading html file
+```html
+<script src="https://unpkg.com/@lavamoat/snow/snow.prod.js"></script>
+```
+* Pass Snow a callback and Snow will invoke it with **every** new window object in runtime!
+```javascript
+SNOW( win => console.log('New window detected:', win) )
+```
+
+<div align="center">
+<img width="1000" alt="❄️SNOW❄️" src="https://user-images.githubusercontent.com/13243797/219565727-12f00654-a709-4a39-87fc-5a60f643b308.png">
+</div>
+
 
 *`Snow` aspires to standardize how to recursively own newborn windows (aka iframes/realms) within a browser web app, 
 from the context of the app itself, and ideally to achieve that goal as a browser builtin API in the future*
@@ -14,10 +32,6 @@ from the context of the app itself, and ideally to achieve that goal as a browse
 Until then, it comes in the form of a JavaScript shim that once applied to the page exposes an API that when is 
 provided with a callback, will make sure to call it with every new window that is being 
 injected to DOM, before its creator gets a hold on it.
-
-<div align="center">
-<img width="1000" alt="❄️SNOW❄️" src="https://user-images.githubusercontent.com/13243797/219565727-12f00654-a709-4a39-87fc-5a60f643b308.png">
-</div>
 
 This ability exists for extensions (with the `all_frames: true` property), but `Snow` brings it
 to non extension javascript with the same privileges as the web app.

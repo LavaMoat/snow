@@ -1,30 +1,75 @@
-# Snow ❄️
+<div align="center">
+    <h1> Snow JS ❄️ </h1>
+    <i> ~ <b>S</b>ecuring <b>N</b>ested <b>O</b>wnership of <b>W</b>indows ~ </i>
+    <br/><br/>
+    <img src="https://img.shields.io/npm/v/@lavamoat/snow"/>
+    <img src="https://img.shields.io/bundlephobia/min/@lavamoat/snow"/>
+    <img src="https://badges.frapsoft.com/javascript/code/javascript.svg?v=101" width="113">
+    <img src="https://img.shields.io/npm/dw/@lavamoat/snow"/>
+    <img src="https://img.shields.io/github/license/lavamoat/snow"/>
+    <br/><br/>
+    <i> / Keeping an 👀 on these <code><iframe></code>s for ya! / </i>
+    <br/><br/>
+</div>
 
-> **S**ecuring **N**ested **O**wnership of **W**indows
+> _Snow is the **most advanced** open sourced tool for securing same origin realms in runtime browser apps - **secured** and **easy to use**:_
 
-`Snow` aspires to standardize how to recursively own newborn windows (aka iframes/realms) within a browser web app, 
-from the context of the app itself, and ideally to achieve that goal as a browser builtin API in the future.
+* Include Snow in your web app's loading html file (or by [requiring it as a module](#Install)):
+```html
+<script src="https://unpkg.com/@lavamoat/snow/snow.prod.js"></script>
+```
+* Pass Snow a callback and Snow will invoke it with **every** new window object in runtime!
+```javascript
+SNOW( win => console.log('New window detected:', win) )
+```
 
-Until then, it comes in the form of a shim that once applied to the page exposes an API that when is 
-provided with a callback, will make sure to call it with every new window that is being 
-injected to DOM, before its creator gets a hold on it.
+<div align="center">
+<img width="750" alt="❄️SNOW❄️" src="https://user-images.githubusercontent.com/13243797/219565727-12f00654-a709-4a39-87fc-5a60f643b308.png">
+<br><br>
+<i> Snow aspires to standardize how to recursively and <b> securely own newborn windows </b> (aka iframes/realms) <br> within a browser web app, 
+<b> from the context of the app itself </b>. </i>
+</div>
+
+## About
+
+Snow is an experimental ⚠️ tool coming in the form of a **JavaScript shim** that once is applied to the page exposes an API that when is 
+provided with a callback, will make sure to call it with **every new window** that is being 
+injected to DOM, **before** its creator gets a hold on it.
 
 This ability exists for extensions (with the `all_frames: true` property), but `Snow` brings it
-to non extension javascript with the same privileges as the web app.
+to **non extension javascript with the same privileges as the web app**.
+    
+> _Read more about Snow and the motivation behind it [here](https://github.com/lavamoat/snow/wiki/Introducing-Snow)_
 
-* [Test](https://lavamoat.github.io/snow/demo/) `Snow` for yourself with this live demo!
-* [Learn](https://github.com/lavamoat/snow/wiki/Introducing-Snow) more about the motivation behind `Snow` and why it should be a browser builtin API
-* `Snow` is still experimental ⚠️ - your [help](#contribute) is highly appreciated!
+## [Demo](https://lavamoat.github.io/snow/demo/#self-xss-challenge-msg) - The Snow Challenge! 🏆
 
+<div align="center">
+<img width="759" alt="Screenshot 2023-02-25 at 19 54 33" src="https://user-images.githubusercontent.com/13243797/221372185-eaeea815-b693-43bf-a371-6375ce8e0e8b.png">
+</div>
+<br>
+
+Snow's challenge is the easiest way to **graspe the power of Snow.** 
+
+Here we have a serverless [demo app](https://lavamoat.github.io/snow/demo/#self-xss-challenge-msg), which installs and **uses Snow to disable the functionality of the `alert` function** for all same origin realms.
+    
+In other words, the app uses Snow to make sure **no one can call the `alert` function**, not even when:
+* Trying to create an `<iframe>` and use its inner window's `alert`;
+* Trying to call the `alert` function from the console (even self-XSS won't help you!);
+* Trying to open a new tab and use its `alert`.
+    
+Hence, the rulls are very simple - **visit the [app](https://lavamoat.github.io/snow/demo/) and pop an alert! 😉**
+    
+If you manage to bypass Snow and pop an alert message - **help us** by opening an issue so we could continue to **improve Snow's security**!
+    
 ## Usage
 
 ```javascript
 // API
-window.SNOW(cb = (win) => {}, win = window);
+SNOW(cb = (win) => { /* LOGIC */ });
 
 
 // example, disable alert API in the webpage completely
-window.SNOW((win) => {
+SNOW((win) => {
     win.alert = (msg) => {
         console.log('alert is disabled! msg is: ' + msg);
     };
@@ -129,5 +174,7 @@ If you encounter an issue that is not being handled by snow correctly, please op
 Funded by [Consensys 💙](https://github.com/consensys)
 
 Maintained and developed by [MetaMask 🦊](https://github.com/MetaMask)
+    
+Part of the [LavaMoat 🌋](https://github.com/LavaMoat) Javascript security toolbox
 
 Invented and developed by [Gal Weizman 👋🏻](https://weizman.github.io/)

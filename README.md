@@ -25,11 +25,10 @@ SNOW( win => console.log('New window detected:', win) )
 
 <div align="center">
 <img width="750" alt="❄️SNOW❄️" src="https://user-images.githubusercontent.com/13243797/219565727-12f00654-a709-4a39-87fc-5a60f643b308.png">
-</div>
 <br><br>
-    
-> *`Snow` aspires to standardize how to recursively and **securely own newborn windows** (aka iframes/realms) within a browser web app, 
-**from the context of the app itself**.*
+<i> Snow aspires to standardize how to recursively and <b> securely own newborn windows </b> (aka iframes/realms) <br> within a browser web app, 
+<b> from the context of the app itself </b>. </i>
+</div>
 
 ## About
 
@@ -46,7 +45,7 @@ to **non extension javascript with the same privileges as the web app**.
 
 ```javascript
 // API
-SNOW(cb = (win) => {}, win = window);
+SNOW(cb = (win) => { /* LOGIC */ });
 
 
 // example, disable alert API in the webpage completely
@@ -155,5 +154,7 @@ If you encounter an issue that is not being handled by snow correctly, please op
 Funded by [Consensys 💙](https://github.com/consensys)
 
 Maintained and developed by [MetaMask 🦊](https://github.com/MetaMask)
+    
+Part of the [LavaMoat 🌋](https://github.com/LavaMoat) Javascript security toolbox
 
 Invented and developed by [Gal Weizman 👋🏻](https://weizman.github.io/)

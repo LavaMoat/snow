@@ -14,7 +14,7 @@
 
 Snow is the **most advanced** open sourced tool for securing same origin realms in runtime in the browser - super **secure**, super **easy to use**:
 
-* Include Snow in your web app's loading html file (or by [requiring it as a module](.#Install)):
+* Include Snow in your web app's loading html file (or by [requiring it as a module](#Install)):
 ```html
 <script src="https://unpkg.com/@lavamoat/snow/snow.prod.js"></script>
 ```

@@ -41,7 +41,7 @@ to **non extension javascript with the same privileges as the web app**.
     
 > _Read more about Snow and the motivation behind it [here](https://github.com/lavamoat/snow/wiki/Introducing-Snow)_
 
-## [Demo](https://lavamoat.github.io/snow/demo/) - The Snow Challenge! 🏆
+## [Demo](https://lavamoat.github.io/snow/demo/#self-xss-challenge-msg) - The Snow Challenge! 🏆
 
 <div align="center">
 <img width="759" alt="Screenshot 2023-02-25 at 19 54 33" src="https://user-images.githubusercontent.com/13243797/221372185-eaeea815-b693-43bf-a371-6375ce8e0e8b.png">
@@ -50,7 +50,7 @@ to **non extension javascript with the same privileges as the web app**.
 
 Snow's challenge is the easiest way to **graspe the power of Snow.** 
 
-Here we have a serverless [demo app](https://lavamoat.github.io/snow/demo/), which installs and **uses Snow to disable the functionality of the `alert` function** for all same origin realms.
+Here we have a serverless [demo app](https://lavamoat.github.io/snow/demo/#self-xss-challenge-msg), which installs and **uses Snow to disable the functionality of the `alert` function** for all same origin realms.
     
 In other words, the app uses Snow to make sure **no one can call the `alert` function**, not even when:
 * Trying to create an `<iframe>` and use its inner window's `alert`;

@@ -12,7 +12,7 @@
 
 Snow is the **most advanced** open sourced tool for securing same origin realms in the browser - super **secure**, super **easy to use**:
 
-* Include Snow in your web app's loading html file
+* Include Snow in your web app's loading html file:
 ```html
 <script src="https://unpkg.com/@lavamoat/snow/snow.prod.js"></script>
 ```
@@ -22,12 +22,13 @@ SNOW( win => console.log('New window detected:', win) )
 ```
 
 <div align="center">
-<img width="1000" alt="❄️SNOW❄️" src="https://user-images.githubusercontent.com/13243797/219565727-12f00654-a709-4a39-87fc-5a60f643b308.png">
+<img width="750" alt="❄️SNOW❄️" src="https://user-images.githubusercontent.com/13243797/219565727-12f00654-a709-4a39-87fc-5a60f643b308.png">
 </div>
 
+## About
 
 *`Snow` aspires to standardize how to recursively own newborn windows (aka iframes/realms) within a browser web app, 
-from the context of the app itself, and ideally to achieve that goal as a browser builtin API in the future*
+from the context of the app itself*
 
 Until then, it comes in the form of a JavaScript shim that once applied to the page exposes an API that when is 
 provided with a callback, will make sure to call it with every new window that is being 

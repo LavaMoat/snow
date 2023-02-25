@@ -1,11 +1,12 @@
-# Snow ❄️ 
-
-> **S**ecuring **N**ested **O**wnership of **W**indows
-
+<div align="center">
+<h1> Snow ❄️ </h1>
+    <i> ~ <b>S</b>ecuring <b>N</b>ested <b>O</b>wnership of <b>W</b>indows ~ </i>
+<br><br>
 <img src="https://img.shields.io/bundlephobia/min/@lavamoat/snow"/>
 <img src="https://img.shields.io/npm/dw/@lavamoat/snow"/>
 <img src="https://img.shields.io/github/license/lavamoat/snow"/>
 <img src="https://img.shields.io/npm/v/@lavamoat/snow"/>
+</div>
 
 *`Snow` aspires to standardize how to recursively own newborn windows (aka iframes/realms) within a browser web app, 
 from the context of the app itself, and ideally to achieve that goal as a browser builtin API in the future*

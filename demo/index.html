@@ -30,7 +30,7 @@
     </head>
     <body style="background-color: #eef3f5;">
         <div id="msg" class="msg">
-            <a style="font-size: 30px; color: black; text-decoration: none;" href="javascript:msg.remove()">X</a>
+            <a style="font-size: 30px; color: black; text-decoration: none;" href="javascript:msg.remove()">X X X</a>
             <div align="center" >
                 <h3>The Ultimate (Self) XSS Challenge 😈</h3>
                 <i style="font-size: 24px">~ Can you pop an <a href="javascript:alert(123)">alert</a> in this page?</i>
@@ -40,11 +40,11 @@
             </div>
             <div>
                 <ul>
-                    <u>Unlike those typical XSS challenges, this time the rules are a bit different:</u>
-                    <br><br>
+                    <br>
                     <li>
-                        Your mission is to pop an alert message by using the native <code>alert</code> API.
+                        <b>THE GAME IS SIMPLE - SUCCESSFULLY POP AN <CODE>alert</CODE> IN THIS PAGE - THAT'S YOUR ONLY JOB!</b>
                     </li>
+                    <br>
                     <li>
                         You are welcome (even expected) to use <b>self XSS</b> for the task!
                         <ul>
@@ -70,11 +70,11 @@
                         </li>
                         <li>
                             <a title="run" href="javascript:eval(selfXSS1.textContent)">▶️</a>
-                            <code id="selfXSS1">document.body.appendChild(document.createElement('iframe')).contentWindow.alert.call(top, 'did it work?!')</code>
+                            <code id="selfXSS1">document.body.appendChild( document.createElement('iframe') ).contentWindow.alert.call( top, 'did it work?!' );</code>
                         </li>
                         <li>
                             <a title="run" href="javascript:eval(selfXSS2.textContent)">▶️</a>
-                            <code id="selfXSS2">var i = document.createElement('iframe'); i.onload = () => i.contentWindow.alert.call(top, 'did it work?!'); document.body.append(i);</code>
+                            <code id="selfXSS2">var i = document.createElement('iframe'); i.onload = () => i.contentWindow.alert.call( top, 'did it work?!' ); document.body.append(i);</code>
                         </li>
                         <li>
                             Those ☝️ aren't going to work 😈 Good Luck! 🍀
@@ -85,10 +85,14 @@
             <div align="center" >
                 <p style="border: black solid; width: 40%; padding: 5px">
                     Did you win? 🏆 Prove it! Open an <a href="https://github.com/lavamoat/snow/issues/new?title=I+Bypassed+Snow!+-+Here%27s+how:">issue</a>
+                    <br>
+                    This challenge runs on <a href="https://github.com/lavamoat/snow">Snow ❄️</a>
+                    <br>
+                    ⭐ it if you like it!
                 </p>
             </div>
             <div id="hof">
-                <h3>Hall of Fame</h3>
+                <h4>Hall of Fame</h4>
                 <span>1. </span>
                 <span>2. </span>
                 <span>3. </span>

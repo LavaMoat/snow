@@ -5,7 +5,7 @@ const hookOpen = require('./open');
 const hookEventListenersSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
-const {Object, addEventListener, getFrameElement} = require('./natives');
+const {Object, Array, addEventListener, getFrameElement} = require('./natives');
 const {isMarked, mark} = require('./mark');
 const {error, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
@@ -15,7 +15,7 @@ function setTopUtil(prop, val) {
     Object.defineProperty(top, prop, desc);
 }
 
-function shouldRun(win) {
+function shouldHook(win) {
     try {
         const run = !isMarked(win);
         if (run) {
@@ -25,7 +25,7 @@ function shouldRun(win) {
     } catch (err) {
         error(ERR_MARK_NEW_WINDOW_FAILED, win, err);
     }
-    return shouldRun(win);
+    return shouldHook(win);
 }
 
 function onLoad(win) {
@@ -44,31 +44,35 @@ function applyHooks(win) {
     hookShadowDOM(win);
 }
 
-function onWin(win) {
-    if (shouldRun(win)) {
+function onWin(win, run) {
+    const hook = shouldHook(win);
+    if (hook) {
         applyHooks(win);
-        callback(win);
+    }
+    if (hook || run) {
+        for (let i = 0; i < callbacks.length; i++) {
+            callbacks[i](win);
+        }
     }
 }
 
-let callback;
+const callbacks = new Array();
 
 module.exports = function snow(cb, win) {
-    if (!callback) {
-        if (typeof cb !== 'function') {
-            const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
-            if (bail) {
-                return;
-            }
+    if (typeof cb !== 'function') {
+        const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
+        if (bail) {
+            return;
         }
+    }
+    if (!callbacks.length) {
         setTopUtil('SNOW_WINDOW', function(win) {
             onWin(win);
         });
         setTopUtil('SNOW_FRAME', function(frame) {
             hook(frame);
         });
-        callback = cb;
     }
-
-    onWin(win || top);
+    callbacks.push(cb);
+    onWin(win || top, true);
 }

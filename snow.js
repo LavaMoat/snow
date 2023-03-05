@@ -303,6 +303,8 @@ const {
 } = __webpack_require__(373);
 const {
   Object,
+  Array,
+  push,
   addEventListener,
   getFrameElement
 } = __webpack_require__(14);
@@ -320,7 +322,7 @@ function setTopUtil(prop, val) {
   desc.value = val;
   Object.defineProperty(top, prop, desc);
 }
-function shouldRun(win) {
+function shouldHook(win) {
   try {
     const run = !isMarked(win);
     if (run) {
@@ -330,7 +332,7 @@ function shouldRun(win) {
   } catch (err) {
     error(ERR_MARK_NEW_WINDOW_FAILED, win, err);
   }
-  return shouldRun(win);
+  return shouldHook(win);
 }
 function onLoad(win) {
   const frame = getFrameElement(win);
@@ -348,30 +350,39 @@ function applyHooks(win) {
   hookDOMInserters(win);
   hookShadowDOM(win);
 }
-function onWin(win) {
-  if (shouldRun(win)) {
+function onWin(win, cb) {
+  const hook = shouldHook(win);
+  if (hook) {
     applyHooks(win);
-    callback(win);
-  }
-}
-let callback;
-module.exports = function snow(cb, win) {
-  if (!callback) {
-    if (typeof cb !== 'function') {
-      const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
-      if (bail) {
+    for (let i = 0; i < callbacks.length; i++) {
+      const stop = callbacks[i](win);
+      if (stop) {
         return;
       }
     }
+  }
+  if (cb) {
+    cb(win);
+  }
+}
+const callbacks = new Array();
+module.exports = function snow(cb) {
+  if (typeof cb !== 'function') {
+    const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
+    if (bail) {
+      return;
+    }
+  }
+  if (!callbacks.length) {
     setTopUtil('SNOW_WINDOW', function (win) {
       onWin(win);
     });
     setTopUtil('SNOW_FRAME', function (frame) {
       hook(frame);
     });
-    callback = cb;
   }
-  onWin(win || top);
+  push(callbacks, cb);
+  onWin(top, cb);
 };
 
 /***/ }),
@@ -728,6 +739,7 @@ function setup(win) {
     objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElement.prototype, 'contentWindow').get,
     createElement: Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value,
     slice: Object.getOwnPropertyDescriptor(Array.prototype, 'slice').value,
+    push: Object.getOwnPropertyDescriptor(Array.prototype, 'push').value,
     split: Object.getOwnPropertyDescriptor(String.prototype, 'split').value,
     nodeType: Object.getOwnPropertyDescriptor(Node.prototype, 'nodeType').get,
     tagName: Object.getOwnPropertyDescriptor(Element.prototype, 'tagName').get,
@@ -768,6 +780,7 @@ function setup(win) {
     parse,
     stringify,
     slice,
+    push,
     split,
     nodeType,
     tagName,
@@ -818,6 +831,9 @@ function setup(win) {
   }
   function slice(arr, start, end) {
     return bag.slice.call(arr, start, end);
+  }
+  function push(arr, item) {
+    return bag.push.call(arr, item);
   }
   function split(string, delimiter) {
     return bag.split.call(string, delimiter);

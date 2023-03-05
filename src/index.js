@@ -62,7 +62,7 @@ function onWin(win, cb) {
 
 const callbacks = new Array();
 
-module.exports = function snow(cb, win) {
+module.exports = function snow(cb) {
     if (typeof cb !== 'function') {
         const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
         if (bail) {
@@ -78,5 +78,5 @@ module.exports = function snow(cb, win) {
         });
     }
     push(callbacks, cb);
-    onWin(win || top, cb);
+    onWin(top, cb);
 }

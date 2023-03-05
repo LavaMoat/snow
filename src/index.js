@@ -51,7 +51,9 @@ function onWin(win, run) {
     }
     if (hook || run) {
         for (let i = 0; i < callbacks.length; i++) {
-            callbacks[i](win);
+            if (callbacks[i](win)) {
+                return;
+            }
         }
     }
 }

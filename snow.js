@@ -304,6 +304,7 @@ const {
 const {
   Object,
   Array,
+  push,
   addEventListener,
   getFrameElement
 } = __webpack_require__(14);
@@ -354,7 +355,8 @@ function onWin(win, cb) {
   if (hook) {
     applyHooks(win);
     for (let i = 0; i < callbacks.length; i++) {
-      if (callbacks[i](win)) {
+      const stop = callbacks[i](win);
+      if (stop) {
         return;
       }
     }
@@ -379,7 +381,7 @@ module.exports = function snow(cb, win) {
       hook(frame);
     });
   }
-  callbacks.push(cb);
+  push(callbacks, cb);
   onWin(win || top, cb);
 };
 
@@ -737,6 +739,7 @@ function setup(win) {
     objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElement.prototype, 'contentWindow').get,
     createElement: Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value,
     slice: Object.getOwnPropertyDescriptor(Array.prototype, 'slice').value,
+    push: Object.getOwnPropertyDescriptor(Array.prototype, 'push').value,
     split: Object.getOwnPropertyDescriptor(String.prototype, 'split').value,
     nodeType: Object.getOwnPropertyDescriptor(Node.prototype, 'nodeType').get,
     tagName: Object.getOwnPropertyDescriptor(Element.prototype, 'tagName').get,
@@ -777,6 +780,7 @@ function setup(win) {
     parse,
     stringify,
     slice,
+    push,
     split,
     nodeType,
     tagName,
@@ -827,6 +831,9 @@ function setup(win) {
   }
   function slice(arr, start, end) {
     return bag.slice.call(arr, start, end);
+  }
+  function push(arr, item) {
+    return bag.push.call(arr, item);
   }
   function split(string, delimiter) {
     return bag.split.call(string, delimiter);

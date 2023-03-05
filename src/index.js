@@ -5,7 +5,7 @@ const hookOpen = require('./open');
 const hookEventListenersSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
-const {Object, Array, addEventListener, getFrameElement} = require('./natives');
+const {Object, Array, push, addEventListener, getFrameElement} = require('./natives');
 const {isMarked, mark} = require('./mark');
 const {error, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
@@ -49,7 +49,8 @@ function onWin(win, cb) {
     if (hook) {
         applyHooks(win);
         for (let i = 0; i < callbacks.length; i++) {
-            if (callbacks[i](win)) {
+            const stop = callbacks[i](win);
+            if (stop) {
                 return;
             }
         }
@@ -76,6 +77,6 @@ module.exports = function snow(cb, win) {
             hook(frame);
         });
     }
-    callbacks.push(cb);
+    push(callbacks, cb);
     onWin(win || top, cb);
 }

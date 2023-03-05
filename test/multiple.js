@@ -6,31 +6,16 @@ describe('test multiple callbacks provided', async function () {
     it('should succeed to digest multiple callbacks and respect the one that commands to stop', async function () {
         const result = await browser.executeAsync(function(done) {
             (function(){
-                let count = 0, flag1 = [], flag2 = [], flag3 = [], flag4 = [], flag5 = [];
-                SNOW(() => {
-                    flag1.push(++count);
-                    return false;
-                });
-                SNOW(() => {
-                    flag2.push(++count);
-                    return false;
-                });
-                SNOW(() => {
-                    flag3.push(++count);
-                    return true;  // stop
-                });
-                SNOW(() => {
-                    flag4.push(++count);
-                    return true;
-                });
+                let count = 0, a = [], b = [], c = [], d = [], e = [];
+                SNOW(() => a.push(++count) && 0);
+                SNOW(() => b.push(++count) && 0);
+                SNOW(() => c.push(++count) && 1); // stop
+                SNOW(() => d.push(++count) && 1);
                 document.body.appendChild(document.createElement('iframe'));
                 document.body.appendChild(document.createElement('iframe'));
-                SNOW(() => {
-                    flag5.push(++count);
-                    return true;
-                });
+                SNOW(() => e.push(++count) && 1);
                 document.body.appendChild(document.createElement('iframe'));
-                done([flag1, flag2, flag3, flag4, flag5]);
+                done([a, b, c, d, e]);
             }());
         });
         expect(JSON.stringify(result)).toBe('[[1,5,8,12],[2,6,9,13],[3,7,10,14],[4],[11]]');

@@ -44,17 +44,18 @@ function applyHooks(win) {
     hookShadowDOM(win);
 }
 
-function onWin(win, run) {
+function onWin(win, cb) {
     const hook = shouldHook(win);
     if (hook) {
         applyHooks(win);
-    }
-    if (hook || run) {
         for (let i = 0; i < callbacks.length; i++) {
             if (callbacks[i](win)) {
                 return;
             }
         }
+    }
+    if (cb) {
+        cb(win);
     }
 }
 
@@ -76,5 +77,5 @@ module.exports = function snow(cb, win) {
         });
     }
     callbacks.push(cb);
-    onWin(win || top, true);
+    onWin(win || top, cb);
 }

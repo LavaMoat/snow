@@ -6,29 +6,33 @@ describe('test multiple callbacks provided', async function () {
     it('should succeed to digest multiple callbacks and respect the one that commands to stop', async function () {
         const result = await browser.executeAsync(function(done) {
             (function(){
-                let flag1, flag2, flag3, flag4;
+                let count = 0, flag1 = [], flag2 = [], flag3 = [], flag4 = [], flag5 = [];
                 SNOW(() => {
-                    // called
-                    flag1 = true;
+                    flag1.push(++count);
                     return false;
                 });
                 SNOW(() => {
-                    // called
-                    flag2 = true;
+                    flag2.push(++count);
                     return false;
                 });
                 SNOW(() => {
-                    // called
-                    flag3 = true;
+                    flag3.push(++count);
                     return true;  // stop
                 });
                 SNOW(() => {
-                    // not called
-                    flag4 = true;
+                    flag4.push(++count);
+                    return true;
                 });
-                done([flag1, flag2, flag3, flag4]);
+                document.body.appendChild(document.createElement('iframe'));
+                document.body.appendChild(document.createElement('iframe'));
+                SNOW(() => {
+                    flag5.push(++count);
+                    return true;
+                });
+                document.body.appendChild(document.createElement('iframe'));
+                done([flag1, flag2, flag3, flag4, flag5]);
             }());
         });
-        expect(JSON.stringify(result)).toBe('[true,true,true,null]');
+        expect(JSON.stringify(result)).toBe('[[1,5,8,12],[2,6,9,13],[3,7,10,14],[4],[11]]');
     });
 });

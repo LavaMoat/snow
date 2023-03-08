@@ -44,6 +44,7 @@ function hookDOMInserters(win) {
         for (let i = 0; i < funcs.length; i++) {
             const func = funcs[i];
             const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
+            if (!desc) continue;
             const prop = desc.set ? 'set' : 'value';
             desc[prop] = getHook(desc[prop], func === 'srcdoc');
             desc.configurable = true;

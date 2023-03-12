@@ -1,8 +1,8 @@
 const {getFramesArray} = require('./utils');
-const {Array, stringToLowerCase, split, getAttribute, setAttribute, getTemplateContent, getChildElementCount, createElement, getInnerHTML, setInnerHTML, remove, DocumentFragment} = require('./natives');
+const {Array, stringToLowerCase, split, getAttribute, setAttribute, getChildElementCount, createElement, getInnerHTML, setInnerHTML, remove, Element} = require('./natives');
 const {warn, WARN_DECLARATIVE_SHADOWS} = require('./log');
 
-const querySelectorAll = DocumentFragment.prototype.querySelectorAll;
+const querySelectorAll = Element.prototype.querySelectorAll;
 
 function makeStringHook(asFrame, asHtml) {
     let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(this);';
@@ -53,25 +53,24 @@ function hookSrcDoc(frame) {
 
 function handleHTML(args, callHook) {
     for (let i = 0; i < args.length; i++) {
-        const template = createElement(document, 'template');
+        const template = createElement(document, 'html');
         setInnerHTML(template, args[i]);
-        const content = getTemplateContent(template);
-        if (!getChildElementCount(content)) {
+        if (!getChildElementCount(template)) {
             continue;
         }
         let modified = false;
         if (callHook) {
             const script = createElement(document, 'script');
             script.textContent = makeStringHook(false, false);
-            content.insertBefore(script, content.firstChild);
+            template.insertBefore(script, template.firstChild);
             modified = true;
         }
-        const declarativeShadows = querySelectorAll.call(content, 'template[shadowroot]');
+        const declarativeShadows = querySelectorAll.call(template, 'template[shadowroot]');
         for (let j = 0; j < declarativeShadows.length; j++) {
             const shadow = declarativeShadows[j];
             modified = dropDeclarativeShadows(shadow, args[i]) || modified;
         }
-        const frames = getFramesArray(content, false);
+        const frames = getFramesArray(template, false);
         for (let j = 0; j < frames.length; j++) {
             const frame = frames[j];
             modified = hookOnLoadAttributes(frame) || modified;

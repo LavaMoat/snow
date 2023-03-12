@@ -91,7 +91,9 @@ describe('test custom elements', async function () {
                 customElements.define(`legit-element${n}`, NotFrame, {extends: 'frame'});
                 const ifr = document.createElement('frame', {is: `legit-element${n}`});
                 ifr.src = '/';
-                testdiv.appendChild(ifr);
+                const set = document.createElement('frameset');
+                set.appendChild(ifr);
+                testdiv.appendChild(set);
             }());
         });
         expect(result).toBe('V');

@@ -196,19 +196,18 @@ const {
   split,
   getAttribute,
   setAttribute,
-  getTemplateContent,
   getChildElementCount,
   createElement,
   getInnerHTML,
   setInnerHTML,
   remove,
-  DocumentFragment
+  Element
 } = __webpack_require__(14);
 const {
   warn,
   WARN_DECLARATIVE_SHADOWS
 } = __webpack_require__(312);
-const querySelectorAll = DocumentFragment.prototype.querySelectorAll;
+const querySelectorAll = Element.prototype.querySelectorAll;
 function makeStringHook(asFrame, asHtml) {
   let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(this);';
   if (asHtml) {
@@ -253,25 +252,24 @@ function hookSrcDoc(frame) {
 }
 function handleHTML(args, callHook) {
   for (let i = 0; i < args.length; i++) {
-    const template = createElement(document, 'template');
+    const template = createElement(document, 'html');
     setInnerHTML(template, args[i]);
-    const content = getTemplateContent(template);
-    if (!getChildElementCount(content)) {
+    if (!getChildElementCount(template)) {
       continue;
     }
     let modified = false;
     if (callHook) {
       const script = createElement(document, 'script');
       script.textContent = makeStringHook(false, false);
-      content.insertBefore(script, content.firstChild);
+      template.insertBefore(script, template.firstChild);
       modified = true;
     }
-    const declarativeShadows = querySelectorAll.call(content, 'template[shadowroot]');
+    const declarativeShadows = querySelectorAll.call(template, 'template[shadowroot]');
     for (let j = 0; j < declarativeShadows.length; j++) {
       const shadow = declarativeShadows[j];
       modified = dropDeclarativeShadows(shadow, args[i]) || modified;
     }
-    const frames = getFramesArray(content, false);
+    const frames = getFramesArray(template, false);
     for (let j = 0; j < frames.length; j++) {
       const frame = frames[j];
       modified = hookOnLoadAttributes(frame) || modified;
@@ -755,8 +753,7 @@ function setup(win) {
     remove: Object.getOwnPropertyDescriptor(Element.prototype, 'remove').value,
     addEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'addEventListener').value,
     removeEventListener: Object.getOwnPropertyDescriptor(EventTarget.prototype, 'removeEventListener').value,
-    getTemplateContent: Object.getOwnPropertyDescriptor(HTMLTemplateElement.prototype, 'content').get,
-    getChildElementCount: Object.getOwnPropertyDescriptor(DocumentFragment.prototype, 'childElementCount').get,
+    getChildElementCount: Object.getOwnPropertyDescriptor(Element.prototype, 'childElementCount').get,
     getFrameElement: Object.getOwnPropertyDescriptor(win, 'frameElement').get,
     getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get,
     getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
@@ -797,7 +794,6 @@ function setup(win) {
     createElement,
     getInnerHTML,
     setInnerHTML,
-    getTemplateContent,
     getChildElementCount,
     getFrameElement,
     getParentElement,
@@ -880,9 +876,6 @@ function setup(win) {
   }
   function setInnerHTML(element, html) {
     return bag.setInnerHTML.call(element, html);
-  }
-  function getTemplateContent(template) {
-    return bag.getTemplateContent.call(template);
   }
   function getChildElementCount(element) {
     return bag.getChildElementCount.call(element);

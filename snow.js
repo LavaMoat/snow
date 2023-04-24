@@ -1029,8 +1029,7 @@ module.exports = {
 const {
   Object,
   slice,
-  Function,
-  Map
+  Function
 } = __webpack_require__(14);
 const {
   proxy

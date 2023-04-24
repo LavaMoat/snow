@@ -1,4 +1,4 @@
-const {Object, slice, Function, Map} = require('./natives');
+const {Object, slice, Function} = require('./natives');
 const {proxy} = require('./proxy');
 
 function hookDocumentPictureInPicture(win, prop) {

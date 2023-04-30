@@ -2,6 +2,7 @@ const hook = require('./hook');
 const hookCreateObjectURL = require('./url');
 const hookCustoms = require('./customs');
 const hookOpen = require('./open');
+const hookRequest = require('./request');
 const hookEventListenersSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
@@ -39,6 +40,7 @@ function applyHooks(win) {
     hookCreateObjectURL(win);
     hookCustoms(win);
     hookOpen(win);
+    hookRequest(win);
     hookEventListenersSetters(win, 'load');
     hookDOMInserters(win);
     hookShadowDOM(win);

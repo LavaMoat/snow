@@ -294,6 +294,7 @@ const hook = __webpack_require__(228);
 const hookCreateObjectURL = __webpack_require__(716);
 const hookCustoms = __webpack_require__(832);
 const hookOpen = __webpack_require__(583);
+const hookRequest = __webpack_require__(278);
 const hookEventListenersSetters = __webpack_require__(459);
 const hookDOMInserters = __webpack_require__(58);
 const {
@@ -344,6 +345,7 @@ function applyHooks(win) {
   hookCreateObjectURL(win);
   hookCustoms(win);
   hookOpen(win);
+  hookRequest(win);
   hookEventListenersSetters(win, 'load');
   hookDOMInserters(win);
   hookShadowDOM(win);
@@ -905,27 +907,72 @@ const {
   stringStartsWith,
   slice,
   Function,
-  Object,
-  Reflect,
-  Proxy,
-  Map
+  Object
 } = __webpack_require__(14);
 const {
   warn,
-  WARN_OPEN_API_LIMITED,
   WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
 } = __webpack_require__(312);
-const openeds = new Map();
+const {
+  proxy,
+  getProxyByOpened
+} = __webpack_require__(134);
 function hookMessageEvent(win) {
   const desc = Object.getOwnPropertyDescriptor(win.MessageEvent.prototype, 'source');
   const get = desc.get;
   desc.get = function () {
     const source = get.call(this);
-    return openeds.get(source) || source;
+    return getProxyByOpened(source) || source;
   };
   Object.defineProperty(win.MessageEvent.prototype, 'source', desc);
 }
-function proxy(win, opened) {
+function hook(win, native, cb) {
+  cb(win);
+  return function open() {
+    const args = slice(arguments);
+    const url = args[0] + '',
+      // open accepts non strings too
+      target = args[1],
+      windowFeatures = args[2];
+    if (stringStartsWith(stringToLowerCase(url), 'javascript')) {
+      const blocked = warn(WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url, win);
+      if (blocked) {
+        return null;
+      }
+    }
+    const opened = Function.prototype.call.call(native, this, url, target, windowFeatures);
+    if (!opened) {
+      return null;
+    }
+    return proxy(opened);
+  };
+}
+function hookOpen(win) {
+  win.open = hook(win, win.open, hookMessageEvent);
+  win.document.open = hook(win, win.document.open, hookMessageEvent);
+}
+module.exports = hookOpen;
+
+/***/ }),
+
+/***/ 134:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const {
+  Object,
+  Proxy,
+  Reflect,
+  Map
+} = __webpack_require__(14);
+const {
+  warn,
+  WARN_OPEN_API_LIMITED
+} = __webpack_require__(312);
+const openeds = new Map();
+function getProxyByOpened(opened) {
+  return openeds.get(opened);
+}
+function proxy(opened) {
   const target = new Object(null);
   Object.defineProperty(target, 'closed', {
     get: function () {
@@ -947,52 +994,73 @@ function proxy(win, opened) {
       return opened.postMessage(message, targetOrigin, transfer);
     }
   });
-  return new Proxy(target, {
-    get: function (target, property) {
-      let ret = Reflect.get(target, property);
-      if (Reflect.has(target, property)) {
-        return ret;
-      }
-      if (Reflect.has(opened, property)) {
-        const blocked = warn(WARN_OPEN_API_LIMITED, property, win);
-        if (!blocked) {
-          ret = Reflect.get(opened, property);
+  if (!openeds.has(opened)) {
+    top['SNOW_WINDOW'](opened);
+    const p = new Proxy(target, {
+      get: function (target, property) {
+        let ret = Reflect.get(target, property);
+        if (Reflect.has(target, property)) {
+          return ret;
         }
-      }
-      return ret;
-    },
-    set: function () {}
-  });
+        if (Reflect.has(opened, property)) {
+          const blocked = warn(WARN_OPEN_API_LIMITED, property, opened);
+          if (!blocked) {
+            ret = Reflect.get(opened, property);
+          }
+        }
+        return ret;
+      },
+      set: function () {}
+    });
+    openeds.set(opened, p);
+  }
+  return getProxyByOpened(opened);
 }
-function hook(win, native) {
-  return function open() {
+module.exports = {
+  proxy,
+  getProxyByOpened
+};
+
+/***/ }),
+
+/***/ 278:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const {
+  Object,
+  slice,
+  Function
+} = __webpack_require__(14);
+const {
+  proxy
+} = __webpack_require__(134);
+function hookDocumentPictureInPicture(win, prop) {
+  const desc = Object.getOwnPropertyDescriptor(win[prop].prototype, 'window');
+  const get = desc.get;
+  desc.get = function () {
+    return proxy(get.call(this));
+  };
+  Object.defineProperty(win[prop].prototype, 'window', desc);
+}
+function hook(win, native, cb) {
+  cb(win, 'DocumentPictureInPictureEvent');
+  cb(win, 'DocumentPictureInPicture');
+  return async function open() {
     const args = slice(arguments);
-    const url = args[0] + '',
-      // open accepts non strings too
-      target = args[1],
-      windowFeatures = args[2];
-    if (stringStartsWith(stringToLowerCase(url), 'javascript')) {
-      const blocked = warn(WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url, win);
-      if (blocked) {
-        return null;
-      }
-    }
-    const opened = Function.prototype.call.call(native, this, url, target, windowFeatures);
+    const opened = await Function.prototype.apply.call(native, this, args);
     if (!opened) {
       return null;
     }
-    top['SNOW_WINDOW'](opened);
-    const p = proxy(win, opened);
-    openeds.set(opened, p);
-    return p;
+    return proxy(opened);
   };
 }
-function hookOpen(win) {
-  hookMessageEvent(win);
-  win.open = hook(win, win.open);
-  win.document.open = hook(win, win.document.open);
+function hookRequest(win) {
+  if (!win?.documentPictureInPicture?.requestWindow) {
+    return;
+  }
+  win.documentPictureInPicture.requestWindow = hook(win, win.documentPictureInPicture.requestWindow, hookDocumentPictureInPicture);
 }
-module.exports = hookOpen;
+module.exports = hookRequest;
 
 /***/ }),
 

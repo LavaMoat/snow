@@ -8,7 +8,7 @@ const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
 const {Object, Array, push, addEventListener, getFrameElement} = require('./natives');
 const {isMarked, mark} = require('./mark');
-const {error, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
+const {error, warn, WARN_SNOW_FAILED_ON_TOP, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
 function setTopUtil(prop, val) {
     const desc = Object.create(null);
@@ -24,6 +24,10 @@ function shouldHook(win) {
         }
         return run;
     } catch (err) {
+        if (win === top) {
+            warn(WARN_SNOW_FAILED_ON_TOP, win);
+            return false;
+        }
         error(ERR_MARK_NEW_WINDOW_FAILED, win, err);
     }
     return shouldHook(win);

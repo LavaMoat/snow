@@ -373,6 +373,10 @@ function onWin(win, cb) {
 }
 const callbacks = new Array();
 module.exports = function snow(cb) {
+  let win = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window;
+  if (win !== top) {
+    return;
+  }
   if (typeof cb !== 'function') {
     const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
     if (bail) {
@@ -1391,9 +1395,11 @@ var __webpack_exports__ = {};
 
 (function (win) {
   Object.defineProperty(win, 'SNOW', {
-    value: (_src_index__WEBPACK_IMPORTED_MODULE_0___default())
+    value: function (cb) {
+      _src_index__WEBPACK_IMPORTED_MODULE_0___default()(cb, win);
+    }
   });
-})(top);
+})(window);
 })();
 
 /******/ })()

@@ -68,7 +68,7 @@ function onWin(win, cb) {
 
 const callbacks = new Array();
 
-module.exports = function snow(cb, win = window) {
+module.exports = function snow(cb, win) {
     if (win !== top) {
         return;
     }

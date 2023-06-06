@@ -372,8 +372,7 @@ function onWin(win, cb) {
   }
 }
 const callbacks = new Array();
-module.exports = function snow(cb) {
-  let win = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window;
+module.exports = function snow(cb, win) {
   if (win !== top) {
     return;
   }

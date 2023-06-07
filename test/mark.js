@@ -11,7 +11,7 @@ describe('test marking mechanism is safe', async function () {
                 Object.defineProperty(Map.prototype, 'get', {value:1});
                 Object.defineProperty(Map.prototype, 'set', {value:1});
                 const ifr = document.createElement('iframe');
-                ifr.src = '//example1.com';
+                ifr.src = '//example.com';
                 let once = false;
                 ifr.addEventListener('load', () => {
                     if (once) {
@@ -33,7 +33,7 @@ describe('test marking mechanism is safe', async function () {
             (function(){
                 Object.defineProperty(Object, 'getOwnPropertyDescriptor', {value:1});
                 const ifr = document.createElement('iframe');
-                ifr.src = '//example1.com';
+                ifr.src = '//example.com';
                 let once = false;
                 ifr.addEventListener('load', () => {
                     if (once) {
@@ -55,7 +55,7 @@ describe('test marking mechanism is safe', async function () {
             (function(){
                 Object.defineProperty(Object, 'hasOwnProperty', {value:1});
                 const ifr = document.createElement('iframe');
-                ifr.src = '//example1.com';
+                ifr.src = '//example.com';
                 let once = false;
                 ifr.addEventListener('load', () => {
                     if (once) {
@@ -77,7 +77,7 @@ describe('test marking mechanism is safe', async function () {
             (function(){
                 Object.defineProperty(Object, 'defineProperty', {value:1});
                 const ifr = document.createElement('iframe');
-                ifr.src = '//example1.com';
+                ifr.src = '//example.com';
                 let once = false;
                 ifr.addEventListener('load', () => {
                     if (once) {

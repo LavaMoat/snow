@@ -84,7 +84,7 @@ describe('special cases', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                testdiv1.innerHTML = ('<object id="temp_id_1" type="text/html" data="/">');
+                testdiv1.innerHTML = (`<object id="temp_id_1" type="text/html" data="${location.href}">`);
                 testdiv2.innerHTML = ('<object id="temp_id_2" type="text/html" data="https://x.com">');
                 setTimeout(() => {
                     temp_id_2.data = temp_id_1.data;

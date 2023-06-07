@@ -93,6 +93,17 @@ describe('window.open API', () => {
         });
         expect(result).toBe('V');
     });
+
+    it.only('should fail to use atob of a window that was created via open API which then opened an iframe', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                open('https://lavamoat.github.io/snow/test/test-util.html?OPENER_IFRAME_HELPER');
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });
 
 describe('document.open API', () => {
@@ -184,17 +195,6 @@ describe('document.open API', () => {
                         bypass([top.win]);
                     }, 500);
                 }, 500);
-            }());
-        });
-        expect(result).toBe('V');
-    });
-
-    it('should fail to use atob of a window that was created via open API which then opened an iframe', async function () {
-        const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
-            (function(){
-                top.bypass = bypass;
-                open('https://lavamoat.github.io/snow/test/test-util.html?OPENER_IFRAME_HELPER');
             }());
         });
         expect(result).toBe('V');

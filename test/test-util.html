@@ -17,9 +17,11 @@
         <script>
             (function(){
                 if (!isHelper('OPENER_IFRAME_HELPER')) return;
-                const ifr = document.createElement('iframe');
-                document.body.appendChild(ifr);
-                opener.bypass([ifr.contentWindow]);
+                setTimeout(() => {
+                    const ifr = document.createElement('iframe');
+                    document.body.appendChild(ifr);
+                    opener.bypass([ifr.contentWindow]);
+                }, 500);
             }());
         </script>
     </head>

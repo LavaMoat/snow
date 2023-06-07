@@ -1,6 +1,22 @@
 <script>
-  // this is for tests purposes only
-  setTimeout(() => {
-    opener.postMessage('msg', '*');
-  }, 500);
+    function isHelper(helper) {
+        return location.href.includes(helper);
+    }
+</script>
+<script>
+    (function(){
+        if (!isHelper('SET_TIMEOUT_HELPER')) return;
+        // this is for tests purposes only
+        setTimeout(() => {
+            opener.postMessage('msg', '*');
+        }, 500);
+    }());
+</script>
+<script>
+    (function(){
+        if (!isHelper('OPENER_IFRAME_HELPER')) return;
+        const ifr = document.createElement('iframe');
+        document.body.appendChild(ifr);
+        opener.bypass([ifr.contentWindow]);
+    }());
 </script>

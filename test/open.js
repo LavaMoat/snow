@@ -47,7 +47,7 @@ describe('window.open API', () => {
                         bypass([x]);
                     }, 1000);
                 };
-                open('https://lavamoat.github.io/snow/test/test-util.html');
+                open('https://lavamoat.github.io/snow/test/test-util.html?SET_TIMEOUT_HELPER');
             }());
         });
         expect(result).toBe('V');
@@ -68,7 +68,7 @@ describe('window.open API', () => {
                     }, 1000);
                 });
                 const x = {};
-                x.toString = () => 'https://lavamoat.github.io/snow/test/test-util.html';
+                x.toString = () => 'https://lavamoat.github.io/snow/test/test-util.html?SET_TIMEOUT_HELPER';
                 open(x);
             }());
         });
@@ -142,7 +142,7 @@ describe('document.open API', () => {
                         bypass([x]);
                     }, 1000);
                 };
-                document.open('https://lavamoat.github.io/snow/test/test-util.html', '', '');
+                document.open('https://lavamoat.github.io/snow/test/test-util.html?SET_TIMEOUT_HELPER', '', '');
             }());
         });
         expect(result).toBe('V');
@@ -163,7 +163,7 @@ describe('document.open API', () => {
                     }, 1000);
                 });
                 const x = {};
-                x.toString = () => 'https://lavamoat.github.io/snow/test/test-util.html';
+                x.toString = () => 'https://lavamoat.github.io/snow/test/test-util.html?SET_TIMEOUT_HELPER';
                 document.open(x, '', '');
             }());
         });
@@ -184,6 +184,17 @@ describe('document.open API', () => {
                         bypass([top.win]);
                     }, 500);
                 }, 500);
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of a window that was created via open API which then opened an iframe', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                open('https://lavamoat.github.io/snow/test/test-util.html?OPENER_IFRAME_HELPER');
             }());
         });
         expect(result).toBe('V');

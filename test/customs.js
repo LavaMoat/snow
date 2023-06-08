@@ -1,4 +1,4 @@
-const setup = require('./index');
+const {setup} = require('./index');
 
 describe('test custom elements', async function () {
     beforeEach(setup);

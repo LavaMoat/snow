@@ -1,4 +1,4 @@
-const setup = require('./index');
+const {setup} = require('./index');
 
 describe('test numeric indexes overrides', async function () {
     beforeEach(setup);

@@ -1,7 +1,7 @@
-const setup = require('./index');
+const {setup, setupNoSnow} = require('./index');
 
 describe('test without Snow', async function () {
-    before(setup.bind(null, false));
+    before(setupNoSnow);
 
     it('should succeed to use top.atob normally', async function () {
         const result = await browser.executeAsync(function(done) {

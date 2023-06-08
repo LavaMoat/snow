@@ -130,6 +130,9 @@ const {
   Object,
   getFrameElement
 } = __webpack_require__(14);
+const {
+  forEachOpened
+} = __webpack_require__(134);
 function findWin(win, frameElement) {
   let i = -1;
   while (win[++i]) {
@@ -165,19 +168,24 @@ function findWin(win, frameElement) {
   }
   return null;
 }
+function hookWin(win) {
+  top['SNOW_WINDOW'](win);
+}
+function findAndHookWin(win, frame) {
+  const contentWindow = findWin(win, frame);
+  if (contentWindow) {
+    hookWin(contentWindow);
+  }
+  return !!contentWindow;
+}
 function hook(frames) {
   frames = toArray(frames);
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i];
-    if (typeof frame !== 'object') {
-      continue;
+    if (typeof frame === 'object' && frame !== null) {
+      workaroundChromiumBug(frame);
+      findAndHookWin(top, frame) || forEachOpened(findAndHookWin, frame);
     }
-    workaroundChromiumBug(frame);
-    const contentWindow = findWin(top, frame);
-    if (!contentWindow) {
-      continue;
-    }
-    top['SNOW_WINDOW'](contentWindow);
   }
 }
 module.exports = hook;
@@ -988,6 +996,11 @@ const openeds = new Map();
 function getProxyByOpened(opened) {
   return openeds.get(opened);
 }
+function forEachOpened(cb, arg1) {
+  for (const opened of openeds.keys()) {
+    cb(opened, arg1);
+  }
+}
 function proxy(opened) {
   const target = new Object(null);
   Object.defineProperty(target, 'closed', {
@@ -1034,7 +1047,8 @@ function proxy(opened) {
 }
 module.exports = {
   proxy,
-  getProxyByOpened
+  getProxyByOpened,
+  forEachOpened
 };
 
 /***/ }),

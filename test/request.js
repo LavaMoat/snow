@@ -1,4 +1,4 @@
-const setup = require('./index');
+const {setup} = require('./index');
 
 describe('window.documentPictureInPicture.requestWindow API', () => {
     beforeEach(setup);

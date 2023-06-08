@@ -1,4 +1,4 @@
-const setup = require('./index');
+const {setup} = require('./index');
 
 describe('special cases', () => {
     beforeEach(setup);
@@ -8,7 +8,7 @@ describe('special cases', () => {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
-                ifr.src = "https://x.com";
+                ifr.src = "https://lavamoat.github.io/snow/test/index.html";
                 testdiv.appendChild(ifr);
                 const zzz = ifr.contentWindow;
                 setTimeout(() => {
@@ -27,13 +27,13 @@ describe('special cases', () => {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
-                ifr.src = "https://x.com";
+                ifr.src = "https://lavamoat.github.io/snow/test/index.html";
                 testdiv.appendChild(ifr);
                 const zzz = ifr.contentWindow;
                 setTimeout(() => {
                     ifr.src = "about:blank";
                     setTimeout(() => {
-                        ifr.src = "https://x.com";
+                        ifr.src = "https://lavamoat.github.io/snow/test/index.html";
                         setTimeout(() => {
                             ifr.src = "about:blank";
                             setTimeout(() => {
@@ -58,10 +58,10 @@ describe('special cases', () => {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 testdiv1.innerHTML = ('<embed id="temp_id_1" type="text/html" src="/">');
-                testdiv2.innerHTML = ('<embed id="temp_id_2" type="text/html" src="https://x.com">');
+                testdiv2.innerHTML = ('<embed id="temp_id_2" type="text/html" src="https://lavamoat.github.io/snow/test/index.html">');
                 setTimeout(() => {
                     temp_id_2.src = temp_id_1.src;
-                    temp_id_1.src = 'https://x.com';
+                    temp_id_1.src = 'https://lavamoat.github.io/snow/test/index.html';
                     setTimeout(() => {
                         temp_id_1.src = temp_id_2.src;
                         setTimeout(() => {
@@ -84,11 +84,11 @@ describe('special cases', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                testdiv1.innerHTML = ('<object id="temp_id_1" type="text/html" data="/">');
-                testdiv2.innerHTML = ('<object id="temp_id_2" type="text/html" data="https://x.com">');
+                testdiv1.innerHTML = (`<object id="temp_id_1" type="text/html" data="${location.href}">`);
+                testdiv2.innerHTML = ('<object id="temp_id_2" type="text/html" data="https://lavamoat.github.io/snow/test/index.html">');
                 setTimeout(() => {
                     temp_id_2.data = temp_id_1.data;
-                    temp_id_1.data = 'https://x.com';
+                    temp_id_1.data = 'https://lavamoat.github.io/snow/test/index.html';
                     setTimeout(() => {
                         temp_id_1.data = temp_id_2.data;
                         setTimeout(() => {

@@ -1,4 +1,4 @@
-const setup = require('./index');
+const {setup} = require('./index');
 
 describe('test overrides of native functions', async function () {
     beforeEach(setup);

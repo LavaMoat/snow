@@ -1,4 +1,4 @@
-const setup = require('./index');
+const {setup} = require('./index');
 
 describe('test different iframe src', async function () {
     beforeEach(setup);

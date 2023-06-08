@@ -3,10 +3,10 @@ const path = require('path');
 
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();
 
-module.exports = async function setup(injectSnow = true) {
-    await browser.url(`https://example.com/`);
+async function setup(url = 'https://example.com/', noSnow) {
+    await browser.url(url);
 
-    if (!injectSnow) return;
+    if (noSnow) return;
 
     // inject SNOW
     await browser.execute(function(js) {
@@ -24,13 +24,19 @@ module.exports = async function setup(injectSnow = true) {
 
     // reset test divs
     await browser.execute(function() {
-        const d = document.getElementById('testdiv');
-        if (d) {
-            d.remove();
-        }
-        document.getElementsByTagName('DIV')[0].innerHTML = '<div id="testdiv"><div id="testdiv1"></div><div id="testdiv2"></div></div>';
+        document.getElementById('testdiv')?.remove();
+        document.querySelector('DIV').innerHTML = '<div id="testdiv"><div id="testdiv1"></div><div id="testdiv2"></div></div>';
         window.testdiv = document.getElementById('testdiv');
         window.testdiv1 = document.getElementById('testdiv1');
         window.testdiv2 = document.getElementById('testdiv2');
     });
+}
+
+async function setupNoSnow(url) {
+    return await setup(url, true);
+}
+
+module.exports = {
+    setup,
+    setupNoSnow,
 }

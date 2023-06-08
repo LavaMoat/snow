@@ -7,6 +7,12 @@ function getProxyByOpened(opened) {
     return openeds.get(opened);
 }
 
+function forEachOpened(cb, arg1) {
+    for (const opened of openeds.keys()) {
+        cb(opened, arg1);
+    }
+}
+
 function proxy(opened) {
     const target = new Object(null);
 
@@ -55,4 +61,4 @@ function proxy(opened) {
     return getProxyByOpened(opened);
 }
 
-module.exports = {proxy, getProxyByOpened};
+module.exports = {proxy, getProxyByOpened, forEachOpened};

@@ -183,7 +183,9 @@ function hook(frames) {
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i];
     workaroundChromiumBug(frame);
-    findAndHookWin(top, frame) || forEachOpened(findAndHookWin, frame);
+    if (typeof frame === 'object' && frame !== null) {
+      findAndHookWin(top, frame) || forEachOpened(findAndHookWin, frame);
+    }
   }
 }
 module.exports = hook;

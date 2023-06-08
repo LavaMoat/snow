@@ -93,7 +93,9 @@ describe('window.open API', () => {
         });
         expect(result).toBe('V');
     });
+});
 
+describe('window.open API (same origin)', () => {
     it.only('should fail to use atob of a window that was created via open API which then opened an iframe', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));

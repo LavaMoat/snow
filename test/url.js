@@ -1,4 +1,4 @@
-const setup = require('./index');
+const {setup} = require('./index');
 
 describe('test url', async function () {
     beforeEach(setup);

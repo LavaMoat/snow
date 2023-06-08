@@ -1,4 +1,4 @@
-const setup = require('./index');
+const {setup} = require('./index');
 
 describe('test marking mechanism is safe', async function () {
     beforeEach(setup);

@@ -1,4 +1,4 @@
-const setup = require('./index');
+const {setup} = require('./index');
 
 describe('test different views', async function () {
     beforeEach(setup);

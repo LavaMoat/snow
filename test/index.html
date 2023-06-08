@@ -13,6 +13,16 @@
                 }, 500);
             }());
         </script>
+        <script>
+            (function(){
+                if (!isHelper('OPENER_IFRAME_HELPER')) return;
+                setTimeout(() => {
+                    const ifr = document.createElement('iframe');
+                    document.body.appendChild(ifr);
+                    opener.bypass([ifr.contentWindow]);
+                }, 500);
+            }());
+        </script>
     </head>
     <body>
         <div>

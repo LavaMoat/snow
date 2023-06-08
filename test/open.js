@@ -95,6 +95,21 @@ describe('window.open API', () => {
     });
 });
 
+describe('window.open API (same origin)', () => {
+    beforeEach(setup.bind(null, 'https://lavamoat.github.io/snow/test/index.html'));
+
+    it('should fail to use atob of a window that was created via open API which then opened an iframe', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                open('https://lavamoat.github.io/snow/test/index.html?OPENER_IFRAME_HELPER');
+            }());
+        });
+        expect(result).toBe('V');
+    });
+});
+
 describe('document.open API', () => {
     beforeEach(setup);
 

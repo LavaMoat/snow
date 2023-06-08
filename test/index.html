@@ -8,7 +8,6 @@
         <script>
             (function(){
                 if (!isHelper('SET_TIMEOUT_HELPER')) return;
-                // this is for tests purposes only
                 setTimeout(() => {
                     opener.postMessage('msg', '*');
                 }, 500);

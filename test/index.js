@@ -4,7 +4,7 @@ const path = require('path');
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();
 
 module.exports = async function setup(injectSnow = true) {
-    await browser.url(`https://lavamoat.github.io/snow/test/test-util.html`);
+    await browser.url(`https://example.com/`);
 
     if (!injectSnow) return;
 
@@ -24,11 +24,8 @@ module.exports = async function setup(injectSnow = true) {
 
     // reset test divs
     await browser.execute(function() {
-        const d = document.getElementById('testdiv');
-        if (d) {
-            d.remove();
-        }
-        document.documentElement.innerHTML = '<div id="testdiv"><div id="testdiv1"></div><div id="testdiv2"></div></div>';
+        document.getElementById('testdiv')?.remove();
+        document.querySelector('DIV').innerHTML = '<div id="testdiv"><div id="testdiv1"></div><div id="testdiv2"></div></div>';
         window.testdiv = document.getElementById('testdiv');
         window.testdiv1 = document.getElementById('testdiv1');
         window.testdiv2 = document.getElementById('testdiv2');

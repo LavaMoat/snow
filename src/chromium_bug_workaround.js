@@ -18,7 +18,7 @@ This for some reason registers it to the window.frames list, otherwise it won't 
 */
 
 function workaroundChromiumBug(frame) {
-    frame && frame.contentWindow;
+    frame && (frame).contentWindow;
 }
 
 module.exports = workaroundChromiumBug;

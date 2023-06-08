@@ -18,7 +18,7 @@ describe('window.open API', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                const win = open('https://example.com');
+                const win = open('https://lavamoat.github.io/snow/test/index.html');
                 setTimeout(() => {
                     if (!win || !win.location) {
                         return bypass([top]); // give up
@@ -42,7 +42,7 @@ describe('window.open API', () => {
                     if (!x || !x.location) {
                         return bypass([top]); // give up
                     }
-                    x.location.href = 'https://lavamoat.github.io/snow/test/index.html/';
+                    x.location.href = 'https://example.com/';
                     setTimeout(() => {
                         bypass([x]);
                     }, 1000);
@@ -62,7 +62,7 @@ describe('window.open API', () => {
                     if (!x || !x.location) {
                         return bypass([top]); // give up
                     }
-                    x.location.href = 'https://lavamoat.github.io/snow/test/index.html/';
+                    x.location.href = 'https://example.com/';
                     setTimeout(() => {
                         bypass([x]);
                     }, 1000);
@@ -84,7 +84,7 @@ describe('window.open API', () => {
                     if (!top.win) {
                         return bypass([top]); // give up
                     }
-                    top.win.location.href = 'https://lavamoat.github.io/snow/test/index.html';
+                    top.win.location.href = 'https://example.com/';
                     setTimeout(() => {
                         bypass([top.win]);
                     }, 500);
@@ -113,7 +113,7 @@ describe('document.open API', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                const win = document.open('https://example.com', '', '');
+                const win = document.open('https://lavamoat.github.io/snow/test/index.html', '', '');
                 setTimeout(() => {
                     if (!win || !win.location) {
                         return bypass([top]); // give up
@@ -137,7 +137,7 @@ describe('document.open API', () => {
                     if (!x || !x.location) {
                         return bypass([top]); // give up
                     }
-                    x.location.href = 'https://lavamoat.github.io/snow/test/index.html/';
+                    x.location.href = 'https://example.com/';
                     setTimeout(() => {
                         bypass([x]);
                     }, 1000);
@@ -157,7 +157,7 @@ describe('document.open API', () => {
                     if (!x || !x.location) {
                         return bypass([top]); // give up
                     }
-                    x.location.href = 'https://lavamoat.github.io/snow/test/index.html/';
+                    x.location.href = 'https://example.com/';
                     setTimeout(() => {
                         bypass([x]);
                     }, 1000);
@@ -179,7 +179,7 @@ describe('document.open API', () => {
                     if (!top.win) {
                         return bypass([top]); // give up
                     }
-                    top.win.location.href = 'https://lavamoat.github.io/snow/test/index.html';
+                    top.win.location.href = 'https://example.com/';
                     setTimeout(() => {
                         bypass([top.win]);
                     }, 500);

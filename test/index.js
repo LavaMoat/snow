@@ -4,7 +4,7 @@ const path = require('path');
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();
 
 module.exports = async function setup(injectSnow = true) {
-    await browser.url(`https://lavamoat.github.io/snow/test/index.html`);
+    await browser.url(`https://example.com/`);
 
     if (!injectSnow) return;
 

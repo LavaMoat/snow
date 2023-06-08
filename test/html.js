@@ -182,7 +182,7 @@ describe('test HTML injections', async function () {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 top.bypass = bypass;
-                testdiv1.innerHTML = ('<object id="temp_id" data="/" onload="top.bypass([temp_id.contentWindow]);"/>');
+                testdiv1.innerHTML = (`<object id="temp_id" data="${location.href}" onload="top.bypass([temp_id.contentWindow]);"/>`);
             }());
         });
         expect(result).toBe('V');

@@ -18,7 +18,7 @@ describe('window.open API', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                const win = open('https://example1.com');
+                const win = open('https://lavamoat.github.io/snow/test/index.html');
                 setTimeout(() => {
                     if (!win || !win.location) {
                         return bypass([top]); // give up
@@ -47,7 +47,7 @@ describe('window.open API', () => {
                         bypass([x]);
                     }, 1000);
                 };
-                open('https://lavamoat.github.io/snow/test/test-util.html');
+                open('https://lavamoat.github.io/snow/test/index.html?SET_TIMEOUT_HELPER');
             }());
         });
         expect(result).toBe('V');
@@ -68,7 +68,7 @@ describe('window.open API', () => {
                     }, 1000);
                 });
                 const x = {};
-                x.toString = () => 'https://lavamoat.github.io/snow/test/test-util.html';
+                x.toString = () => 'https://lavamoat.github.io/snow/test/index.html?SET_TIMEOUT_HELPER';
                 open(x);
             }());
         });
@@ -84,7 +84,7 @@ describe('window.open API', () => {
                     if (!top.win) {
                         return bypass([top]); // give up
                     }
-                    top.win.location.href = 'https://example.com';
+                    top.win.location.href = 'https://example.com/';
                     setTimeout(() => {
                         bypass([top.win]);
                     }, 500);
@@ -113,7 +113,7 @@ describe('document.open API', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                const win = document.open('https://example1.com', '', '');
+                const win = document.open('https://lavamoat.github.io/snow/test/index.html', '', '');
                 setTimeout(() => {
                     if (!win || !win.location) {
                         return bypass([top]); // give up
@@ -142,7 +142,7 @@ describe('document.open API', () => {
                         bypass([x]);
                     }, 1000);
                 };
-                document.open('https://lavamoat.github.io/snow/test/test-util.html', '', '');
+                document.open('https://lavamoat.github.io/snow/test/index.html?SET_TIMEOUT_HELPER', '', '');
             }());
         });
         expect(result).toBe('V');
@@ -163,7 +163,7 @@ describe('document.open API', () => {
                     }, 1000);
                 });
                 const x = {};
-                x.toString = () => 'https://lavamoat.github.io/snow/test/test-util.html';
+                x.toString = () => 'https://lavamoat.github.io/snow/test/index.html?SET_TIMEOUT_HELPER';
                 document.open(x, '', '');
             }());
         });
@@ -179,7 +179,7 @@ describe('document.open API', () => {
                     if (!top.win) {
                         return bypass([top]); // give up
                     }
-                    top.win.location.href = 'https://example.com';
+                    top.win.location.href = 'https://example.com/';
                     setTimeout(() => {
                         bypass([top.win]);
                     }, 500);

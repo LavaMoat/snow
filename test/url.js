@@ -148,4 +148,27 @@ describe('test url', async function () {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe that is loading a blob url constructed of a native blob by the browser', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'https://weizman.github.io/content/img/gpt.png', true);
+                xhr.responseType = 'blob';
+                xhr.onload = function(e) {
+                    top.bypass = bypass;
+                    setTimeout(top.bypass, 200, [top]);
+                    if (this.status === 200) {
+                        const f = document.createElement('iframe');
+                        document.body.appendChild(f);
+                        var blob = this.response;
+                        f.src = URL.createObjectURL(new blob.constructor(["<script>top.bypass([window])</script>"], {type: "text/html"}));
+                    }
+                };
+                xhr.send();
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

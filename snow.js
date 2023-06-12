@@ -582,7 +582,7 @@ function error(msg, a, b, c) {
         kind = b,
         type = c;
       bail = true;
-      console.error('SNOW:', `${kind} object:`, object2, `of type ${type} is not allowed and therefore is blocked`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.', '\n');
+      console.error('SNOW:', `${kind} object:`, object2, `of type "${type}" is not allowed and therefore is blocked`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.', '\n');
       break;
     case ERR_EXTENDING_FRAMABLES_BLOCKED:
       const name = a,

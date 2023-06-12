@@ -11,7 +11,6 @@ function natives(win) {
     const {EventTarget} = win; // PR#62
     return natively(win, function(win) {
         const {
-            console,
             Proxy,
             JSON,
             Attr,
@@ -33,7 +32,6 @@ function natives(win) {
             HTMLObjectElement,
         } = win;
         const bag = {
-            console,
             Proxy,
             JSON,
             Attr,
@@ -66,7 +64,6 @@ function setup(win) {
     const bag = natives(win);
 
     const {
-        console,
         Proxy,
         Function,
         String,
@@ -116,7 +113,6 @@ function setup(win) {
     });
 
     return {
-        console,
         Proxy,
         Object,
         Reflect,

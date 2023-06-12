@@ -1148,8 +1148,11 @@ const KIND = 'KIND',
 const BLOB = 'Blob',
   FILE = 'File',
   MEDIA_SOURCE = 'MediaSource';
+const BLOCKED = URL.createObjectURL(new Blob(['BLOCKED BY SNOW'], {
+  type: 'text/plain'
+}));
 const allowedBlobs = new Array();
-const allowedTypes = new Array('text/javascript');
+const allowedTypes = new Array('text/javascript', 'text/css');
 function getHook(native, kind) {
   return function (a, b) {
     const ret = new native(a, b);
@@ -1195,23 +1198,30 @@ function hookMediaSource(win) {
   Object.setPrototypeOf(MediaSource, native);
   win[MEDIA_SOURCE] = MediaSource;
 }
+function isBlobForbidden(object) {
+  const index = allowedBlobs.indexOf(object);
+  if (index > -1) {
+    allowedBlobs.splice(index, 1);
+    return false;
+  }
+  return error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, 'unknown', object);
+}
+function isTypeForbidden(object) {
+  const kind = object[KIND];
+  if (kind !== BLOB && kind !== FILE) {
+    return false;
+  }
+  const type = object[TYPE];
+  if (allowedTypes.includes(type)) {
+    return false;
+  }
+  return error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, kind, object);
+}
 function hook(win) {
   const native = win.URL.createObjectURL;
   function createObjectURL(object) {
-    if (!allowedBlobs.includes(object)) {
-      // remove from allowedBlobs after usage is safe??
-      if (error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, 'unknown', object)) {
-        return;
-      }
-    }
-    const kind = object[KIND];
-    if (kind === BLOB || kind === FILE) {
-      const type = object[TYPE];
-      if (!type || !allowedTypes.includes(type)) {
-        if (error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, kind, object)) {
-          return;
-        }
-      }
+    if (isBlobForbidden(object) || isTypeForbidden(object)) {
+      return BLOCKED;
     }
     return native(object);
   }

@@ -530,11 +530,8 @@ module.exports = hookEventListenersSetters;
 /***/ }),
 
 /***/ 312:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module) => {
 
-const {
-  console
-} = __webpack_require__(14);
 const ERR_MARK_NEW_WINDOW_FAILED = 1;
 const WARN_OPEN_API_LIMITED = 2;
 const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
@@ -542,6 +539,9 @@ const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
 const ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN = 7;
+const {
+  console
+} = top;
 function warn(msg, a, b) {
   let bail;
   switch (msg) {
@@ -669,7 +669,6 @@ function natives(win) {
   } = win; // PR#62
   return natively(win, function (win) {
     const {
-      console,
       Proxy,
       JSON,
       Attr,
@@ -692,7 +691,6 @@ function natives(win) {
       HTMLObjectElement
     } = win;
     const bag = {
-      console,
       Proxy,
       JSON,
       Attr,
@@ -724,7 +722,6 @@ function natives(win) {
 function setup(win) {
   const bag = natives(win);
   const {
-    console,
     Proxy,
     Function,
     String,
@@ -774,7 +771,6 @@ function setup(win) {
     getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get
   });
   return {
-    console,
     Proxy,
     Object,
     Reflect,

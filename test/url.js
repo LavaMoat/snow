@@ -94,13 +94,22 @@ describe('test url', async function () {
                 top.bypass = bypass;
                 setTimeout(top.bypass, 200, [top]);
                 const workerJs = `postMessage(URL.createObjectURL(new Blob(["<script>top.bypass([window])</script>"], {type: "text/html"})));`
-                const workerBlob = new Blob([workerJs], {type: "text/plain"})
-                const w = new Worker(URL.createObjectURL(workerBlob))
-                w.onmessage = (msg) => {
-                    console.log(msg);
-                    const f = document.createElement("iframe");
-                    document.body.appendChild(f)
-                    f.src = msg.data;
+                for (const type of [
+                    "text/javascript",
+                    "text/plain",
+                    "application/javascript",
+                    "application/plain",
+                    "text/html",
+                    "application/html",
+                ]) {
+                    const workerBlob = new Blob([workerJs], {type})
+                    const w = new Worker(URL.createObjectURL(workerBlob))
+                    w.onmessage = (msg) => {
+                        console.log(msg);
+                        const f = document.createElement("iframe");
+                        document.body.appendChild(f)
+                        f.src = msg.data;
+                    }
                 }
             }());
         });

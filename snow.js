@@ -679,6 +679,7 @@ function natives(win) {
       Node,
       Document,
       DocumentFragment,
+      Blob,
       ShadowRoot,
       Object,
       Reflect,
@@ -701,6 +702,7 @@ function natives(win) {
       Node,
       Document,
       DocumentFragment,
+      Blob,
       ShadowRoot,
       Object,
       Reflect,
@@ -730,6 +732,7 @@ function setup(win) {
     Node,
     Document,
     DocumentFragment,
+    Blob,
     ShadowRoot,
     Object,
     Reflect,
@@ -767,7 +770,8 @@ function setup(win) {
     getFrameElement: Object.getOwnPropertyDescriptor(win, 'frameElement').get,
     getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get,
     getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
-    getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get
+    getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
+    getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get
   });
   return {
     console,
@@ -779,6 +783,7 @@ function setup(win) {
     Element,
     Document,
     DocumentFragment,
+    Blob,
     ShadowRoot,
     Array,
     Map,
@@ -808,7 +813,8 @@ function setup(win) {
     getFrameElement,
     getParentElement,
     getOwnerDocument,
-    getDefaultView
+    getDefaultView,
+    getBlobFileType
   };
   function getContentWindow(element, tag) {
     switch (tag) {
@@ -901,6 +907,9 @@ function setup(win) {
   }
   function getDefaultView(document) {
     return bag.getDefaultView.call(document);
+  }
+  function getBlobFileType(blob) {
+    return bag.getBlobFileType.call(blob);
   }
 }
 module.exports = setup(top);
@@ -1127,91 +1136,91 @@ module.exports = {
 
 const {
   Object,
-  Array
+  Array,
+  getBlobFileType
 } = __webpack_require__(14);
 const {
   error,
   ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN
 } = __webpack_require__(312);
-const IS = 'IS',
-  TYPE = 'TYPE',
-  BLOB = 'Blob',
+const KIND = 'KIND',
+  TYPE = 'TYPE';
+const BLOB = 'Blob',
   FILE = 'File',
   MEDIA_SOURCE = 'MediaSource';
 const allowedBlobs = new Array();
 const allowedTypes = new Array('text/javascript');
+function getHook(native, kind) {
+  return function (a, b) {
+    const ret = new native(a, b);
+    Object.defineProperty(ret, KIND, {
+      value: kind
+    });
+    if (kind === BLOB || kind === FILE) {
+      Object.defineProperty(ret, TYPE, {
+        value: getBlobFileType(ret)
+      });
+    }
+    allowedBlobs.push(ret);
+    return ret;
+  };
+}
 function hookBlob(win) {
   const native = win[BLOB];
-  const getType = Object.getOwnPropertyDescriptor(native.prototype, 'type').get;
+  const hook = getHook(native, BLOB);
   function Blob(a, b) {
-    const x = new native(a, b);
-    Object.defineProperty(x, IS, {
-      value: BLOB
-    });
-    Object.defineProperty(x, TYPE, {
-      value: getType.call(x)
-    });
-    allowedBlobs.push(x);
-    return x;
+    return hook(a, b);
   }
+  // to pass 'Blob.prototype.isPrototypeOf(b)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
   Object.setPrototypeOf(native.prototype, Blob.prototype);
   win[BLOB] = Blob;
 }
 function hookFile(win) {
   const native = win[FILE];
-  const getType = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(native).prototype, 'type').get;
+  const hook = getHook(native, FILE);
   function File(a, b) {
-    const x = new native(a, b);
-    Object.defineProperty(x, IS, {
-      value: FILE
-    });
-    Object.defineProperty(x, TYPE, {
-      value: getType.call(x)
-    });
-    allowedBlobs.push(x);
-    return x;
+    return hook(a, b);
   }
+  // to pass 'File.prototype.isPrototypeOf(f)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
   Object.setPrototypeOf(native.prototype, File.prototype);
   win[FILE] = File;
 }
 function hookMediaSource(win) {
   const native = win[MEDIA_SOURCE];
+  const hook = getHook(native, MEDIA_SOURCE);
   function MediaSource(a, b) {
-    const x = new native(a, b);
-    Object.defineProperty(x, IS, {
-      value: MEDIA_SOURCE
-    });
-    allowedBlobs.push(x);
-    return x;
+    return hook(a, b);
   }
-  Object.setPrototypeOf(MediaSource.prototype, native.prototype);
+  // MediaSource is expected to have static own props (e.g. isTypeSupported)
   Object.setPrototypeOf(MediaSource, native);
   win[MEDIA_SOURCE] = MediaSource;
 }
-function hook(win, native) {
-  return function (object) {
+function hook(win) {
+  const native = win.URL.createObjectURL;
+  function createObjectURL(object) {
     if (!allowedBlobs.includes(object)) {
+      // remove from allowedBlobs after usage is safe??
       if (error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, 'unknown', object)) {
         return;
       }
     }
-    const is = object[IS];
-    if (is === BLOB || is === FILE) {
+    const kind = object[KIND];
+    if (kind === BLOB || kind === FILE) {
       const type = object[TYPE];
-      if (!allowedTypes.includes(type)) {
-        // remove from allowedTypes after usage is safe??
-        if (error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, is, object)) {
+      if (!type || !allowedTypes.includes(type)) {
+        if (error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, kind, object)) {
           return;
         }
       }
     }
     return native(object);
-  };
+  }
+  Object.defineProperty(win.URL, 'createObjectURL', {
+    value: createObjectURL
+  });
 }
 function hookCreateObjectURL(win) {
-  Object.defineProperty(win.URL, 'createObjectURL', {
-    value: hook(win, win.URL.createObjectURL)
-  });
+  hook(win);
   hookBlob(win);
   hookFile(win);
   hookMediaSource(win);

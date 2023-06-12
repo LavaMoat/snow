@@ -21,6 +21,7 @@ function natives(win) {
             Node,
             Document,
             DocumentFragment,
+            Blob,
             ShadowRoot,
             Object,
             Reflect,
@@ -43,6 +44,7 @@ function natives(win) {
             Node,
             Document,
             DocumentFragment,
+            Blob,
             ShadowRoot,
             Object,
             Reflect,
@@ -74,6 +76,7 @@ function setup(win) {
         Node,
         Document,
         DocumentFragment,
+        Blob,
         ShadowRoot,
         Object,
         Reflect,
@@ -113,6 +116,7 @@ function setup(win) {
         getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get,
         getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
         getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
+        getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get
     });
 
     return {
@@ -125,6 +129,7 @@ function setup(win) {
         Element,
         Document,
         DocumentFragment,
+        Blob,
         ShadowRoot,
         Array,
         Map,
@@ -155,6 +160,7 @@ function setup(win) {
         getParentElement,
         getOwnerDocument,
         getDefaultView,
+        getBlobFileType,
     };
 
     function getContentWindow(element, tag) {
@@ -274,6 +280,10 @@ function setup(win) {
 
     function getDefaultView(document) {
         return bag.getDefaultView.call(document);
+    }
+
+    function getBlobFileType(blob) {
+        return bag.getBlobFileType.call(blob);
     }
 }
 

@@ -1,78 +1,78 @@
-const {Object, Array} = require('./natives');
+const {Object, Array, getBlobFileType} = require('./natives');
 const {error, ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN} = require('./log');
 
-const IS = 'IS', TYPE = 'TYPE',
-    BLOB = 'Blob', FILE = 'File', MEDIA_SOURCE = 'MediaSource';
+const KIND = 'KIND', TYPE = 'TYPE';
+const BLOB = 'Blob', FILE = 'File', MEDIA_SOURCE = 'MediaSource';
 
 const allowedBlobs = new Array();
 const allowedTypes = new Array('text/javascript');
 
+function getHook(native, kind) {
+    return function (a, b) {
+        const ret = new native(a, b);
+        Object.defineProperty(ret, KIND, { value: kind });
+        if (kind === BLOB || kind === FILE) {
+            Object.defineProperty(ret, TYPE, { value: getBlobFileType(ret) });
+        }
+        allowedBlobs.push(ret);
+        return ret;
+    }
+}
+
 function hookBlob(win) {
     const native = win[BLOB];
-    const getType = Object.getOwnPropertyDescriptor(native.prototype, 'type').get;
-    function Blob(a,b) {
-        const x = new native(a,b);
-        Object.defineProperty(x, IS, { value: BLOB });
-        Object.defineProperty(x, TYPE, { value: getType.call(x) });
-        allowedBlobs.push(x);
-        return x;
-    }
+    const hook = getHook(native, BLOB);
+    function Blob(a, b) { return hook(a, b) }
+    // to pass 'Blob.prototype.isPrototypeOf(b)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
     Object.setPrototypeOf(native.prototype, Blob.prototype);
     win[BLOB] = Blob;
 }
 
 function hookFile(win) {
     const native = win[FILE];
-    const getType = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(native).prototype, 'type').get;
-    function File(a,b) {
-        const x = new native(a,b);
-        Object.defineProperty(x, IS, { value: FILE });
-        Object.defineProperty(x, TYPE, { value: getType.call(x) });
-        allowedBlobs.push(x);
-        return x;
-    }
+    const hook = getHook(native, FILE);
+    function File(a, b) { return hook(a, b) }
+    // to pass 'File.prototype.isPrototypeOf(f)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
     Object.setPrototypeOf(native.prototype, File.prototype);
     win[FILE] = File;
 }
 
 function hookMediaSource(win) {
     const native = win[MEDIA_SOURCE];
-    function MediaSource(a,b) {
-        const x = new native(a,b);
-        Object.defineProperty(x, IS, { value: MEDIA_SOURCE });
-        allowedBlobs.push(x);
-        return x;
-    }
-    Object.setPrototypeOf(MediaSource.prototype, native.prototype);
+    const hook = getHook(native, MEDIA_SOURCE);
+    function MediaSource(a, b) { return hook(a, b) }
+    // MediaSource is expected to have static own props (e.g. isTypeSupported)
     Object.setPrototypeOf(MediaSource, native);
     win[MEDIA_SOURCE] = MediaSource;
 }
 
-function hook(win, native) {
-    return function (object) {
+function hook(win) {
+    const native = win.URL.createObjectURL;
+    function createObjectURL(object) {
         if (!allowedBlobs.includes(object)) {
+            // remove from allowedBlobs after usage is safe??
             if (error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, 'unknown', object)) {
                 return;
             }
         }
-        const is = object[IS];
-        if (is === BLOB || is === FILE) {
+        const kind = object[KIND];
+        if (kind === BLOB || kind === FILE) {
             const type = object[TYPE];
-            if (!allowedTypes.includes(type)) {
-                // remove from allowedTypes after usage is safe??
-                if (error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, is, object)) {
+            if (!type || !allowedTypes.includes(type)) {
+                if (error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, kind, object)) {
                     return;
                 }
             }
         }
         return native(object);
-    };
+    }
+    Object.defineProperty(win.URL, 'createObjectURL', {
+        value: createObjectURL
+    });
 }
 
 function hookCreateObjectURL(win) {
-    Object.defineProperty(win.URL, 'createObjectURL', {
-        value: hook(win, win.URL.createObjectURL)
-    });
+    hook(win);
     hookBlob(win);
     hookFile(win);
     hookMediaSource(win);

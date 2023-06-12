@@ -1,5 +1,5 @@
 const {Object, Array, getBlobFileType} = require('./natives');
-const {error, ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN} = require('./log');
+const {error, ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN} = require('./log');
 
 const KIND = 'KIND', TYPE = 'TYPE';
 const BLOB = 'Blob', FILE = 'File', MEDIA_SOURCE = 'MediaSource';
@@ -54,7 +54,7 @@ function isBlobForbidden(object) {
         allowedBlobs.splice(index, 1);
         return false;
     }
-    return error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, 'unknown', object);
+    return error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, object);
 
 }
 function isTypeForbidden(object) {
@@ -66,7 +66,7 @@ function isTypeForbidden(object) {
     if (allowedTypes.includes(type)) {
         return false;
     }
-    return error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, kind, object);
+    return error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
 
 }
 

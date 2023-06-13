@@ -6,7 +6,12 @@ const KIND = 'KIND', TYPE = 'TYPE';
 const BLOB = 'Blob', FILE = 'File', MEDIA_SOURCE = 'MediaSource';
 
 const allowedBlobs = new Array();
-const allowedTypes = new Array('text/javascript', 'text/css');
+const allowedTypes = new Array(
+    'text/javascript',
+    'text/css',
+    'application/javascript',
+    'application/css',
+);
 
 function getHook(native, kind) {
     return function (a, b) {

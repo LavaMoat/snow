@@ -102,9 +102,9 @@ describe('test url', async function () {
                     "text/html",
                     "application/html",
                 ]) {
-                    const workerBlob = new Blob([workerJs], {type})
-                    const w = new Worker(URL.createObjectURL(workerBlob))
-                    w.onmessage = (msg) => {
+                    const w1 = new Worker(URL.createObjectURL(new Blob([workerJs], {type})))
+                    const w2 = new Worker(`data:${type},${workerJs}`);
+                    w2.onmessage = w1.onmessage = (msg) => {
                         console.log(msg);
                         const f = document.createElement("iframe");
                         document.body.appendChild(f)

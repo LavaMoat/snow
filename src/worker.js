@@ -1,25 +1,30 @@
-const {BLOCKED_BLOB_URL} = require('./common');
-const {Map, toString, stringStartsWith} = require('./natives');
+const {BLOCKED_BLOB_URL, runInNewRealm} = require('./common');
+const {Map, toString, stringStartsWith, createObjectURL, Blob} = require('./natives');
 
 const blobs = new Map();
 
-function syncGet(url, done) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url, false);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            done(xhr.responseText);
-        }
-    };
-    xhr.send();
+function syncGet(url) {
+    return runInNewRealm(function(win) {
+        let content;
+        const xhr = new win.XMLHttpRequest();
+        xhr.open('GET', url, false);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                content = xhr.responseText;
+            }
+        };
+        xhr.send();
+        return content;
+    });
 }
 
 function swap(url) {
     if (!blobs.has(url)) {
-        syncGet(url, function(content) {
-            const js = `(function(){Object.defineProperty(URL, "createObjectURL", {value:()=>"${BLOCKED_BLOB_URL}"})}());` + content;
-            blobs.set(url, URL.createObjectURL(new Blob([js], {type: 'text/javascript'})));
-        });
+        const content = syncGet(url);
+        const js = `(function() {
+                Object.defineProperty(URL, "createObjectURL", {value:()=>"${BLOCKED_BLOB_URL}"})
+            }());` + content;
+        blobs.set(url, createObjectURL(new Blob([js], {type: 'text/javascript'})));
     }
     return blobs.get(url);
 }

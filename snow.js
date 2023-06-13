@@ -77,7 +77,18 @@ module.exports = workaroundChromiumBug;
 /***/ 407:
 /***/ ((module) => {
 
+const createElement = Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value.bind(document);
+const appendChild = Object.getOwnPropertyDescriptor(Node.prototype, 'appendChild').value.bind(document.documentElement);
+const removeChild = Object.getOwnPropertyDescriptor(Node.prototype, 'removeChild').value.bind(document.documentElement);
+function runInNewRealm(cb) {
+  const ifr = createElement('IFRAME');
+  appendChild(ifr);
+  const ret = cb(ifr.contentWindow);
+  removeChild(ifr);
+  return ret;
+}
 module.exports = {
+  runInNewRealm,
   BLOCKED_BLOB_URL: URL.createObjectURL(new Blob(['BLOCKED BY SNOW'], {
     type: 'text/plain'
   }))
@@ -676,22 +687,18 @@ module.exports = {
 /***/ }),
 
 /***/ 14:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-function natively(win, cb) {
-  const ifr = win.document.createElement('iframe');
-  const parent = win.document.head || win.document.documentElement;
-  parent.appendChild(ifr);
-  const ret = cb(ifr.contentWindow);
-  ifr.parentElement.removeChild(ifr);
-  return ret;
-}
+const {
+  runInNewRealm
+} = __webpack_require__(407);
 function natives(win) {
   const {
     EventTarget
   } = win; // PR#62
-  return natively(win, function (win) {
+  return runInNewRealm(function (win) {
     const {
+      URL,
       Proxy,
       JSON,
       Attr,
@@ -714,6 +721,7 @@ function natives(win) {
       HTMLObjectElement
     } = win;
     const bag = {
+      URL,
       Proxy,
       JSON,
       Attr,
@@ -745,6 +753,7 @@ function natives(win) {
 function setup(win) {
   const bag = natives(win);
   const {
+    URL,
     Proxy,
     Function,
     String,
@@ -791,7 +800,8 @@ function setup(win) {
     getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get,
     getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
     getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
-    getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get
+    getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
+    createObjectURL: Object.getOwnPropertyDescriptor(URL, 'createObjectURL').value
   });
   return {
     Proxy,
@@ -833,7 +843,8 @@ function setup(win) {
     getParentElement,
     getOwnerDocument,
     getDefaultView,
-    getBlobFileType
+    getBlobFileType,
+    createObjectURL
   };
   function getContentWindow(element, tag) {
     switch (tag) {
@@ -929,6 +940,9 @@ function setup(win) {
   }
   function getBlobFileType(blob) {
     return bag.getBlobFileType.call(blob);
+  }
+  function createObjectURL(object) {
+    return bag.createObjectURL(object);
   }
 }
 module.exports = setup(top);
@@ -1172,7 +1186,7 @@ const BLOB = 'Blob',
   FILE = 'File',
   MEDIA_SOURCE = 'MediaSource';
 const allowedBlobs = new Array();
-const allowedTypes = new Array('text/javascript', 'text/css');
+const allowedTypes = new Array('text/javascript', 'text/css', 'application/javascript', 'application/css');
 function getHook(native, kind) {
   return function (a, b) {
     const ret = new native(a, b);
@@ -1382,32 +1396,40 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
-  BLOCKED_BLOB_URL
+  BLOCKED_BLOB_URL,
+  runInNewRealm
 } = __webpack_require__(407);
 const {
   Map,
   toString,
-  stringStartsWith
+  stringStartsWith,
+  createObjectURL,
+  Blob
 } = __webpack_require__(14);
 const blobs = new Map();
-function syncGet(url, done) {
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', url, false);
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4 && xhr.status === 200) {
-      done(xhr.responseText);
-    }
-  };
-  xhr.send();
+function syncGet(url) {
+  return runInNewRealm(function (win) {
+    let content;
+    const xhr = new win.XMLHttpRequest();
+    xhr.open('GET', url, false);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        content = xhr.responseText;
+      }
+    };
+    xhr.send();
+    return content;
+  });
 }
 function swap(url) {
   if (!blobs.has(url)) {
-    syncGet(url, function (content) {
-      const js = `(function(){Object.defineProperty(URL, "createObjectURL", {value:()=>"${BLOCKED_BLOB_URL}"})}());` + content;
-      blobs.set(url, URL.createObjectURL(new Blob([js], {
-        type: 'text/javascript'
-      })));
-    });
+    const content = syncGet(url);
+    const js = `(function() {
+                Object.defineProperty(URL, "createObjectURL", {value:()=>"${BLOCKED_BLOB_URL}"})
+            }());` + content;
+    blobs.set(url, createObjectURL(new Blob([js], {
+      type: 'text/javascript'
+    })));
   }
   return blobs.get(url);
 }

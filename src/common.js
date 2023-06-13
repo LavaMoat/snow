@@ -12,7 +12,8 @@ function runInNewRealm(cb) {
 
 const BLOCKED_BLOB_MSG = `BLOCKED BY SNOW:
 Creating URL objects is not allowed under Snow protection within Web Workers.
-Learn more at https://github.com/LavaMoat/snow/pull/89/`;
+If this prevents your application from running correctly, please visit/report at https://github.com/LavaMoat/snow/pull/89#issuecomment-1589359673.
+Learn more at https://github.com/LavaMoat/snow/pull/89`;
 
 module.exports = {
     runInNewRealm,

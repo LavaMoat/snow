@@ -1,10 +1,9 @@
+const {BLOCKED_BLOB_URL} = require('./common');
 const {Object, Array, getBlobFileType} = require('./natives');
 const {error, ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN} = require('./log');
 
 const KIND = 'KIND', TYPE = 'TYPE';
 const BLOB = 'Blob', FILE = 'File', MEDIA_SOURCE = 'MediaSource';
-
-const BLOCKED = URL.createObjectURL(new Blob(['BLOCKED BY SNOW'], {type: 'text/plain'}));
 
 const allowedBlobs = new Array();
 const allowedTypes = new Array('text/javascript', 'text/css');
@@ -67,14 +66,13 @@ function isTypeForbidden(object) {
         return false;
     }
     return error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
-
 }
 
 function hook(win) {
     const native = win.URL.createObjectURL;
     function createObjectURL(object) {
         if (isBlobForbidden(object) || isTypeForbidden(object)) {
-            return BLOCKED;
+            return BLOCKED_BLOB_URL;
         }
         return native(object);
     }

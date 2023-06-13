@@ -74,6 +74,17 @@ module.exports = workaroundChromiumBug;
 
 /***/ }),
 
+/***/ 407:
+/***/ ((module) => {
+
+module.exports = {
+  BLOCKED_BLOB_URL: URL.createObjectURL(new Blob(['BLOCKED BY SNOW'], {
+    type: 'text/plain'
+  }))
+};
+
+/***/ }),
+
 /***/ 832:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -309,6 +320,9 @@ const {
   hookShadowDOM
 } = __webpack_require__(373);
 const {
+  hookWorker
+} = __webpack_require__(744);
+const {
   Object,
   Array,
   push,
@@ -357,6 +371,7 @@ function applyHooks(win) {
   hookEventListenersSetters(win, 'load');
   hookDOMInserters(win);
   hookShadowDOM(win);
+  hookWorker(win);
 }
 function onWin(win, cb) {
   const hook = shouldHook(win);
@@ -1139,6 +1154,9 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
+  BLOCKED_BLOB_URL
+} = __webpack_require__(407);
+const {
   Object,
   Array,
   getBlobFileType
@@ -1153,9 +1171,6 @@ const KIND = 'KIND',
 const BLOB = 'Blob',
   FILE = 'File',
   MEDIA_SOURCE = 'MediaSource';
-const BLOCKED = URL.createObjectURL(new Blob(['BLOCKED BY SNOW'], {
-  type: 'text/plain'
-}));
 const allowedBlobs = new Array();
 const allowedTypes = new Array('text/javascript', 'text/css');
 function getHook(native, kind) {
@@ -1226,7 +1241,7 @@ function hook(win) {
   const native = win.URL.createObjectURL;
   function createObjectURL(object) {
     if (isBlobForbidden(object) || isTypeForbidden(object)) {
-      return BLOCKED;
+      return BLOCKED_BLOB_URL;
     }
     return native(object);
   }
@@ -1359,6 +1374,58 @@ module.exports = {
   getFramesArray,
   getFrameTag,
   shadows
+};
+
+/***/ }),
+
+/***/ 744:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const {
+  BLOCKED_BLOB_URL
+} = __webpack_require__(407);
+const {
+  Map,
+  toString,
+  stringStartsWith
+} = __webpack_require__(14);
+const blobs = new Map();
+function syncGet(url, done) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', url, false);
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      done(xhr.responseText);
+    }
+  };
+  xhr.send();
+}
+function swap(url) {
+  if (!blobs.has(url)) {
+    syncGet(url, function (content) {
+      const js = `(function(){Object.defineProperty(URL, "createObjectURL", {value:()=>"${BLOCKED_BLOB_URL}"})}());` + content;
+      blobs.set(url, URL.createObjectURL(new Blob([js], {
+        type: 'text/javascript'
+      })));
+    });
+  }
+  return blobs.get(url);
+}
+function hook(win, native) {
+  return function Worker(aURL, options) {
+    const url = typeof aURL === 'string' ? aURL : toString(aURL);
+    if (stringStartsWith(url, 'blob')) {
+      return new native(swap(aURL), options);
+    }
+    return new native(aURL, options);
+  };
+}
+function hookWorker(win) {
+  const native = win.Worker;
+  win.Worker = hook(win, native);
+}
+module.exports = {
+  hookWorker
 };
 
 /***/ }),

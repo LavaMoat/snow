@@ -14,6 +14,8 @@ const allowedTypes = new Array(
     'image/jpeg',
     'image/jpg',
     'image/png',
+    'audio/ogg; codecs=opus',
+    'video/mp4',
 );
 
 function getHook(native, kind) {

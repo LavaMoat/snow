@@ -1464,9 +1464,9 @@ function hook(win) {
   win.Worker = function Worker(aURL, options) {
     const url = typeof aURL === 'string' ? aURL : toString(aURL);
     if (stringStartsWith(url, 'blob')) {
-      return new native(swap(aURL), options);
+      return new native(swap(url), options);
     }
-    return new native(aURL, options);
+    return new native(url, options);
   };
 }
 function hookWorker(win) {

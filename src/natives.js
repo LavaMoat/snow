@@ -111,6 +111,7 @@ function setup(win) {
         getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
         getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
         createObjectURL: Object.getOwnPropertyDescriptor(URL,'createObjectURL').value,
+        revokeObjectURL: Object.getOwnPropertyDescriptor(URL,'revokeObjectURL').value,
     });
 
     return {
@@ -155,6 +156,7 @@ function setup(win) {
         getDefaultView,
         getBlobFileType,
         createObjectURL,
+        revokeObjectURL,
     };
 
     function getContentWindow(element, tag) {
@@ -282,6 +284,10 @@ function setup(win) {
 
     function createObjectURL(object) {
         return bag.createObjectURL(object);
+    }
+
+    function revokeObjectURL(object) {
+        return bag.revokeObjectURL(object);
     }
 }
 

@@ -805,7 +805,8 @@ function setup(win) {
     getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
     getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
     getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
-    createObjectURL: Object.getOwnPropertyDescriptor(URL, 'createObjectURL').value
+    createObjectURL: Object.getOwnPropertyDescriptor(URL, 'createObjectURL').value,
+    revokeObjectURL: Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL').value
   });
   return {
     Proxy,
@@ -848,7 +849,8 @@ function setup(win) {
     getOwnerDocument,
     getDefaultView,
     getBlobFileType,
-    createObjectURL
+    createObjectURL,
+    revokeObjectURL
   };
   function getContentWindow(element, tag) {
     switch (tag) {
@@ -947,6 +949,9 @@ function setup(win) {
   }
   function createObjectURL(object) {
     return bag.createObjectURL(object);
+  }
+  function revokeObjectURL(object) {
+    return bag.revokeObjectURL(object);
   }
 }
 module.exports = setup(top);
@@ -1409,6 +1414,7 @@ const {
   toString,
   stringStartsWith,
   createObjectURL,
+  revokeObjectURL,
   Blob
 } = __webpack_require__(14);
 const blobs = new Map();
@@ -1443,8 +1449,19 @@ function swap(url) {
   }
   return blobs.get(url);
 }
-function hook(win, native) {
-  return function Worker(aURL, options) {
+function hookRevokeObjectURL(win) {
+  win.URL.revokeObjectURL = function (objectURL) {
+    const url = blobs.get(objectURL);
+    if (url) {
+      revokeObjectURL(url);
+      blobs.delete(url);
+    }
+    return revokeObjectURL(objectURL);
+  };
+}
+function hook(win) {
+  const native = win.Worker;
+  win.Worker = function Worker(aURL, options) {
     const url = typeof aURL === 'string' ? aURL : toString(aURL);
     if (stringStartsWith(url, 'blob')) {
       return new native(swap(aURL), options);
@@ -1453,8 +1470,8 @@ function hook(win, native) {
   };
 }
 function hookWorker(win) {
-  const native = win.Worker;
-  win.Worker = hook(win, native);
+  hookRevokeObjectURL(win);
+  hook(win);
 }
 module.exports = {
   hookWorker

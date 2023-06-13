@@ -1,5 +1,5 @@
 const {BLOCKED_BLOB_URL, BLOCKED_BLOB_MSG, runInNewRealm} = require('./common');
-const {Map, toString, stringStartsWith, createObjectURL, Blob} = require('./natives');
+const {Map, toString, stringStartsWith, createObjectURL, revokeObjectURL, Blob} = require('./natives');
 
 const blobs = new Map();
 
@@ -34,19 +34,31 @@ function swap(url) {
     return blobs.get(url);
 }
 
-function hook(win, native) {
-    return function Worker(aURL, options) {
+function hookRevokeObjectURL(win) {
+    win.URL.revokeObjectURL = function (objectURL) {
+        const url = blobs.get(objectURL);
+        if (url) {
+            revokeObjectURL(url);
+            blobs.delete(url);
+        }
+        return revokeObjectURL(objectURL);
+    }
+}
+
+function hook(win) {
+    const native = win.Worker;
+    win.Worker = function Worker(aURL, options) {
         const url = typeof aURL === 'string' ? aURL : toString(aURL);
         if (stringStartsWith(url, 'blob')) {
             return new native(swap(aURL), options);
         }
         return new native(aURL, options);
-    }
+    };
 }
 
 function hookWorker(win) {
-    const native = win.Worker;
-    win.Worker = hook(win, native);
+    hookRevokeObjectURL(win);
+    hook(win);
 }
 
 module.exports = {hookWorker};

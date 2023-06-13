@@ -11,6 +11,9 @@ const allowedTypes = new Array(
     'text/css',
     'application/javascript',
     'application/css',
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
 );
 
 function getHook(native, kind) {

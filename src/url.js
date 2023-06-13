@@ -16,6 +16,8 @@ const allowedTypes = new Array(
     'image/png',
     'audio/ogg; codecs=opus',
     'video/mp4',
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 );
 
 function getHook(native, kind) {

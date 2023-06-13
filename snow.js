@@ -1196,7 +1196,7 @@ const BLOB = 'Blob',
   FILE = 'File',
   MEDIA_SOURCE = 'MediaSource';
 const allowedBlobs = new Array();
-const allowedTypes = new Array('text/javascript', 'text/css', 'application/javascript', 'application/css', 'image/jpeg', 'image/jpg', 'image/png', 'audio/ogg; codecs=opus', 'video/mp4');
+const allowedTypes = new Array('text/javascript', 'text/css', 'application/javascript', 'application/css', 'image/jpeg', 'image/jpg', 'image/png', 'audio/ogg; codecs=opus', 'video/mp4', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 function getHook(native, kind) {
   return function (a, b) {
     const ret = new native(a, b);

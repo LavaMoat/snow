@@ -1,4 +1,4 @@
-const {BLOCKED_BLOB_URL, runInNewRealm} = require('./common');
+const {BLOCKED_BLOB_URL, BLOCKED_BLOB_MSG, runInNewRealm} = require('./common');
 const {Map, toString, stringStartsWith, createObjectURL, Blob} = require('./natives');
 
 const blobs = new Map();
@@ -22,8 +22,13 @@ function swap(url) {
     if (!blobs.has(url)) {
         const content = syncGet(url);
         const js = `(function() {
-                Object.defineProperty(URL, "createObjectURL", {value:()=>"${BLOCKED_BLOB_URL}"})
-            }());` + content;
+                Object.defineProperty(URL, 'createObjectURL', {value:() => {
+                    console.log(\`${BLOCKED_BLOB_MSG}\`);
+                    return '${BLOCKED_BLOB_URL}';
+                }})
+            }());
+            
+            ` + content;
         blobs.set(url, createObjectURL(new Blob([js], {type: 'text/javascript'})));
     }
     return blobs.get(url);

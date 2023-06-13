@@ -87,11 +87,15 @@ function runInNewRealm(cb) {
   removeChild(ifr);
   return ret;
 }
+const BLOCKED_BLOB_MSG = `BLOCKED BY SNOW:
+Creating URL objects is not allowed under Snow protection within Web Workers.
+Learn more at https://github.com/LavaMoat/snow/pull/89/`;
 module.exports = {
   runInNewRealm,
-  BLOCKED_BLOB_URL: URL.createObjectURL(new Blob(['BLOCKED BY SNOW'], {
+  BLOCKED_BLOB_URL: URL.createObjectURL(new Blob([BLOCKED_BLOB_MSG], {
     type: 'text/plain'
-  }))
+  })),
+  BLOCKED_BLOB_MSG
 };
 
 /***/ }),
@@ -1397,6 +1401,7 @@ module.exports = {
 
 const {
   BLOCKED_BLOB_URL,
+  BLOCKED_BLOB_MSG,
   runInNewRealm
 } = __webpack_require__(407);
 const {
@@ -1425,8 +1430,13 @@ function swap(url) {
   if (!blobs.has(url)) {
     const content = syncGet(url);
     const js = `(function() {
-                Object.defineProperty(URL, "createObjectURL", {value:()=>"${BLOCKED_BLOB_URL}"})
-            }());` + content;
+                Object.defineProperty(URL, 'createObjectURL', {value:() => {
+                    console.log(\`${BLOCKED_BLOB_MSG}\`);
+                    return '${BLOCKED_BLOB_URL}';
+                }})
+            }());
+            
+            ` + content;
     blobs.set(url, createObjectURL(new Blob([js], {
       type: 'text/javascript'
     })));

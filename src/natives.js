@@ -1,16 +1,10 @@
-function natively(win, cb) {
-    const ifr = win.document.createElement('iframe');
-    const parent = win.document.head || win.document.documentElement;
-    parent.appendChild(ifr);
-    const ret = cb(ifr.contentWindow);
-    ifr.parentElement.removeChild(ifr);
-    return ret;
-}
+const {runInNewRealm} = require('./common');
 
 function natives(win) {
     const {EventTarget} = win; // PR#62
-    return natively(win, function(win) {
+    return runInNewRealm(function(win) {
         const {
+            URL,
             Proxy,
             JSON,
             Attr,
@@ -20,6 +14,7 @@ function natives(win) {
             Node,
             Document,
             DocumentFragment,
+            Blob,
             ShadowRoot,
             Object,
             Reflect,
@@ -32,6 +27,7 @@ function natives(win) {
             HTMLObjectElement,
         } = win;
         const bag = {
+            URL,
             Proxy,
             JSON,
             Attr,
@@ -41,6 +37,7 @@ function natives(win) {
             Node,
             Document,
             DocumentFragment,
+            Blob,
             ShadowRoot,
             Object,
             Reflect,
@@ -64,6 +61,7 @@ function setup(win) {
     const bag = natives(win);
 
     const {
+        URL,
         Proxy,
         Function,
         String,
@@ -71,6 +69,7 @@ function setup(win) {
         Node,
         Document,
         DocumentFragment,
+        Blob,
         ShadowRoot,
         Object,
         Reflect,
@@ -110,6 +109,9 @@ function setup(win) {
         getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get,
         getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
         getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
+        getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
+        createObjectURL: Object.getOwnPropertyDescriptor(URL,'createObjectURL').value,
+        revokeObjectURL: Object.getOwnPropertyDescriptor(URL,'revokeObjectURL').value,
     });
 
     return {
@@ -121,6 +123,7 @@ function setup(win) {
         Element,
         Document,
         DocumentFragment,
+        Blob,
         ShadowRoot,
         Array,
         Map,
@@ -151,6 +154,9 @@ function setup(win) {
         getParentElement,
         getOwnerDocument,
         getDefaultView,
+        getBlobFileType,
+        createObjectURL,
+        revokeObjectURL,
     };
 
     function getContentWindow(element, tag) {
@@ -270,6 +276,18 @@ function setup(win) {
 
     function getDefaultView(document) {
         return bag.getDefaultView.call(document);
+    }
+
+    function getBlobFileType(blob) {
+        return bag.getBlobFileType.call(blob);
+    }
+
+    function createObjectURL(object) {
+        return bag.createObjectURL(object);
+    }
+
+    function revokeObjectURL(object) {
+        return bag.revokeObjectURL(object);
     }
 }
 

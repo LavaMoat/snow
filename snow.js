@@ -569,8 +569,7 @@ const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
 const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
-const ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN = 7;
-const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 8;
+const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
 const {
   console
 } = top;
@@ -603,11 +602,6 @@ function warn(msg, a, b) {
 function error(msg, a, b, c) {
   let bail;
   switch (msg) {
-    case ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN:
-      const object = a;
-      bail = true;
-      console.error('SNOW:', `Blob/File/MediaSource object:`, object, `was not created normally via the proper constructor,`, `and therefore calling "URL.createObjectURL()" on it is blocked`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.', '\n');
-      break;
     case ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN:
       const object2 = a,
         kind = b,
@@ -646,7 +640,6 @@ module.exports = {
   ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
   WARN_DECLARATIVE_SHADOWS,
   ERR_EXTENDING_FRAMABLES_BLOCKED,
-  ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN,
   ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN
 };
 
@@ -1187,7 +1180,6 @@ const {
 } = __webpack_require__(14);
 const {
   error,
-  ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN,
   ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN
 } = __webpack_require__(312);
 const KIND = 'KIND',
@@ -1195,7 +1187,9 @@ const KIND = 'KIND',
 const BLOB = 'Blob',
   FILE = 'File',
   MEDIA_SOURCE = 'MediaSource';
-const allowedBlobs = new Array();
+
+// blobs that were JS crafted by Blob constructor rather than naturally created by the browser from a remote resource
+const artificialBlobs = new Array();
 const allowedTypes = new Array('text/javascript', 'text/css', 'application/javascript', 'application/css', 'image/jpeg', 'image/jpg', 'image/png', 'audio/ogg; codecs=opus', 'video/mp4', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 function getHook(native, kind) {
   return function (a, b) {
@@ -1208,7 +1202,7 @@ function getHook(native, kind) {
         value: getBlobFileType(ret)
       });
     }
-    allowedBlobs.push(ret);
+    artificialBlobs.push(ret);
     return ret;
   };
 }
@@ -1221,6 +1215,9 @@ function hookBlob(win) {
   // to pass 'Blob.prototype.isPrototypeOf(b)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
   Object.setPrototypeOf(native.prototype, Blob.prototype);
   win[BLOB] = Blob;
+  Object.defineProperty(native.prototype, 'constructor', {
+    value: Blob
+  });
 }
 function hookFile(win) {
   const native = win[FILE];
@@ -1231,6 +1228,9 @@ function hookFile(win) {
   // to pass 'File.prototype.isPrototypeOf(f)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
   Object.setPrototypeOf(native.prototype, File.prototype);
   win[FILE] = File;
+  Object.defineProperty(native.prototype, 'constructor', {
+    value: File
+  });
 }
 function hookMediaSource(win) {
   const native = win[MEDIA_SOURCE];
@@ -1241,14 +1241,12 @@ function hookMediaSource(win) {
   // MediaSource is expected to have static own props (e.g. isTypeSupported)
   Object.setPrototypeOf(MediaSource, native);
   win[MEDIA_SOURCE] = MediaSource;
+  Object.defineProperty(native.prototype, 'constructor', {
+    value: MediaSource
+  });
 }
-function isBlobForbidden(object) {
-  const index = allowedBlobs.indexOf(object);
-  if (index > -1) {
-    allowedBlobs.splice(index, 1);
-    return false;
-  }
-  return error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, object);
+function isBlobArtificial(object) {
+  return artificialBlobs.includes(object);
 }
 function isTypeForbidden(object) {
   const kind = object[KIND];
@@ -1264,7 +1262,7 @@ function isTypeForbidden(object) {
 function hook(win) {
   const native = win.URL.createObjectURL;
   function createObjectURL(object) {
-    if (isBlobForbidden(object) || isTypeForbidden(object)) {
+    if (isBlobArtificial(object) && isTypeForbidden(object)) {
       return BLOCKED_BLOB_URL;
     }
     return native(object);

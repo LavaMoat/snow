@@ -1,11 +1,12 @@
 const {BLOCKED_BLOB_URL} = require('./common');
 const {Object, Array, getBlobFileType} = require('./natives');
-const {error, ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN} = require('./log');
+const {error, ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN} = require('./log');
 
 const KIND = 'KIND', TYPE = 'TYPE';
 const BLOB = 'Blob', FILE = 'File', MEDIA_SOURCE = 'MediaSource';
 
-const allowedBlobs = new Array();
+// blobs that were JS crafted by Blob constructor rather than naturally created by the browser from a remote resource
+const artificialBlobs = new Array();
 const allowedTypes = new Array(
     'text/javascript',
     'text/css',
@@ -27,7 +28,7 @@ function getHook(native, kind) {
         if (kind === BLOB || kind === FILE) {
             Object.defineProperty(ret, TYPE, { value: getBlobFileType(ret) });
         }
-        allowedBlobs.push(ret);
+        artificialBlobs.push(ret);
         return ret;
     }
 }
@@ -39,6 +40,7 @@ function hookBlob(win) {
     // to pass 'Blob.prototype.isPrototypeOf(b)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
     Object.setPrototypeOf(native.prototype, Blob.prototype);
     win[BLOB] = Blob;
+    Object.defineProperty(native.prototype, 'constructor', {value: Blob});
 }
 
 function hookFile(win) {
@@ -48,6 +50,7 @@ function hookFile(win) {
     // to pass 'File.prototype.isPrototypeOf(f)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
     Object.setPrototypeOf(native.prototype, File.prototype);
     win[FILE] = File;
+    Object.defineProperty(native.prototype, 'constructor', {value: File});
 }
 
 function hookMediaSource(win) {
@@ -57,15 +60,11 @@ function hookMediaSource(win) {
     // MediaSource is expected to have static own props (e.g. isTypeSupported)
     Object.setPrototypeOf(MediaSource, native);
     win[MEDIA_SOURCE] = MediaSource;
+    Object.defineProperty(native.prototype, 'constructor', {value: MediaSource});
 }
 
-function isBlobForbidden(object) {
-    const index = allowedBlobs.indexOf(object);
-    if (index > -1) {
-        allowedBlobs.splice(index, 1);
-        return false;
-    }
-    return error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, object);
+function isBlobArtificial(object) {
+    return artificialBlobs.includes(object);
 
 }
 function isTypeForbidden(object) {
@@ -83,7 +82,7 @@ function isTypeForbidden(object) {
 function hook(win) {
     const native = win.URL.createObjectURL;
     function createObjectURL(object) {
-        if (isBlobForbidden(object) || isTypeForbidden(object)) {
+        if (isBlobArtificial(object) && isTypeForbidden(object)) {
             return BLOCKED_BLOB_URL;
         }
         return native(object);

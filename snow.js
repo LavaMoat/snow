@@ -74,6 +74,33 @@ module.exports = workaroundChromiumBug;
 
 /***/ }),
 
+/***/ 407:
+/***/ ((module) => {
+
+const createElement = Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value.bind(document);
+const appendChild = Object.getOwnPropertyDescriptor(Node.prototype, 'appendChild').value.bind(document.documentElement);
+const removeChild = Object.getOwnPropertyDescriptor(Node.prototype, 'removeChild').value.bind(document.documentElement);
+function runInNewRealm(cb) {
+  const ifr = createElement('IFRAME');
+  appendChild(ifr);
+  const ret = cb(ifr.contentWindow);
+  removeChild(ifr);
+  return ret;
+}
+const BLOCKED_BLOB_MSG = `BLOCKED BY SNOW:
+Creating URL objects is not allowed under Snow protection within Web Workers.
+If this prevents your application from running correctly, please visit/report at https://github.com/LavaMoat/snow/pull/89#issuecomment-1589359673.
+Learn more at https://github.com/LavaMoat/snow/pull/89`;
+module.exports = {
+  runInNewRealm,
+  BLOCKED_BLOB_URL: URL.createObjectURL(new Blob([BLOCKED_BLOB_MSG], {
+    type: 'text/plain'
+  })),
+  BLOCKED_BLOB_MSG
+};
+
+/***/ }),
+
 /***/ 832:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -309,6 +336,9 @@ const {
   hookShadowDOM
 } = __webpack_require__(373);
 const {
+  hookWorker
+} = __webpack_require__(744);
+const {
   Object,
   Array,
   push,
@@ -363,6 +393,7 @@ function applyHooks(win) {
   hookEventListenersSetters(win, 'load');
   hookDOMInserters(win);
   hookShadowDOM(win);
+  hookWorker(win);
 }
 function onWin(win, cb) {
   const hook = shouldHook(win);
@@ -539,19 +570,19 @@ module.exports = hookEventListenersSetters;
 /***/ }),
 
 /***/ 312:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module) => {
 
-const {
-  console
-} = __webpack_require__(14);
 const ERR_MARK_NEW_WINDOW_FAILED = 1;
 const WARN_OPEN_API_LIMITED = 2;
 const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
 const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
-const ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN = 7;
+const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
 const WARN_SNOW_FAILED_ON_TOP = 8;
+const {
+  console
+} = top;
 function warn(msg, a, b) {
   let bail;
   switch (msg) {
@@ -583,14 +614,15 @@ function warn(msg, a, b) {
   }
   return bail;
 }
-function error(msg, a, b) {
+function error(msg, a, b, c) {
   let bail;
   switch (msg) {
-    case ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN:
-      const type = a,
-        object = b;
+    case ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN:
+      const object2 = a,
+        kind = b,
+        type = c;
       bail = true;
-      console.error('SNOW:', `calling "URL.createObjectURL()" on a "${type}" object is forbidden under snow protection:`, object, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/43#issuecomment-1434063891', '.', '\n');
+      console.error('SNOW:', `${kind} object:`, object2, `of type "${type}" is not allowed and therefore is blocked`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.', '\n');
       break;
     case ERR_EXTENDING_FRAMABLES_BLOCKED:
       const name = a,
@@ -623,7 +655,7 @@ module.exports = {
   ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
   WARN_DECLARATIVE_SHADOWS,
   ERR_EXTENDING_FRAMABLES_BLOCKED,
-  ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN,
+  ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN,
   WARN_SNOW_FAILED_ON_TOP
 };
 
@@ -669,23 +701,18 @@ module.exports = {
 /***/ }),
 
 /***/ 14:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-function natively(win, cb) {
-  const ifr = win.document.createElement('iframe');
-  const parent = win.document.head || win.document.documentElement;
-  parent.appendChild(ifr);
-  const ret = cb(ifr.contentWindow);
-  ifr.parentElement.removeChild(ifr);
-  return ret;
-}
+const {
+  runInNewRealm
+} = __webpack_require__(407);
 function natives(win) {
   const {
     EventTarget
   } = win; // PR#62
-  return natively(win, function (win) {
+  return runInNewRealm(function (win) {
     const {
-      console,
+      URL,
       Proxy,
       JSON,
       Attr,
@@ -695,6 +722,7 @@ function natives(win) {
       Node,
       Document,
       DocumentFragment,
+      Blob,
       ShadowRoot,
       Object,
       Reflect,
@@ -707,7 +735,7 @@ function natives(win) {
       HTMLObjectElement
     } = win;
     const bag = {
-      console,
+      URL,
       Proxy,
       JSON,
       Attr,
@@ -717,6 +745,7 @@ function natives(win) {
       Node,
       Document,
       DocumentFragment,
+      Blob,
       ShadowRoot,
       Object,
       Reflect,
@@ -738,7 +767,7 @@ function natives(win) {
 function setup(win) {
   const bag = natives(win);
   const {
-    console,
+    URL,
     Proxy,
     Function,
     String,
@@ -746,6 +775,7 @@ function setup(win) {
     Node,
     Document,
     DocumentFragment,
+    Blob,
     ShadowRoot,
     Object,
     Reflect,
@@ -783,10 +813,12 @@ function setup(win) {
     getFrameElement: Object.getOwnPropertyDescriptor(win, 'frameElement').get,
     getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get,
     getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
-    getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get
+    getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
+    getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
+    createObjectURL: Object.getOwnPropertyDescriptor(URL, 'createObjectURL').value,
+    revokeObjectURL: Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL').value
   });
   return {
-    console,
     Proxy,
     Object,
     Reflect,
@@ -795,6 +827,7 @@ function setup(win) {
     Element,
     Document,
     DocumentFragment,
+    Blob,
     ShadowRoot,
     Array,
     Map,
@@ -824,7 +857,10 @@ function setup(win) {
     getFrameElement,
     getParentElement,
     getOwnerDocument,
-    getDefaultView
+    getDefaultView,
+    getBlobFileType,
+    createObjectURL,
+    revokeObjectURL
   };
   function getContentWindow(element, tag) {
     switch (tag) {
@@ -917,6 +953,15 @@ function setup(win) {
   }
   function getDefaultView(document) {
     return bag.getDefaultView.call(document);
+  }
+  function getBlobFileType(blob) {
+    return bag.getBlobFileType.call(blob);
+  }
+  function createObjectURL(object) {
+    return bag.createObjectURL(object);
+  }
+  function revokeObjectURL(object) {
+    return bag.revokeObjectURL(object);
   }
 }
 module.exports = setup(top);
@@ -1142,41 +1187,111 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
-  Object
+  BLOCKED_BLOB_URL
+} = __webpack_require__(407);
+const {
+  Object,
+  Array,
+  getBlobFileType
 } = __webpack_require__(14);
 const {
   error,
-  ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN
+  ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN
 } = __webpack_require__(312);
+const KIND = 'KIND',
+  TYPE = 'TYPE';
 const BLOB = 'Blob',
-  FILE = 'File';
-function hookObject(win, prop) {
-  const native = win[prop];
-  return function (a, b, c) {
-    const ret = new native(a, b, c);
-    Object.defineProperty(ret, prop, {
-      value: true
+  FILE = 'File',
+  MEDIA_SOURCE = 'MediaSource';
+
+// blobs that were JS crafted by Blob constructor rather than naturally created by the browser from a remote resource
+const artificialBlobs = new Array();
+const allowedTypes = new Array('text/javascript', 'text/css', 'application/javascript', 'application/css', 'image/jpeg', 'image/jpg', 'image/png', 'audio/ogg; codecs=opus', 'video/mp4', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+function getHook(native, kind) {
+  return function (a, b) {
+    const ret = new native(a, b);
+    Object.defineProperty(ret, KIND, {
+      value: kind
     });
+    if (kind === BLOB || kind === FILE) {
+      Object.defineProperty(ret, TYPE, {
+        value: getBlobFileType(ret)
+      });
+    }
+    artificialBlobs.push(ret);
     return ret;
   };
 }
-function hook(win, native) {
-  return function (object) {
-    const type = object[BLOB] ? BLOB : object[FILE] ? FILE : null;
-    if (type) {
-      if (error(ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN, type, object)) {
-        return;
-      }
+function hookBlob(win) {
+  const native = win[BLOB];
+  const hook = getHook(native, BLOB);
+  function Blob(a, b) {
+    return hook(a, b);
+  }
+  // to pass 'Blob.prototype.isPrototypeOf(b)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
+  Object.setPrototypeOf(native.prototype, Blob.prototype);
+  win[BLOB] = Blob;
+  Object.defineProperty(native.prototype, 'constructor', {
+    value: Blob
+  });
+}
+function hookFile(win) {
+  const native = win[FILE];
+  const hook = getHook(native, FILE);
+  function File(a, b) {
+    return hook(a, b);
+  }
+  // to pass 'File.prototype.isPrototypeOf(f)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
+  Object.setPrototypeOf(native.prototype, File.prototype);
+  win[FILE] = File;
+  Object.defineProperty(native.prototype, 'constructor', {
+    value: File
+  });
+}
+function hookMediaSource(win) {
+  const native = win[MEDIA_SOURCE];
+  const hook = getHook(native, MEDIA_SOURCE);
+  function MediaSource(a, b) {
+    return hook(a, b);
+  }
+  // MediaSource is expected to have static own props (e.g. isTypeSupported)
+  Object.setPrototypeOf(MediaSource, native);
+  win[MEDIA_SOURCE] = MediaSource;
+  Object.defineProperty(native.prototype, 'constructor', {
+    value: MediaSource
+  });
+}
+function isBlobArtificial(object) {
+  return artificialBlobs.includes(object);
+}
+function isTypeForbidden(object) {
+  const kind = object[KIND];
+  if (kind !== BLOB && kind !== FILE) {
+    return false;
+  }
+  const type = object[TYPE];
+  if (allowedTypes.includes(type)) {
+    return false;
+  }
+  return error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
+}
+function hook(win) {
+  const native = win.URL.createObjectURL;
+  function createObjectURL(object) {
+    if (isBlobArtificial(object) && isTypeForbidden(object)) {
+      return BLOCKED_BLOB_URL;
     }
     return native(object);
-  };
+  }
+  Object.defineProperty(win.URL, 'createObjectURL', {
+    value: createObjectURL
+  });
 }
 function hookCreateObjectURL(win) {
-  Object.defineProperty(win.URL, 'createObjectURL', {
-    value: hook(win, win.URL.createObjectURL)
-  });
-  win[BLOB] = hookObject(win, BLOB);
-  win[FILE] = hookObject(win, FILE);
+  hook(win);
+  hookBlob(win);
+  hookFile(win);
+  hookMediaSource(win);
 }
 module.exports = hookCreateObjectURL;
 
@@ -1297,6 +1412,84 @@ module.exports = {
   getFramesArray,
   getFrameTag,
   shadows
+};
+
+/***/ }),
+
+/***/ 744:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const {
+  BLOCKED_BLOB_URL,
+  BLOCKED_BLOB_MSG,
+  runInNewRealm
+} = __webpack_require__(407);
+const {
+  Map,
+  toString,
+  stringStartsWith,
+  createObjectURL,
+  revokeObjectURL,
+  Blob
+} = __webpack_require__(14);
+const blobs = new Map();
+function syncGet(url) {
+  return runInNewRealm(function (win) {
+    let content;
+    const xhr = new win.XMLHttpRequest();
+    xhr.open('GET', url, false);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        content = xhr.responseText;
+      }
+    };
+    xhr.send();
+    return content;
+  });
+}
+function swap(url) {
+  if (!blobs.has(url)) {
+    const content = syncGet(url);
+    const js = `(function() {
+                Object.defineProperty(URL, 'createObjectURL', {value:() => {
+                    console.log(\`${BLOCKED_BLOB_MSG}\`);
+                    return '${BLOCKED_BLOB_URL}';
+                }})
+            }());
+            
+            ` + content;
+    blobs.set(url, createObjectURL(new Blob([js], {
+      type: 'text/javascript'
+    })));
+  }
+  return blobs.get(url);
+}
+function hookRevokeObjectURL(win) {
+  win.URL.revokeObjectURL = function (objectURL) {
+    const url = blobs.get(objectURL);
+    if (url) {
+      revokeObjectURL(url);
+      blobs.delete(url);
+    }
+    return revokeObjectURL(objectURL);
+  };
+}
+function hook(win) {
+  const native = win.Worker;
+  win.Worker = function Worker(aURL, options) {
+    const url = typeof aURL === 'string' ? aURL : toString(aURL);
+    if (stringStartsWith(url, 'blob')) {
+      return new native(swap(url), options);
+    }
+    return new native(url, options);
+  };
+}
+function hookWorker(win) {
+  hookRevokeObjectURL(win);
+  hook(win);
+}
+module.exports = {
+  hookWorker
 };
 
 /***/ }),

@@ -94,13 +94,22 @@ describe('test url', async function () {
                 top.bypass = bypass;
                 setTimeout(top.bypass, 200, [top]);
                 const workerJs = `postMessage(URL.createObjectURL(new Blob(["<script>top.bypass([window])</script>"], {type: "text/html"})));`
-                const workerBlob = new Blob([workerJs], {type: "text/plain"})
-                const w = new Worker(URL.createObjectURL(workerBlob))
-                w.onmessage = (msg) => {
-                    console.log(msg);
-                    const f = document.createElement("iframe");
-                    document.body.appendChild(f)
-                    f.src = msg.data;
+                for (const type of [
+                    "text/javascript",
+                    "text/plain",
+                    "application/javascript",
+                    "application/plain",
+                    "text/html",
+                    "application/html",
+                ]) {
+                    const w1 = new Worker(URL.createObjectURL(new Blob([workerJs], {type})))
+                    const w2 = new Worker(`data:${type},${workerJs}`);
+                    w2.onmessage = w1.onmessage = (msg) => {
+                        console.log(msg);
+                        const f = document.createElement("iframe");
+                        document.body.appendChild(f)
+                        f.src = msg.data;
+                    }
                 }
             }());
         });
@@ -144,6 +153,29 @@ describe('test url', async function () {
 <?xml-stylesheet type="text/xsl" href="data:text/xml;base64,${btoa(xslt)}" ?>
 <asdf>meep</asdf>`;
                 f.src = URL.createObjectURL(new Blob([xml], {type: "text/xml"}));
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an iframe that is loading a blob url constructed of a native blob by the browser', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'https://weizman.github.io/content/img/gpt.png', true);
+                xhr.responseType = 'blob';
+                xhr.onload = function(e) {
+                    top.bypass = bypass;
+                    setTimeout(top.bypass, 200, [top]);
+                    if (this.status === 200) {
+                        const f = document.createElement('iframe');
+                        document.body.appendChild(f);
+                        var blob = this.response;
+                        f.src = URL.createObjectURL(new blob.constructor(["<script>top.bypass([window])</script>"], {type: "text/html"}));
+                    }
+                };
+                xhr.send();
             }());
         });
         expect(result).toBe('V');

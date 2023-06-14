@@ -6,6 +6,7 @@ const hookRequest = require('./request');
 const hookEventListenersSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
+const {hookWorker} = require('./worker');
 const {Object, Array, push, addEventListener, getFrameElement} = require('./natives');
 const {isMarked, mark} = require('./mark');
 const {error, warn, WARN_SNOW_FAILED_ON_TOP, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
@@ -48,6 +49,7 @@ function applyHooks(win) {
     hookEventListenersSetters(win, 'load');
     hookDOMInserters(win);
     hookShadowDOM(win);
+    hookWorker(win);
 }
 
 function onWin(win, cb) {

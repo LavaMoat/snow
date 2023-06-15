@@ -55,6 +55,7 @@ function applyHooks(win) {
 function onWin(win, cb) {
     const hook = shouldHook(win);
     if (hook) {
+        win.SNOW || Object.defineProperty(win, 'SNOW', {value:snow});
         applyHooks(win);
         for (let i = 0; i < callbacks.length; i++) {
             const stop = callbacks[i](win);
@@ -70,10 +71,7 @@ function onWin(win, cb) {
 
 const callbacks = new Array();
 
-module.exports = function snow(cb, win) {
-    if (win !== top) {
-        return;
-    }
+function snow(cb, win) {
     if (typeof cb !== 'function') {
         const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
         if (bail) {
@@ -91,3 +89,5 @@ module.exports = function snow(cb, win) {
     push(callbacks, cb);
     onWin(top, cb);
 }
+
+module.exports = snow;

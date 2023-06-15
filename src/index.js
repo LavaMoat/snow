@@ -11,10 +11,20 @@ const {Object, Array, push, addEventListener, getFrameElement} = require('./nati
 const {isMarked, mark} = require('./mark');
 const {error, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
-function setTopUtil(prop, val) {
+function makeWindowUtilSetter(prop, val) {
     const desc = Object.create(null);
     desc.value = val;
-    Object.defineProperty(top, prop, desc);
+    return function(win) { Object.defineProperty(win, prop, desc) };
+}
+
+const setSnowWindowUtil = makeWindowUtilSetter('SNOW_WINDOW', function(win) { onWin(win) });
+const setSnowFrameUtil = makeWindowUtilSetter('SNOW_FRAME', function(frame) { hook(frame); });
+const setSnowUtil = makeWindowUtilSetter('SNOW', snow);
+
+function setWindowUtil(win, prop, val) {
+    const desc = Object.create(null);
+    desc.value = val;
+    Object.defineProperty(win, prop, desc);
 }
 
 function shouldHook(win) {
@@ -37,6 +47,7 @@ function onLoad(win) {
 }
 
 function applyHooks(win) {
+    setSnowUtil(win);
     onLoad(win);
     hookCreateObjectURL(win);
     hookCustoms(win);
@@ -66,21 +77,17 @@ function onWin(win, cb) {
 
 const callbacks = new Array();
 
-module.exports = function snow(cb) {
+function snow(cb) {
     if (typeof cb !== 'function') {
         const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
         if (bail) {
             return;
         }
     }
-    if (!callbacks.length) {
-        setTopUtil('SNOW_WINDOW', function(win) {
-            onWin(win);
-        });
-        setTopUtil('SNOW_FRAME', function(frame) {
-            hook(frame);
-        });
-    }
+    setSnowWindowUtil(top);
+    setSnowFrameUtil(top);
     push(callbacks, cb);
     onWin(top, cb);
 }
+
+module.exports = snow;

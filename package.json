@@ -20,8 +20,8 @@
     "webpack-cli": "^4.6.0"
   },
   "scripts": {
-    "use-strict-dev": "node -p 'fs.writeFileSync(`snow.js`, `(function(){\n\"use strict\";\n` + fs.readFileSync(`snow.js`)+ `\n}())`) , `successfully wrapped snow.js with use-strict scope`'",
-    "use-strict-prod": "node -p 'fs.writeFileSync(`snow.prod.js`, `(function(){\"use strict\";` + fs.readFileSync(`snow.prod.js`)+ `}())`) , `successfully wrapped snow.prod.js with use-strict scope`'",
+    "use-strict-dev": "node -p 'fs.writeFileSync(`snow.js`, `(function(){\n\"use strict\";\nif (typeof SNOW === \"function\") return;\n` + fs.readFileSync(`snow.js`)+ `\n}())`) , `successfully wrapped snow.js with use-strict scope`'",
+    "use-strict-prod": "node -p 'fs.writeFileSync(`snow.prod.js`, `(function(){\"use strict\";if (typeof SNOW === \"function\") return;` + fs.readFileSync(`snow.prod.js`)+ `}())`) , `successfully wrapped snow.prod.js with use-strict scope`'",
     "build-dev": "webpack --config ./webpack.config.js && yarn use-strict-dev",
     "build-prod": "webpack --config ./webpack.prod.config.js && yarn use-strict-prod",
     "build": "yarn build-prod & yarn build-dev",

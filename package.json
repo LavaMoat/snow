@@ -11,7 +11,7 @@
     "@wdio/mocha-framework": "^7.5.3",
     "@wdio/spec-reporter": "^7.5.3",
     "babel-loader": "^8.2.2",
-    "chromedriver": "^113.0.0",
+    "chromedriver": "^114.0.0",
     "geckodriver": "^3.2.0",
     "wdio-chromedriver-service": "7.0.0",
     "wdio-safaridriver-service": "^2.0.0",

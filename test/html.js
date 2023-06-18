@@ -193,7 +193,7 @@ describe('test HTML injections', async function () {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 top.bypass = bypass;
-                testdiv1.innerHTML = `<iframe srcdoc="<iframe></iframe><script>top.bypass([frames[0])</script>"></iframe>`;
+                testdiv1.innerHTML = `<iframe srcdoc="<iframe></iframe><script>top.bypass([frames[0]])</script>"></iframe>`;
             }());
         });
         expect(result).toBe('V');

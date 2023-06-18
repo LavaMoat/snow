@@ -1,12 +1,18 @@
 const {tagName, nodeType, slice, Array, parse, stringify,
     Node, Document, DocumentFragment, Element, ShadowRoot, getContentWindow,
-    getDefaultView, getOwnerDocument, stringToLowerCase,
+    getDefaultView, getOwnerDocument, stringToLowerCase, Object,
 } = require('./natives');
 
 const shadows = new Array();
 
 function isShadow(node) {
     return shadows.includes(node);
+}
+
+function makeWindowUtilSetter(prop, val) {
+    const desc = Object.create(null);
+    desc.value = val;
+    return function(win) { Object.defineProperty(win, prop, desc) };
 }
 
 function isTrustedHTML(node) {
@@ -118,4 +124,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {toArray, isTagFramable, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};
+module.exports = {makeWindowUtilSetter, toArray, isTagFramable, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};

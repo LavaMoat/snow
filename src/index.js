@@ -7,25 +7,14 @@ const hookEventListenersSetters = require('./listeners');
 const hookDOMInserters = require('./inserters');
 const {hookShadowDOM} = require('./shadow');
 const {hookWorker} = require('./worker');
-const {Object, Array, push, addEventListener, getFrameElement} = require('./natives');
+const {Array, push, addEventListener, getFrameElement} = require('./natives');
+const {makeWindowUtilSetter} = require('./utils');
 const {isMarked, mark} = require('./mark');
 const {error, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
-
-function makeWindowUtilSetter(prop, val) {
-    const desc = Object.create(null);
-    desc.value = val;
-    return function(win) { Object.defineProperty(win, prop, desc) };
-}
 
 const setSnowWindowUtil = makeWindowUtilSetter('SNOW_WINDOW', function(win) { onWin(win) });
 const setSnowFrameUtil = makeWindowUtilSetter('SNOW_FRAME', function(frame) { hook(frame); });
 const setSnowUtil = makeWindowUtilSetter('SNOW', snow);
-
-function setWindowUtil(win, prop, val) {
-    const desc = Object.create(null);
-    desc.value = val;
-    Object.defineProperty(win, prop, desc);
-}
 
 function shouldHook(win) {
     try {

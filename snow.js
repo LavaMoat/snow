@@ -346,12 +346,14 @@ const {
   hookWorker
 } = __webpack_require__(744);
 const {
-  Object,
   Array,
   push,
   addEventListener,
   getFrameElement
 } = __webpack_require__(14);
+const {
+  makeWindowUtilSetter
+} = __webpack_require__(648);
 const {
   isMarked,
   mark
@@ -361,13 +363,6 @@ const {
   ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
   ERR_MARK_NEW_WINDOW_FAILED
 } = __webpack_require__(312);
-function makeWindowUtilSetter(prop, val) {
-  const desc = Object.create(null);
-  desc.value = val;
-  return function (win) {
-    Object.defineProperty(win, prop, desc);
-  };
-}
 const setSnowWindowUtil = makeWindowUtilSetter('SNOW_WINDOW', function (win) {
   onWin(win);
 });
@@ -375,11 +370,6 @@ const setSnowFrameUtil = makeWindowUtilSetter('SNOW_FRAME', function (frame) {
   hook(frame);
 });
 const setSnowUtil = makeWindowUtilSetter('SNOW', snow);
-function setWindowUtil(win, prop, val) {
-  const desc = Object.create(null);
-  desc.value = val;
-  Object.defineProperty(win, prop, desc);
-}
 function shouldHook(win) {
   try {
     const run = !isMarked(win);
@@ -1316,11 +1306,19 @@ const {
   getContentWindow,
   getDefaultView,
   getOwnerDocument,
-  stringToLowerCase
+  stringToLowerCase,
+  Object
 } = __webpack_require__(14);
 const shadows = new Array();
 function isShadow(node) {
   return shadows.includes(node);
+}
+function makeWindowUtilSetter(prop, val) {
+  const desc = Object.create(null);
+  desc.value = val;
+  return function (win) {
+    Object.defineProperty(win, prop, desc);
+  };
 }
 function isTrustedHTML(node) {
   const replacer = (k, v) => !k && node === v ? v : ''; // avoid own props
@@ -1406,6 +1404,7 @@ function fillArrayUniques(arr, items) {
   return isArrUpdated;
 }
 module.exports = {
+  makeWindowUtilSetter,
   toArray,
   isTagFramable,
   getOwnerWindowOfNode,

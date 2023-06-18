@@ -15,10 +15,15 @@ one must first try to access any property of it.
 
 This for some reason registers it to the window.frames list, otherwise it won't be there.
 
+UPDATE: doesn't have to be a direct prop access, could also be a less
+vulnerable and less direct manipulation (see https://github.com/LavaMoat/snow/issues/98)
+
 */
 
+const {Object} = require('./natives');
+
 function workaroundChromiumBug(frame) {
-    frame && (frame).contentWindow;
+    frame && Object.getOwnPropertyDescriptor(frame, '');
 }
 
 module.exports = workaroundChromiumBug;

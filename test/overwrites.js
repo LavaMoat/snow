@@ -151,4 +151,21 @@ describe('test overrides of native functions', async function () {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe that was under sabotage attempt via its contentWindow prop override attempt', async function () {
+        // reference: https://github.com/LavaMoat/snow/pull/99
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                const ifr = document.createElement('iframe');
+                Object.defineProperty(ifr, 'contentWindow', {get: () => {
+                        bypass([window[0]]);
+                    }
+                });
+                document.body.appendChild(ifr);
+                setTimeout(bypass, 200, [top]);
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

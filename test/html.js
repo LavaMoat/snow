@@ -187,4 +187,15 @@ describe('test HTML injections', async function () {
         });
         expect(result).toBe('V');
     });
+    
+    it('should fail to use atob of an iframe that was loaded via HTML in a new document', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                testdiv1.innerHTML = `<iframe srcdoc="<iframe></iframe><script>top.bypass([frames[0])</script>"></iframe>`;
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

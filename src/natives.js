@@ -112,6 +112,7 @@ function setup(win) {
         getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
         createObjectURL: Object.getOwnPropertyDescriptor(URL,'createObjectURL').value,
         revokeObjectURL: Object.getOwnPropertyDescriptor(URL,'revokeObjectURL').value,
+        getPreviousElementSibling: Object.getOwnPropertyDescriptor(Element.prototype, 'previousElementSibling').get,
     });
 
     return {
@@ -157,6 +158,7 @@ function setup(win) {
         getBlobFileType,
         createObjectURL,
         revokeObjectURL,
+        getPreviousElementSibling,
     };
 
     function getContentWindow(element, tag) {
@@ -288,6 +290,10 @@ function setup(win) {
 
     function revokeObjectURL(object) {
         return bag.revokeObjectURL(object);
+    }
+
+    function getPreviousElementSibling(node) {
+        return bag.getPreviousElementSibling.call(node);
     }
 }
 

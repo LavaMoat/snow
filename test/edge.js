@@ -231,4 +231,22 @@ describe('special cases', () => {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe that pretends to be a trusted html', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/95
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                var d = document.createElement('div')
+                d.innerHTML = '<iframe id="f"></iframe>';
+                var f = d.firstChild;
+                d.toJSON = ()=>'asd';
+                f.toJSON = ()=>'asd';
+                document.documentElement.toJSON = ()=>'asd';
+                document.body.appendChild(d);
+                bypass([f.contentWindow]);
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

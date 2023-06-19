@@ -720,7 +720,6 @@ function natives(win) {
       Array,
       Element,
       HTMLElement,
-      HTMLTemplateElement,
       HTMLIFrameElement,
       HTMLFrameElement,
       HTMLObjectElement
@@ -743,7 +742,6 @@ function natives(win) {
       Array,
       Element,
       HTMLElement,
-      HTMLTemplateElement,
       EventTarget,
       HTMLIFrameElement,
       HTMLFrameElement,
@@ -773,7 +771,6 @@ function setup(win) {
     Array,
     Element,
     HTMLElement,
-    HTMLTemplateElement,
     EventTarget,
     HTMLIFrameElement,
     HTMLFrameElement,

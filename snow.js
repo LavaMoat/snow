@@ -339,12 +339,10 @@ const hookOpen = __webpack_require__(583);
 const hookRequest = __webpack_require__(278);
 const hookEventListenersSetters = __webpack_require__(459);
 const hookDOMInserters = __webpack_require__(58);
+const hookWorker = __webpack_require__(744);
 const {
   hookShadowDOM
 } = __webpack_require__(373);
-const {
-  hookWorker
-} = __webpack_require__(744);
 const {
   Array,
   push,
@@ -1488,9 +1486,7 @@ function hookWorker(win) {
   hookRevokeObjectURL(win);
   hook(win);
 }
-module.exports = {
-  hookWorker
-};
+module.exports = hookWorker;
 
 /***/ }),
 

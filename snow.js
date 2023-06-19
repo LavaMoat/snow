@@ -340,6 +340,7 @@ const hookRequest = __webpack_require__(278);
 const hookEventListenersSetters = __webpack_require__(459);
 const hookDOMInserters = __webpack_require__(58);
 const hookWorker = __webpack_require__(744);
+const hookTrustedHTMLs = __webpack_require__(294);
 const {
   hookShadowDOM
 } = __webpack_require__(373);
@@ -397,6 +398,7 @@ function applyHooks(win) {
   hookEventListenersSetters(win, 'load');
   hookDOMInserters(win);
   hookShadowDOM(win);
+  hookTrustedHTMLs(win);
   hookWorker(win);
 }
 function onWin(win, cb) {
@@ -1172,6 +1174,37 @@ module.exports = {
 
 /***/ }),
 
+/***/ 294:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const {
+  trustedHTMLs
+} = __webpack_require__(648);
+const {
+  Object,
+  Function
+} = __webpack_require__(14);
+function getHook(win, native) {
+  return function (a, b) {
+    const ret = Function.prototype.call.call(native, this, a, b);
+    trustedHTMLs.push(ret);
+    return ret;
+  };
+}
+function hookTrustedHTMLs(win) {
+  if (typeof TrustedTypePolicy === 'undefined') {
+    return;
+  }
+  const desc = Object.getOwnPropertyDescriptor(TrustedTypePolicy.prototype, 'createHTML');
+  desc.configurable = desc.writable = true;
+  const val = desc.value;
+  desc.value = getHook(win, val);
+  Object.defineProperty(TrustedTypePolicy.prototype, 'createHTML', desc);
+}
+module.exports = hookTrustedHTMLs;
+
+/***/ }),
+
 /***/ 716:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -1307,9 +1340,13 @@ const {
   stringToLowerCase,
   Object
 } = __webpack_require__(14);
-const shadows = new Array();
+const shadows = new Array(),
+  trustedHTMLs = new Array();
 function isShadow(node) {
   return shadows.includes(node);
+}
+function isTrustedHTML(node) {
+  return trustedHTMLs.includes(node);
 }
 function makeWindowUtilSetter(prop, val) {
   const desc = Object.create(null);
@@ -1317,11 +1354,6 @@ function makeWindowUtilSetter(prop, val) {
   return function (win) {
     Object.defineProperty(win, prop, desc);
   };
-}
-function isTrustedHTML(node) {
-  const replacer = (k, v) => !k && node === v ? v : ''; // avoid own props
-  // normal nodes will parse into objects whereas trusted htmls into strings
-  return typeof parse(stringify(node, replacer)) === 'string';
 }
 function getPrototype(node) {
   if (isShadow(node)) {
@@ -1409,7 +1441,8 @@ module.exports = {
   getContentWindowOfFrame,
   getFramesArray,
   getFrameTag,
-  shadows
+  shadows,
+  trustedHTMLs
 };
 
 /***/ }),

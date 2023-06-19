@@ -1,11 +1,12 @@
 const {protectShadows} = require('./shadow');
 const resetOnloadAttributes = require('./attributes');
 const {getFramesArray, shadows} = require('./utils');
-const {getParentElement, slice, Object, Function} = require('./natives');
+const {getParentElement, getCommonAncestorContainer, slice, Object, Function} = require('./natives');
 const {handleHTML} = require('./html');
 const hook = require('./hook');
 
 const map = {
+    Range: ['insertNode'],
     DocumentFragment: ['replaceChildren', 'append', 'prepend'],
     Document: ['replaceChildren', 'append', 'prepend', 'write', 'writeln'],
     Node: ['appendChild', 'insertBefore', 'replaceChild'],
@@ -14,11 +15,11 @@ const map = {
     HTMLIFrameElement: ['srcdoc'],
 };
 
-function getHook(native, callHook) {
+function getHook(native, isRange, isSrcDoc) {
     function before(args) {
         resetOnloadAttributes(args);
         resetOnloadAttributes(shadows);
-        handleHTML(args, callHook);
+        handleHTML(args, isSrcDoc);
     }
 
     function after(args, element) {
@@ -30,7 +31,7 @@ function getHook(native, callHook) {
 
     return function() {
         const args = slice(arguments);
-        const element = getParentElement(this) || this;
+        const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;
         before(args);
         const ret = Function.prototype.apply.call(native, this, args);
         after(args, element);
@@ -46,7 +47,7 @@ function hookDOMInserters(win) {
             const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
             if (!desc) continue;
             const prop = desc.set ? 'set' : 'value';
-            desc[prop] = getHook(desc[prop], func === 'srcdoc');
+            desc[prop] = getHook(desc[prop], proto === 'Range', func === 'srcdoc');
             desc.configurable = true;
             if (prop === 'value') {
                 desc.writable = true;

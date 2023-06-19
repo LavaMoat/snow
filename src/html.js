@@ -72,7 +72,7 @@ function hookInlineFrame(frame) {
     return true;
 }
 
-function handleHTML(args, callHook) {
+function handleHTML(args, isSrcDoc) {
     for (let i = 0; i < args.length; i++) {
         const template = createElement(document, 'html');
         setInnerHTML(template, args[i]);
@@ -80,7 +80,7 @@ function handleHTML(args, callHook) {
             continue;
         }
         let modified = false;
-        if (callHook) {
+        if (isSrcDoc) {
             modified = hookInlineWindow(template);
         }
         const declarativeShadows = querySelectorAll.call(template, 'template[shadowroot]');
@@ -91,7 +91,7 @@ function handleHTML(args, callHook) {
         const frames = getFramesArray(template, false);
         for (let j = 0; j < frames.length; j++) {
             const frame = frames[j];
-            modified = (callHook && hookInlineFrame(frame)) || modified;
+            modified = (isSrcDoc && hookInlineFrame(frame)) || modified;
             modified = hookOnLoadAttributes(frame) || modified;
             modified = hookJavaScriptURI(frame) || modified;
             modified = hookSrcDoc(frame) || modified;

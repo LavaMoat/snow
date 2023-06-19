@@ -311,7 +311,7 @@ function hookInlineFrame(frame) {
   frame.after(script);
   return true;
 }
-function handleHTML(args, callHook) {
+function handleHTML(args, isSrcDoc) {
   for (let i = 0; i < args.length; i++) {
     const template = createElement(document, 'html');
     setInnerHTML(template, args[i]);
@@ -319,7 +319,7 @@ function handleHTML(args, callHook) {
       continue;
     }
     let modified = false;
-    if (callHook) {
+    if (isSrcDoc) {
       modified = hookInlineWindow(template);
     }
     const declarativeShadows = querySelectorAll.call(template, 'template[shadowroot]');
@@ -330,7 +330,7 @@ function handleHTML(args, callHook) {
     const frames = getFramesArray(template, false);
     for (let j = 0; j < frames.length; j++) {
       const frame = frames[j];
-      modified = callHook && hookInlineFrame(frame) || modified;
+      modified = isSrcDoc && hookInlineFrame(frame) || modified;
       modified = hookOnLoadAttributes(frame) || modified;
       modified = hookJavaScriptURI(frame) || modified;
       modified = hookSrcDoc(frame) || modified;
@@ -356,12 +356,11 @@ const hookOpen = __webpack_require__(583);
 const hookRequest = __webpack_require__(278);
 const hookEventListenersSetters = __webpack_require__(459);
 const hookDOMInserters = __webpack_require__(58);
+const hookWorker = __webpack_require__(744);
+const hookTrustedHTMLs = __webpack_require__(294);
 const {
   hookShadowDOM
 } = __webpack_require__(373);
-const {
-  hookWorker
-} = __webpack_require__(744);
 const {
   Array,
   push,
@@ -416,6 +415,7 @@ function applyHooks(win) {
   hookEventListenersSetters(win, 'load');
   hookDOMInserters(win);
   hookShadowDOM(win);
+  hookTrustedHTMLs(win);
   hookWorker(win);
 }
 function onWin(win, cb) {
@@ -463,6 +463,7 @@ const {
 } = __webpack_require__(648);
 const {
   getParentElement,
+  getCommonAncestorContainer,
   slice,
   Object,
   Function
@@ -472,6 +473,7 @@ const {
 } = __webpack_require__(328);
 const hook = __webpack_require__(228);
 const map = {
+  Range: ['insertNode'],
   DocumentFragment: ['replaceChildren', 'append', 'prepend'],
   Document: ['replaceChildren', 'append', 'prepend', 'write', 'writeln'],
   Node: ['appendChild', 'insertBefore', 'replaceChild'],
@@ -479,11 +481,11 @@ const map = {
   ShadowRoot: ['innerHTML'],
   HTMLIFrameElement: ['srcdoc']
 };
-function getHook(native, callHook) {
+function getHook(native, isRange, isSrcDoc) {
   function before(args) {
     resetOnloadAttributes(args);
     resetOnloadAttributes(shadows);
-    handleHTML(args, callHook);
+    handleHTML(args, isSrcDoc);
   }
   function after(args, element) {
     const frames = getFramesArray(element, false);
@@ -493,7 +495,7 @@ function getHook(native, callHook) {
   }
   return function () {
     const args = slice(arguments);
-    const element = getParentElement(this) || this;
+    const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;
     before(args);
     const ret = Function.prototype.apply.call(native, this, args);
     after(args, element);
@@ -508,7 +510,7 @@ function hookDOMInserters(win) {
       const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
       if (!desc) continue;
       const prop = desc.set ? 'set' : 'value';
-      desc[prop] = getHook(desc[prop], func === 'srcdoc');
+      desc[prop] = getHook(desc[prop], proto === 'Range', func === 'srcdoc');
       desc.configurable = true;
       if (prop === 'value') {
         desc.writable = true;
@@ -737,7 +739,7 @@ function natives(win) {
       Array,
       Element,
       HTMLElement,
-      HTMLTemplateElement,
+      Range,
       HTMLIFrameElement,
       HTMLFrameElement,
       HTMLObjectElement
@@ -760,7 +762,7 @@ function natives(win) {
       Array,
       Element,
       HTMLElement,
-      HTMLTemplateElement,
+      Range,
       EventTarget,
       HTMLIFrameElement,
       HTMLFrameElement,
@@ -790,7 +792,7 @@ function setup(win) {
     Array,
     Element,
     HTMLElement,
-    HTMLTemplateElement,
+    Range,
     EventTarget,
     HTMLIFrameElement,
     HTMLFrameElement,
@@ -825,7 +827,8 @@ function setup(win) {
     getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
     createObjectURL: Object.getOwnPropertyDescriptor(URL, 'createObjectURL').value,
     revokeObjectURL: Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL').value,
-    getPreviousElementSibling: Object.getOwnPropertyDescriptor(Element.prototype, 'previousElementSibling').get
+    getPreviousElementSibling: Object.getOwnPropertyDescriptor(Element.prototype, 'previousElementSibling').get,
+    getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get
   });
   return {
     Proxy,
@@ -870,7 +873,8 @@ function setup(win) {
     getBlobFileType,
     createObjectURL,
     revokeObjectURL,
-    getPreviousElementSibling
+    getPreviousElementSibling,
+    getCommonAncestorContainer
   };
   function getContentWindow(element, tag) {
     switch (tag) {
@@ -975,6 +979,9 @@ function setup(win) {
   }
   function getPreviousElementSibling(node) {
     return bag.getPreviousElementSibling.call(node);
+  }
+  function getCommonAncestorContainer(range) {
+    return bag.getCommonAncestorContainer.call(range);
   }
 }
 module.exports = setup(top);
@@ -1196,6 +1203,37 @@ module.exports = {
 
 /***/ }),
 
+/***/ 294:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const {
+  trustedHTMLs
+} = __webpack_require__(648);
+const {
+  Object,
+  Function
+} = __webpack_require__(14);
+function getHook(win, native) {
+  return function (a, b) {
+    const ret = Function.prototype.call.call(native, this, a, b);
+    trustedHTMLs.push(ret);
+    return ret;
+  };
+}
+function hookTrustedHTMLs(win) {
+  if (typeof TrustedTypePolicy === 'undefined') {
+    return;
+  }
+  const desc = Object.getOwnPropertyDescriptor(TrustedTypePolicy.prototype, 'createHTML');
+  desc.configurable = desc.writable = true;
+  const val = desc.value;
+  desc.value = getHook(win, val);
+  Object.defineProperty(TrustedTypePolicy.prototype, 'createHTML', desc);
+}
+module.exports = hookTrustedHTMLs;
+
+/***/ }),
+
 /***/ 716:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -1331,9 +1369,13 @@ const {
   stringToLowerCase,
   Object
 } = __webpack_require__(14);
-const shadows = new Array();
+const shadows = new Array(),
+  trustedHTMLs = new Array();
 function isShadow(node) {
   return shadows.includes(node);
+}
+function isTrustedHTML(node) {
+  return trustedHTMLs.includes(node);
 }
 function makeWindowUtilSetter(prop, val) {
   const desc = Object.create(null);
@@ -1341,11 +1383,6 @@ function makeWindowUtilSetter(prop, val) {
   return function (win) {
     Object.defineProperty(win, prop, desc);
   };
-}
-function isTrustedHTML(node) {
-  const replacer = (k, v) => !k && node === v ? v : ''; // avoid own props
-  // normal nodes will parse into objects whereas trusted htmls into strings
-  return typeof parse(stringify(node, replacer)) === 'string';
 }
 function getPrototype(node) {
   if (isShadow(node)) {
@@ -1433,7 +1470,8 @@ module.exports = {
   getContentWindowOfFrame,
   getFramesArray,
   getFrameTag,
-  shadows
+  shadows,
+  trustedHTMLs
 };
 
 /***/ }),
@@ -1510,9 +1548,7 @@ function hookWorker(win) {
   hookRevokeObjectURL(win);
   hook(win);
 }
-module.exports = {
-  hookWorker
-};
+module.exports = hookWorker;
 
 /***/ }),
 

@@ -21,7 +21,7 @@ function natives(win) {
             Array,
             Element,
             HTMLElement,
-            HTMLTemplateElement,
+            Range,
             HTMLIFrameElement,
             HTMLFrameElement,
             HTMLObjectElement,
@@ -44,7 +44,7 @@ function natives(win) {
             Array,
             Element,
             HTMLElement,
-            HTMLTemplateElement,
+            Range,
             EventTarget,
             HTMLIFrameElement,
             HTMLFrameElement,
@@ -76,7 +76,7 @@ function setup(win) {
         Array,
         Element,
         HTMLElement,
-        HTMLTemplateElement,
+        Range,
         EventTarget,
         HTMLIFrameElement,
         HTMLFrameElement,
@@ -113,6 +113,7 @@ function setup(win) {
         createObjectURL: Object.getOwnPropertyDescriptor(URL,'createObjectURL').value,
         revokeObjectURL: Object.getOwnPropertyDescriptor(URL,'revokeObjectURL').value,
         getPreviousElementSibling: Object.getOwnPropertyDescriptor(Element.prototype, 'previousElementSibling').get,
+        getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get,
     });
 
     return {
@@ -159,6 +160,7 @@ function setup(win) {
         createObjectURL,
         revokeObjectURL,
         getPreviousElementSibling,
+        getCommonAncestorContainer,
     };
 
     function getContentWindow(element, tag) {
@@ -294,6 +296,10 @@ function setup(win) {
 
     function getPreviousElementSibling(node) {
         return bag.getPreviousElementSibling.call(node);
+    }
+
+    function getCommonAncestorContainer(range) {
+        return bag.getCommonAncestorContainer.call(range);
     }
 }
 

@@ -61,4 +61,4 @@ function hookWorker(win) {
     hook(win);
 }
 
-module.exports = {hookWorker};
+module.exports = hookWorker;

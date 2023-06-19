@@ -247,7 +247,8 @@ const {
 } = __webpack_require__(14);
 const {
   warn,
-  WARN_DECLARATIVE_SHADOWS
+  WARN_DECLARATIVE_SHADOWS,
+  WARN_SRCDOC_WITH_CSP_BLOCKED
 } = __webpack_require__(312);
 const querySelectorAll = Element.prototype.querySelectorAll;
 function makeStringHook(asFrame, asHtml) {
@@ -292,6 +293,19 @@ function hookSrcDoc(frame) {
   }
   return false;
 }
+function findMetaCSP(template) {
+  const metas = querySelectorAll.call(template, 'meta');
+  for (let i = 0; i < metas.length; i++) {
+    const meta = metas[i];
+    for (let j = 0; j < meta.attributes.length; j++) {
+      const attribute = meta.attributes[j];
+      const value = attribute.value.toLowerCase();
+      if (value === 'content-security-policy') {
+        return attribute;
+      }
+    }
+  }
+}
 function handleHTML(args, isSrcDoc) {
   for (let i = 0; i < args.length; i++) {
     const template = createElement(document, 'html');
@@ -301,6 +315,13 @@ function handleHTML(args, isSrcDoc) {
     }
     let modified = false;
     if (isSrcDoc) {
+      const csp = findMetaCSP(template);
+      if (csp) {
+        if (warn(WARN_SRCDOC_WITH_CSP_BLOCKED, args[i], csp)) {
+          args[i] = '';
+          continue;
+        }
+      }
       const script = createElement(document, 'script');
       script.textContent = makeStringHook(false, false);
       template.insertBefore(script, template.firstChild);
@@ -579,6 +600,7 @@ const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
 const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
+const WARN_SRCDOC_WITH_CSP_BLOCKED = 8;
 const {
   console
 } = top;
@@ -602,6 +624,12 @@ function warn(msg, a, b) {
         win3 = b;
       bail = true;
       console.warn('SNOW:', 'blocking access to property:', `"${property}"`, 'of opened window: ', win3, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
+      break;
+    case WARN_SRCDOC_WITH_CSP_BLOCKED:
+      const srcdoc = a,
+        csp = b;
+      bail = true;
+      console.warn('SNOW:', 'blocking srcdoc (below) for trying to inject a static meta csp tag: ', csp, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.', '\n', `srcdoc content: `, '\n', `"${srcdoc}"`);
       break;
     default:
       break;
@@ -649,7 +677,8 @@ module.exports = {
   ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
   WARN_DECLARATIVE_SHADOWS,
   ERR_EXTENDING_FRAMABLES_BLOCKED,
-  ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN
+  ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN,
+  WARN_SRCDOC_WITH_CSP_BLOCKED
 };
 
 /***/ }),

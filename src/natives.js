@@ -21,6 +21,7 @@ function natives(win) {
             Array,
             Element,
             HTMLElement,
+            Range,
             HTMLIFrameElement,
             HTMLFrameElement,
             HTMLObjectElement,
@@ -43,6 +44,7 @@ function natives(win) {
             Array,
             Element,
             HTMLElement,
+            Range,
             EventTarget,
             HTMLIFrameElement,
             HTMLFrameElement,
@@ -74,6 +76,7 @@ function setup(win) {
         Array,
         Element,
         HTMLElement,
+        Range,
         EventTarget,
         HTMLIFrameElement,
         HTMLFrameElement,
@@ -109,6 +112,7 @@ function setup(win) {
         getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
         createObjectURL: Object.getOwnPropertyDescriptor(URL,'createObjectURL').value,
         revokeObjectURL: Object.getOwnPropertyDescriptor(URL,'revokeObjectURL').value,
+        getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get,
     });
 
     return {
@@ -154,6 +158,7 @@ function setup(win) {
         getBlobFileType,
         createObjectURL,
         revokeObjectURL,
+        getCommonAncestorContainer,
     };
 
     function getContentWindow(element, tag) {
@@ -285,6 +290,10 @@ function setup(win) {
 
     function revokeObjectURL(object) {
         return bag.revokeObjectURL(object);
+    }
+
+    function getCommonAncestorContainer(range) {
+        return bag.getCommonAncestorContainer.call(range);
     }
 }
 

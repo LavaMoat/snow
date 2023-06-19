@@ -170,4 +170,18 @@ describe('test DOM insertions', async function () {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe added by Range.prototype.insertNode', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                var range = document.createRange();
+                var f = document.createElement("iframe");
+                range.selectNode(document.getElementsByTagName("head")[0]);
+                range.insertNode(f);
+                bypass([f.contentWindow]);
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

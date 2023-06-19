@@ -51,7 +51,7 @@ function hookSrcDoc(frame) {
     return false;
 }
 
-function handleHTML(args, callHook) {
+function handleHTML(args, isSrcDoc) {
     for (let i = 0; i < args.length; i++) {
         const template = createElement(document, 'html');
         setInnerHTML(template, args[i]);
@@ -59,7 +59,7 @@ function handleHTML(args, callHook) {
             continue;
         }
         let modified = false;
-        if (callHook) {
+        if (isSrcDoc) {
             const script = createElement(document, 'script');
             script.textContent = makeStringHook(false, false);
             template.insertBefore(script, template.firstChild);

@@ -292,7 +292,7 @@ function hookSrcDoc(frame) {
   }
   return false;
 }
-function handleHTML(args, callHook) {
+function handleHTML(args, isSrcDoc) {
   for (let i = 0; i < args.length; i++) {
     const template = createElement(document, 'html');
     setInnerHTML(template, args[i]);
@@ -300,7 +300,7 @@ function handleHTML(args, callHook) {
       continue;
     }
     let modified = false;
-    if (callHook) {
+    if (isSrcDoc) {
       const script = createElement(document, 'script');
       script.textContent = makeStringHook(false, false);
       template.insertBefore(script, template.firstChild);
@@ -446,6 +446,7 @@ const {
 } = __webpack_require__(648);
 const {
   getParentElement,
+  getCommonAncestorContainer,
   slice,
   Object,
   Function
@@ -455,6 +456,7 @@ const {
 } = __webpack_require__(328);
 const hook = __webpack_require__(228);
 const map = {
+  Range: ['insertNode'],
   DocumentFragment: ['replaceChildren', 'append', 'prepend'],
   Document: ['replaceChildren', 'append', 'prepend', 'write', 'writeln'],
   Node: ['appendChild', 'insertBefore', 'replaceChild'],
@@ -462,11 +464,11 @@ const map = {
   ShadowRoot: ['innerHTML'],
   HTMLIFrameElement: ['srcdoc']
 };
-function getHook(native, callHook) {
+function getHook(native, isRange, isSrcDoc) {
   function before(args) {
     resetOnloadAttributes(args);
     resetOnloadAttributes(shadows);
-    handleHTML(args, callHook);
+    handleHTML(args, isSrcDoc);
   }
   function after(args, element) {
     const frames = getFramesArray(element, false);
@@ -476,7 +478,7 @@ function getHook(native, callHook) {
   }
   return function () {
     const args = slice(arguments);
-    const element = getParentElement(this) || this;
+    const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;
     before(args);
     const ret = Function.prototype.apply.call(native, this, args);
     after(args, element);
@@ -491,7 +493,7 @@ function hookDOMInserters(win) {
       const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
       if (!desc) continue;
       const prop = desc.set ? 'set' : 'value';
-      desc[prop] = getHook(desc[prop], func === 'srcdoc');
+      desc[prop] = getHook(desc[prop], proto === 'Range', func === 'srcdoc');
       desc.configurable = true;
       if (prop === 'value') {
         desc.writable = true;
@@ -720,6 +722,7 @@ function natives(win) {
       Array,
       Element,
       HTMLElement,
+      Range,
       HTMLIFrameElement,
       HTMLFrameElement,
       HTMLObjectElement
@@ -742,6 +745,7 @@ function natives(win) {
       Array,
       Element,
       HTMLElement,
+      Range,
       EventTarget,
       HTMLIFrameElement,
       HTMLFrameElement,
@@ -771,6 +775,7 @@ function setup(win) {
     Array,
     Element,
     HTMLElement,
+    Range,
     EventTarget,
     HTMLIFrameElement,
     HTMLFrameElement,
@@ -804,7 +809,8 @@ function setup(win) {
     getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
     getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
     createObjectURL: Object.getOwnPropertyDescriptor(URL, 'createObjectURL').value,
-    revokeObjectURL: Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL').value
+    revokeObjectURL: Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL').value,
+    getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get
   });
   return {
     Proxy,
@@ -848,7 +854,8 @@ function setup(win) {
     getDefaultView,
     getBlobFileType,
     createObjectURL,
-    revokeObjectURL
+    revokeObjectURL,
+    getCommonAncestorContainer
   };
   function getContentWindow(element, tag) {
     switch (tag) {
@@ -950,6 +957,9 @@ function setup(win) {
   }
   function revokeObjectURL(object) {
     return bag.revokeObjectURL(object);
+  }
+  function getCommonAncestorContainer(range) {
+    return bag.getCommonAncestorContainer.call(range);
   }
 }
 module.exports = setup(top);

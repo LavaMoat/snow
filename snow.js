@@ -840,8 +840,6 @@ function setup(win) {
     getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
     getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
     getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
-    createObjectURL: Object.getOwnPropertyDescriptor(URL, 'createObjectURL').value,
-    revokeObjectURL: Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL').value,
     getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get
   });
   return {
@@ -886,8 +884,6 @@ function setup(win) {
     getOwnerDocument,
     getDefaultView,
     getBlobFileType,
-    createObjectURL,
-    revokeObjectURL,
     getCommonAncestorContainer
   };
   function getContentWindow(element, tag) {
@@ -984,12 +980,6 @@ function setup(win) {
   }
   function getBlobFileType(blob) {
     return bag.getBlobFileType.call(blob);
-  }
-  function createObjectURL(object) {
-    return bag.createObjectURL(object);
-  }
-  function revokeObjectURL(object) {
-    return bag.revokeObjectURL(object);
   }
   function getCommonAncestorContainer(range) {
     return bag.getCommonAncestorContainer.call(range);
@@ -1225,6 +1215,7 @@ const {
   Function
 } = __webpack_require__(14);
 function getHook(win, native) {
+  trustedHTMLs.push(win.trustedTypes.emptyHTML);
   return function (a, b) {
     const ret = Function.prototype.call.call(native, this, a, b);
     trustedHTMLs.push(ret);
@@ -1232,14 +1223,14 @@ function getHook(win, native) {
   };
 }
 function hookTrustedHTMLs(win) {
-  if (typeof TrustedTypePolicy === 'undefined') {
+  if (typeof win.TrustedTypePolicy === 'undefined') {
     return;
   }
-  const desc = Object.getOwnPropertyDescriptor(TrustedTypePolicy.prototype, 'createHTML');
+  const desc = Object.getOwnPropertyDescriptor(win.TrustedTypePolicy.prototype, 'createHTML');
   desc.configurable = desc.writable = true;
   const val = desc.value;
   desc.value = getHook(win, val);
-  Object.defineProperty(TrustedTypePolicy.prototype, 'createHTML', desc);
+  Object.defineProperty(win.TrustedTypePolicy.prototype, 'createHTML', desc);
 }
 module.exports = hookTrustedHTMLs;
 
@@ -1268,7 +1259,7 @@ const BLOB = 'Blob',
 
 // blobs that were JS crafted by Blob constructor rather than naturally created by the browser from a remote resource
 const artificialBlobs = new Array();
-const allowedTypes = new Array('text/javascript', 'text/css', 'application/javascript', 'application/css', 'image/jpeg', 'image/jpg', 'image/png', 'audio/ogg; codecs=opus', 'video/mp4', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+const allowedTypes = new Array('', 'text/javascript', 'text/css', 'application/javascript', 'application/css', 'image/jpeg', 'image/jpg', 'image/png', 'audio/ogg; codecs=opus', 'video/mp4', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 function getHook(native, kind) {
   return function (a, b) {
     const ret = new native(a, b);
@@ -1499,11 +1490,13 @@ const {
   Map,
   toString,
   stringStartsWith,
-  createObjectURL,
-  revokeObjectURL,
   Blob
 } = __webpack_require__(14);
 const blobs = new Map();
+const {
+  createObjectURL,
+  revokeObjectURL
+} = URL;
 function syncGet(url) {
   return runInNewRealm(function (win) {
     let content;

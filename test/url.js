@@ -37,6 +37,24 @@ describe('test url', async function () {
         expect(result).toBe('V');
     });
 
+    it('should fail to use atob of an iframe that is loading a blob url (binary and empty type)', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                setTimeout(top.bypass, 200, [top]);
+                const enc = new TextEncoder();
+                const by = enc.encode("<script>top.bypass([window])</script>");
+                const blob = new Blob([by]);
+                const url = URL.createObjectURL(blob);
+                const ifr = document.createElement('iframe');
+                document.body.append(ifr);
+                ifr.src = url;
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
     it('should fail to use atob of an iframe that is loading a file url (text)', async function () {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -95,6 +113,7 @@ describe('test url', async function () {
                 setTimeout(top.bypass, 200, [top]);
                 const workerJs = `postMessage(URL.createObjectURL(new Blob(["<script>top.bypass([window])</script>"], {type: "text/html"})));`
                 for (const type of [
+                    "",
                     "text/javascript",
                     "text/plain",
                     "application/javascript",

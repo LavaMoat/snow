@@ -1,7 +1,8 @@
 const {BLOCKED_BLOB_URL, BLOCKED_BLOB_MSG, runInNewRealm} = require('./common');
-const {Map, toString, stringStartsWith, createObjectURL, revokeObjectURL, Blob} = require('./natives');
+const {Map, toString, stringStartsWith, Blob} = require('./natives');
 
 const blobs = new Map();
+const {createObjectURL, revokeObjectURL} = URL;
 
 function syncGet(url) {
     return runInNewRealm(function(win) {

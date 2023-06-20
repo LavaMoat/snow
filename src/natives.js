@@ -111,8 +111,6 @@ function setup(win) {
         getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
         getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
         getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
-        createObjectURL: Object.getOwnPropertyDescriptor(URL,'createObjectURL').value,
-        revokeObjectURL: Object.getOwnPropertyDescriptor(URL,'revokeObjectURL').value,
         getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get,
     });
 
@@ -158,8 +156,6 @@ function setup(win) {
         getOwnerDocument,
         getDefaultView,
         getBlobFileType,
-        createObjectURL,
-        revokeObjectURL,
         getCommonAncestorContainer,
     };
 
@@ -284,14 +280,6 @@ function setup(win) {
 
     function getBlobFileType(blob) {
         return bag.getBlobFileType.call(blob);
-    }
-
-    function createObjectURL(object) {
-        return bag.createObjectURL(object);
-    }
-
-    function revokeObjectURL(object) {
-        return bag.revokeObjectURL(object);
     }
 
     function getCommonAncestorContainer(range) {

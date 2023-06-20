@@ -249,4 +249,48 @@ describe('special cases', () => {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe was injected with srcdoc with a defending meta csp tag and trusted types', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/90
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                setTimeout(bypass, 200, [window]);
+                var d = document.createElement('div');
+                testdiv.appendChild(d);
+                d.innerHTML = `
+  <iframe srcdoc="
+    <meta http-equiv='Content-Security-pOlicy' content=&quot;require-trusted-types-for 'script';&quot;>. 
+    <script>
+      trustedTypes.createPolicy('default', { createHTML: s=>s, createScript: function (s) { return ''; } });
+      setTimeout(()=>top.bypass([frames[0]]),100);
+    </script>
+  <iframe src=\'javascript:alert(1)\'</iframe>"></iframe>`
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an iframe was injected with srcdoc with a defending meta csp tag with a nonce', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/94
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                setTimeout(bypass, 200, [window]);
+                var d = document.createElement('div');
+                testdiv.appendChild(d);
+                d.innerHTML = `
+    <iframe
+        srcdoc="
+        <meta http-equiv='Content-SecuriTy-Policy' content=&quot;script-src 'nonce-pwnd' ;&quot;>
+            <iframe src=&quot;javascript:haha&quot;>
+            </iframe>
+        <script nonce=&quot;pwnd&quot;>top.bypass([frames[0]]);</script>">
+    </iframe>`
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

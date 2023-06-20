@@ -1,6 +1,6 @@
 const {getFramesArray} = require('./utils');
 const {Array, stringToLowerCase, split, getAttribute, setAttribute, getChildElementCount, document, getInnerHTML, setInnerHTML, remove, Element} = require('./natives');
-const {warn, WARN_DECLARATIVE_SHADOWS} = require('./log');
+const {warn, WARN_DECLARATIVE_SHADOWS, WARN_SRCDOC_WITH_CSP_BLOCKED} = require('./log');
 
 const querySelectorAll = Element.prototype.querySelectorAll;
 
@@ -51,6 +51,20 @@ function hookSrcDoc(frame) {
     return false;
 }
 
+function findMetaCSP(template) {
+    const metas = querySelectorAll.call(template, 'meta');
+    for (let i = 0; i < metas.length; i++) {
+        const meta = metas[i];
+        for (let j = 0; j < meta.attributes.length; j++) {
+            const attribute = meta.attributes[j];
+            const value = attribute.value.toLowerCase();
+            if (value === 'content-security-policy') {
+                return attribute;
+            }
+        }
+    }
+}
+
 function handleHTML(args, isSrcDoc) {
     for (let i = 0; i < args.length; i++) {
         const template = document.createElement('html');
@@ -60,6 +74,13 @@ function handleHTML(args, isSrcDoc) {
         }
         let modified = false;
         if (isSrcDoc) {
+            const csp = findMetaCSP(template);
+            if (csp) {
+                if (warn(WARN_SRCDOC_WITH_CSP_BLOCKED, args[i], csp)) {
+                    args[i] = '';
+                    continue;
+                }
+            }
             const script = document.createElement('script');
             script.textContent = makeStringHook(false, false);
             template.insertBefore(script, template.firstChild);

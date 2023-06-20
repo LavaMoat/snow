@@ -5,6 +5,7 @@ const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
 const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
+const WARN_SRCDOC_WITH_CSP_BLOCKED = 8;
 
 const {console} = top;
 
@@ -37,6 +38,16 @@ function warn(msg, a, b) {
                 'blocking access to property:', `"${property}"`, 'of opened window: ', win3, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
                 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.',
+            );
+            break;
+        case WARN_SRCDOC_WITH_CSP_BLOCKED:
+            const srcdoc = a, csp = b;
+            bail = true;
+            console.warn('SNOW:',
+                'blocking srcdoc (below) for trying to inject a static meta csp tag: ', csp, '.', '\n',
+                'if this prevents your application from running correctly, please visit/report at',
+                'https://github.com/LavaMoat/snow/issues/???', '.', '\n',
+                `srcdoc content: `, '\n', `"${srcdoc}"`,
             );
             break;
         default:
@@ -100,5 +111,6 @@ module.exports = {
     ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
     WARN_DECLARATIVE_SHADOWS,
     ERR_EXTENDING_FRAMABLES_BLOCKED,
-    ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN
+    ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN,
+    WARN_SRCDOC_WITH_CSP_BLOCKED,
 };

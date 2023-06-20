@@ -67,18 +67,18 @@ function findMetaCSP(template) {
 }
 
 function normalize(html) {
-	try {
-		return xmlSerializer.serializeToString(html);
-	} catch (e) {
-		return html;
-	}
+    try {
+        return xmlSerializer.serializeToString(html);
+    } catch (e) {
+        return html;
+    }
 }
 
 function handleHTML(args, isSrcDoc) {
     for (let i = 0; i < args.length; i++) {
         const template = document.createElement('html');
         setInnerHTML(template, args[i]);
-		setInnerHTML(template, normalize(getInnerHTML(template)));
+        setInnerHTML(template, normalize(getInnerHTML(template)));
         if (!getChildElementCount(template)) {
             continue;
         }

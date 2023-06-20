@@ -8,6 +8,7 @@ const BLOB = 'Blob', FILE = 'File', MEDIA_SOURCE = 'MediaSource';
 // blobs that were JS crafted by Blob constructor rather than naturally created by the browser from a remote resource
 const artificialBlobs = new Array();
 const allowedTypes = new Array(
+    '',
     'text/javascript',
     'text/css',
     'application/javascript',

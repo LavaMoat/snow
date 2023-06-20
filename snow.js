@@ -84,13 +84,15 @@ module.exports = workaroundChromiumBug;
 /***/ 407:
 /***/ ((module) => {
 
+const getLength = Object.getOwnPropertyDescriptor(window, 'length').get.bind(window);
 const createElement = Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value.bind(document);
 const appendChild = Object.getOwnPropertyDescriptor(Node.prototype, 'appendChild').value.bind(document.documentElement);
 const removeChild = Object.getOwnPropertyDescriptor(Node.prototype, 'removeChild').value.bind(document.documentElement);
 function runInNewRealm(cb) {
+  const length = getLength();
   const ifr = createElement('IFRAME');
   appendChild(ifr);
-  const ret = cb(ifr.contentWindow);
+  const ret = cb(window[length]);
   removeChild(ifr);
   return ret;
 }
@@ -234,6 +236,7 @@ const {
   makeWindowUtilSetter
 } = __webpack_require__(648);
 const {
+  document,
   getPreviousElementSibling,
   Array,
   stringToLowerCase,
@@ -241,7 +244,6 @@ const {
   getAttribute,
   setAttribute,
   getChildElementCount,
-  createElement,
   getInnerHTML,
   setInnerHTML,
   remove,
@@ -249,7 +251,8 @@ const {
 } = __webpack_require__(14);
 const {
   warn,
-  WARN_DECLARATIVE_SHADOWS
+  WARN_DECLARATIVE_SHADOWS,
+  WARN_SRCDOC_WITH_CSP_BLOCKED
 } = __webpack_require__(312);
 const querySelectorAll = Element.prototype.querySelectorAll;
 makeWindowUtilSetter('SNOW_GET_PREVIOUS_ELEMENT_SIBLING', getPreviousElementSibling)(top);
@@ -300,26 +303,46 @@ function hookSrcDoc(frame) {
   return false;
 }
 function hookInlineWindow(parent) {
-  const script = createElement(document, 'script');
+  const script = document.createElement('script');
   script.textContent = getDocumentCurrentScriptHelper + makeStringHook(false, false, 'this');
   parent.insertBefore(script, parent.firstChild);
   return true;
 }
 function hookInlineFrame(frame) {
-  const script = createElement(document, 'script');
+  const script = document.createElement('script');
   script.textContent = makeStringHook(true, false, 'top.SNOW_GET_PREVIOUS_ELEMENT_SIBLING(SNOW_DOCUMENT_CURRENT_SCRIPT())');
   frame.after(script);
   return true;
 }
+function findMetaCSP(template) {
+  const metas = querySelectorAll.call(template, 'meta');
+  for (let i = 0; i < metas.length; i++) {
+    const meta = metas[i];
+    for (let j = 0; j < meta.attributes.length; j++) {
+      const attribute = meta.attributes[j];
+      const value = attribute.value.toLowerCase();
+      if (value === 'content-security-policy') {
+        return attribute;
+      }
+    }
+  }
+}
 function handleHTML(args, isSrcDoc) {
   for (let i = 0; i < args.length; i++) {
-    const template = createElement(document, 'html');
+    const template = document.createElement('html');
     setInnerHTML(template, args[i]);
     if (!getChildElementCount(template)) {
       continue;
     }
     let modified = false;
     if (isSrcDoc) {
+      const csp = findMetaCSP(template);
+      if (csp) {
+        if (warn(WARN_SRCDOC_WITH_CSP_BLOCKED, args[i], csp)) {
+          args[i] = '';
+          continue;
+        }
+      }
       modified = hookInlineWindow(template);
     }
     const declarativeShadows = querySelectorAll.call(template, 'template[shadowroot]');
@@ -596,6 +619,7 @@ const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
 const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
+const WARN_SRCDOC_WITH_CSP_BLOCKED = 8;
 const {
   console
 } = top;
@@ -619,6 +643,12 @@ function warn(msg, a, b) {
         win3 = b;
       bail = true;
       console.warn('SNOW:', 'blocking access to property:', `"${property}"`, 'of opened window: ', win3, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
+      break;
+    case WARN_SRCDOC_WITH_CSP_BLOCKED:
+      const srcdoc = a,
+        csp = b;
+      bail = true;
+      console.warn('SNOW:', 'blocking srcdoc (below) for trying to inject a static meta csp tag: ', csp, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.', '\n', `srcdoc content: `, '\n', `"${srcdoc}"`);
       break;
     default:
       break;
@@ -666,7 +696,8 @@ module.exports = {
   ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
   WARN_DECLARATIVE_SHADOWS,
   ERR_EXTENDING_FRAMABLES_BLOCKED,
-  ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN
+  ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN,
+  WARN_SRCDOC_WITH_CSP_BLOCKED
 };
 
 /***/ }),
@@ -769,7 +800,7 @@ function natives(win) {
       HTMLObjectElement
     };
     bag.document = {
-      createElement: win.document.createElement
+      createElement: win.document.createElement.bind(win.document)
     };
     return bag;
   });
@@ -777,6 +808,7 @@ function natives(win) {
 function setup(win) {
   const bag = natives(win);
   const {
+    document,
     URL,
     Proxy,
     Function,
@@ -825,12 +857,11 @@ function setup(win) {
     getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
     getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
     getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
-    createObjectURL: Object.getOwnPropertyDescriptor(URL, 'createObjectURL').value,
-    revokeObjectURL: Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL').value,
     getPreviousElementSibling: Object.getOwnPropertyDescriptor(Element.prototype, 'previousElementSibling').get,
     getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get
   });
   return {
+    document,
     Proxy,
     Object,
     Reflect,
@@ -871,8 +902,6 @@ function setup(win) {
     getOwnerDocument,
     getDefaultView,
     getBlobFileType,
-    createObjectURL,
-    revokeObjectURL,
     getPreviousElementSibling,
     getCommonAncestorContainer
   };
@@ -970,12 +999,6 @@ function setup(win) {
   }
   function getBlobFileType(blob) {
     return bag.getBlobFileType.call(blob);
-  }
-  function createObjectURL(object) {
-    return bag.createObjectURL(object);
-  }
-  function revokeObjectURL(object) {
-    return bag.revokeObjectURL(object);
   }
   function getPreviousElementSibling(node) {
     return bag.getPreviousElementSibling.call(node);
@@ -1214,6 +1237,7 @@ const {
   Function
 } = __webpack_require__(14);
 function getHook(win, native) {
+  trustedHTMLs.push(win.trustedTypes.emptyHTML);
   return function (a, b) {
     const ret = Function.prototype.call.call(native, this, a, b);
     trustedHTMLs.push(ret);
@@ -1221,14 +1245,14 @@ function getHook(win, native) {
   };
 }
 function hookTrustedHTMLs(win) {
-  if (typeof TrustedTypePolicy === 'undefined') {
+  if (typeof win.TrustedTypePolicy === 'undefined') {
     return;
   }
-  const desc = Object.getOwnPropertyDescriptor(TrustedTypePolicy.prototype, 'createHTML');
+  const desc = Object.getOwnPropertyDescriptor(win.TrustedTypePolicy.prototype, 'createHTML');
   desc.configurable = desc.writable = true;
   const val = desc.value;
   desc.value = getHook(win, val);
-  Object.defineProperty(TrustedTypePolicy.prototype, 'createHTML', desc);
+  Object.defineProperty(win.TrustedTypePolicy.prototype, 'createHTML', desc);
 }
 module.exports = hookTrustedHTMLs;
 
@@ -1257,7 +1281,7 @@ const BLOB = 'Blob',
 
 // blobs that were JS crafted by Blob constructor rather than naturally created by the browser from a remote resource
 const artificialBlobs = new Array();
-const allowedTypes = new Array('text/javascript', 'text/css', 'application/javascript', 'application/css', 'image/jpeg', 'image/jpg', 'image/png', 'audio/ogg; codecs=opus', 'video/mp4', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+const allowedTypes = new Array('', 'text/javascript', 'text/css', 'application/javascript', 'application/css', 'image/jpeg', 'image/jpg', 'image/png', 'audio/ogg; codecs=opus', 'video/mp4', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 function getHook(native, kind) {
   return function (a, b) {
     const ret = new native(a, b);
@@ -1488,11 +1512,13 @@ const {
   Map,
   toString,
   stringStartsWith,
-  createObjectURL,
-  revokeObjectURL,
   Blob
 } = __webpack_require__(14);
 const blobs = new Map();
+const {
+  createObjectURL,
+  revokeObjectURL
+} = URL;
 function syncGet(url) {
   return runInNewRealm(function (win) {
     let content;

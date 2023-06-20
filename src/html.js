@@ -1,6 +1,6 @@
 const {getFramesArray, makeWindowUtilSetter} = require('./utils');
-const {getPreviousElementSibling, Array, stringToLowerCase, split, getAttribute, setAttribute, getChildElementCount, createElement, getInnerHTML, setInnerHTML, remove, Element} = require('./natives');
-const {warn, WARN_DECLARATIVE_SHADOWS} = require('./log');
+const {document, getPreviousElementSibling, Array, stringToLowerCase, split, getAttribute, setAttribute, getChildElementCount, getInnerHTML, setInnerHTML, remove, Element} = require('./natives');
+const {warn, WARN_DECLARATIVE_SHADOWS, WARN_SRCDOC_WITH_CSP_BLOCKED} = require('./log');
 
 const querySelectorAll = Element.prototype.querySelectorAll;
 
@@ -59,28 +59,49 @@ function hookSrcDoc(frame) {
 }
 
 function hookInlineWindow(parent) {
-    const script = createElement(document, 'script');
+    const script = document.createElement('script');
     script.textContent = getDocumentCurrentScriptHelper + makeStringHook(false, false, 'this');
     parent.insertBefore(script, parent.firstChild);
     return true;
 }
 
 function hookInlineFrame(frame) {
-    const script = createElement(document, 'script');
+    const script = document.createElement('script');
     script.textContent = makeStringHook(true, false, 'top.SNOW_GET_PREVIOUS_ELEMENT_SIBLING(SNOW_DOCUMENT_CURRENT_SCRIPT())');
     frame.after(script);
     return true;
 }
 
+function findMetaCSP(template) {
+    const metas = querySelectorAll.call(template, 'meta');
+    for (let i = 0; i < metas.length; i++) {
+        const meta = metas[i];
+        for (let j = 0; j < meta.attributes.length; j++) {
+            const attribute = meta.attributes[j];
+            const value = attribute.value.toLowerCase();
+            if (value === 'content-security-policy') {
+                return attribute;
+            }
+        }
+    }
+}
+
 function handleHTML(args, isSrcDoc) {
     for (let i = 0; i < args.length; i++) {
-        const template = createElement(document, 'html');
+        const template = document.createElement('html');
         setInnerHTML(template, args[i]);
         if (!getChildElementCount(template)) {
             continue;
         }
         let modified = false;
         if (isSrcDoc) {
+            const csp = findMetaCSP(template);
+            if (csp) {
+                if (warn(WARN_SRCDOC_WITH_CSP_BLOCKED, args[i], csp)) {
+                    args[i] = '';
+                    continue;
+                }
+            }
             modified = hookInlineWindow(template);
         }
         const declarativeShadows = querySelectorAll.call(template, 'template[shadowroot]');

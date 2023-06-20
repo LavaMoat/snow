@@ -1,11 +1,13 @@
+const getLength = Object.getOwnPropertyDescriptor(window, 'length').get.bind(window);
 const createElement = Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value.bind(document);
 const appendChild = Object.getOwnPropertyDescriptor(Node.prototype, 'appendChild').value.bind(document.documentElement);
 const removeChild = Object.getOwnPropertyDescriptor(Node.prototype, 'removeChild').value.bind(document.documentElement);
 
 function runInNewRealm(cb) {
+    const length = getLength();
     const ifr = createElement('IFRAME');
     appendChild(ifr);
-    const ret = cb(ifr.contentWindow);
+    const ret = cb(window[length]);
     removeChild(ifr);
     return ret;
 }

@@ -84,13 +84,15 @@ module.exports = workaroundChromiumBug;
 /***/ 407:
 /***/ ((module) => {
 
+const getLength = Object.getOwnPropertyDescriptor(window, 'length').get.bind(window);
 const createElement = Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value.bind(document);
 const appendChild = Object.getOwnPropertyDescriptor(Node.prototype, 'appendChild').value.bind(document.documentElement);
 const removeChild = Object.getOwnPropertyDescriptor(Node.prototype, 'removeChild').value.bind(document.documentElement);
 function runInNewRealm(cb) {
+  const length = getLength();
   const ifr = createElement('IFRAME');
   appendChild(ifr);
-  const ret = cb(ifr.contentWindow);
+  const ret = cb(window[length]);
   removeChild(ifr);
   return ret;
 }
@@ -239,7 +241,7 @@ const {
   getAttribute,
   setAttribute,
   getChildElementCount,
-  createElement,
+  document,
   getInnerHTML,
   setInnerHTML,
   remove,
@@ -294,14 +296,14 @@ function hookSrcDoc(frame) {
 }
 function handleHTML(args, isSrcDoc) {
   for (let i = 0; i < args.length; i++) {
-    const template = createElement(document, 'html');
+    const template = document.createElement('html');
     setInnerHTML(template, args[i]);
     if (!getChildElementCount(template)) {
       continue;
     }
     let modified = false;
     if (isSrcDoc) {
-      const script = createElement(document, 'script');
+      const script = document.createElement('script');
       script.textContent = makeStringHook(false, false);
       template.insertBefore(script, template.firstChild);
       modified = true;
@@ -752,7 +754,7 @@ function natives(win) {
       HTMLObjectElement
     };
     bag.document = {
-      createElement: win.document.createElement
+      createElement: win.document.createElement.bind(win.document)
     };
     return bag;
   });
@@ -760,6 +762,7 @@ function natives(win) {
 function setup(win) {
   const bag = natives(win);
   const {
+    document,
     URL,
     Proxy,
     Function,
@@ -813,6 +816,7 @@ function setup(win) {
     getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get
   });
   return {
+    document,
     Proxy,
     Object,
     Reflect,

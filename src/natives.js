@@ -25,6 +25,7 @@ function natives(win) {
             HTMLIFrameElement,
             HTMLFrameElement,
             HTMLObjectElement,
+			XMLSerializer
         } = win;
         const bag = {
             URL,
@@ -49,6 +50,7 @@ function natives(win) {
             HTMLIFrameElement,
             HTMLFrameElement,
             HTMLObjectElement,
+			XMLSerializer
         };
         bag.document = {
             createElement: win.document.createElement.bind(win.document),
@@ -82,6 +84,7 @@ function setup(win) {
         HTMLIFrameElement,
         HTMLFrameElement,
         HTMLObjectElement,
+		XMLSerializer
     } = bag;
 
     Object.assign(bag, {
@@ -157,6 +160,7 @@ function setup(win) {
         getDefaultView,
         getBlobFileType,
         getCommonAncestorContainer,
+		XMLSerializer
     };
 
     function getContentWindow(element, tag) {

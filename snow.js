@@ -1196,6 +1196,7 @@ const {
   Function
 } = __webpack_require__(14);
 function getHook(win, native) {
+  trustedHTMLs.push(win.trustedTypes.emptyHTML);
   return function (a, b) {
     const ret = Function.prototype.call.call(native, this, a, b);
     trustedHTMLs.push(ret);
@@ -1203,14 +1204,14 @@ function getHook(win, native) {
   };
 }
 function hookTrustedHTMLs(win) {
-  if (typeof TrustedTypePolicy === 'undefined') {
+  if (typeof win.TrustedTypePolicy === 'undefined') {
     return;
   }
-  const desc = Object.getOwnPropertyDescriptor(TrustedTypePolicy.prototype, 'createHTML');
+  const desc = Object.getOwnPropertyDescriptor(win.TrustedTypePolicy.prototype, 'createHTML');
   desc.configurable = desc.writable = true;
   const val = desc.value;
   desc.value = getHook(win, val);
-  Object.defineProperty(TrustedTypePolicy.prototype, 'createHTML', desc);
+  Object.defineProperty(win.TrustedTypePolicy.prototype, 'createHTML', desc);
 }
 module.exports = hookTrustedHTMLs;
 

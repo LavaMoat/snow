@@ -1,8 +1,9 @@
 const {getFramesArray} = require('./utils');
-const {Array, stringToLowerCase, split, getAttribute, setAttribute, getChildElementCount, document, getInnerHTML, setInnerHTML, remove, Element} = require('./natives');
+const {Array, stringToLowerCase, split, getAttribute, setAttribute, getChildElementCount, document, getInnerHTML, setInnerHTML, remove, Element, XMLSerializer} = require('./natives');
 const {warn, WARN_DECLARATIVE_SHADOWS, WARN_SRCDOC_WITH_CSP_BLOCKED} = require('./log');
 
 const querySelectorAll = Element.prototype.querySelectorAll;
+const xmlSerializer = new XMLSerializer();
 
 function makeStringHook(asFrame, asHtml) {
     let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(this);';
@@ -65,10 +66,19 @@ function findMetaCSP(template) {
     }
 }
 
+function normalize(html) {
+	try {
+		return xmlSerializer.serializeToString(html);
+	} catch (e) {
+		return html;
+	}
+}
+
 function handleHTML(args, isSrcDoc) {
     for (let i = 0; i < args.length; i++) {
         const template = document.createElement('html');
         setInnerHTML(template, args[i]);
+		setInnerHTML(template, normalize(getInnerHTML(template)));
         if (!getChildElementCount(template)) {
             continue;
         }

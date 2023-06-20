@@ -51,7 +51,7 @@ function natives(win) {
             HTMLObjectElement,
         };
         bag.document = {
-            createElement: win.document.createElement,
+            createElement: win.document.createElement.bind(win.document),
         };
         return bag;
     });
@@ -61,6 +61,7 @@ function setup(win) {
     const bag = natives(win);
 
     const {
+        document,
         URL,
         Proxy,
         Function,
@@ -116,6 +117,7 @@ function setup(win) {
     });
 
     return {
+        document,
         Proxy,
         Object,
         Reflect,

@@ -1,5 +1,5 @@
 const {getFramesArray} = require('./utils');
-const {Array, stringToLowerCase, split, getAttribute, setAttribute, getChildElementCount, createElement, getInnerHTML, setInnerHTML, remove, Element} = require('./natives');
+const {Array, stringToLowerCase, split, getAttribute, setAttribute, getChildElementCount, document, getInnerHTML, setInnerHTML, remove, Element} = require('./natives');
 const {warn, WARN_DECLARATIVE_SHADOWS, WARN_SRCDOC_WITH_CSP_BLOCKED} = require('./log');
 
 const querySelectorAll = Element.prototype.querySelectorAll;
@@ -67,7 +67,7 @@ function findMetaCSP(template) {
 
 function handleHTML(args, isSrcDoc) {
     for (let i = 0; i < args.length; i++) {
-        const template = createElement(document, 'html');
+        const template = document.createElement('html');
         setInnerHTML(template, args[i]);
         if (!getChildElementCount(template)) {
             continue;
@@ -81,7 +81,7 @@ function handleHTML(args, isSrcDoc) {
                     continue;
                 }
             }
-            const script = createElement(document, 'script');
+            const script = document.createElement('script');
             script.textContent = makeStringHook(false, false);
             template.insertBefore(script, template.firstChild);
             modified = true;

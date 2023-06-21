@@ -20,7 +20,12 @@ jobs:
       - name: Build Snow
         run: yarn build
       - name: Verify No Change
-        run: yarn verify-no-change
+        run: |
+          git diff-index --quiet HEAD --
+          if [ $? -ne 0 ]; then
+            echo "There are unstaged files. Aborting the workflow."
+            exit 1
+          fi
       - name: Test Chrome
         run: yarn build-test-chrome
       - name: Test FireFox

@@ -1,5 +1,5 @@
 (function(){
-"use strict test";
+"use strict";
 if (typeof SNOW === "function") return;
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({

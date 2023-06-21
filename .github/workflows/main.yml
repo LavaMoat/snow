@@ -17,6 +17,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install Dependencies
         run: yarn
+      - name: Build Snow
+        run: yarn build
+      - name: Verify No Change
+        run: yarn verify-no-change
       - name: Test Chrome
         run: yarn build-test-chrome
       - name: Test FireFox

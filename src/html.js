@@ -69,6 +69,7 @@ function handleHTML(args, isSrcDoc) {
     for (let i = 0; i < args.length; i++) {
         const template = document.createElement('html');
         setInnerHTML(template, args[i]);
+        setInnerHTML(template, getInnerHTML(template));
         if (!getChildElementCount(template)) {
             continue;
         }

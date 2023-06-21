@@ -187,4 +187,16 @@ describe('test HTML injections', async function () {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe formed using mXSS', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/91
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                testdiv1.innerHTML =  `<iframe srcdoc="<form><math><mtext></form><form><mglyph><style></math><iframe src=&quot;javascript:top.bypass([window])&quot;></iframe>"</iframe>`;
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

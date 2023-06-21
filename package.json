@@ -20,7 +20,7 @@
     "webpack-cli": "^4.6.0"
   },
   "scripts": {
-    "verify-no-change": "[[ -n $(git status --porcelain) ]] && { echo \"Error: There are changes to local files, this should not happen. This probably means you forgot to run [yarn build] and push the changes.\"; exit 1; }\n",
+    "verify-no-change": "bash -c '[[ -n $(git status --porcelain) ]] && { echo \"Error: There are changes to local files, this should not happen. This probably means you forgot to run [yarn build] and push the changes.\"; exit 1; }'",
     "use-strict-dev": "node -p 'fs.writeFileSync(`snow.js`, `(function(){\n\"use strict\";\nif (typeof SNOW === \"function\") return;\n` + fs.readFileSync(`snow.js`)+ `\n}())`) , `successfully wrapped snow.js with use-strict scope`'",
     "use-strict-prod": "node -p 'fs.writeFileSync(`snow.prod.js`, `(function(){\"use strict\";if (typeof SNOW === \"function\") return;` + fs.readFileSync(`snow.prod.js`)+ `}())`) , `successfully wrapped snow.prod.js with use-strict scope`'",
     "build-dev": "webpack --config ./webpack.config.js && yarn use-strict-dev",

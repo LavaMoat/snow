@@ -1,13 +1,24 @@
-const isCrossOrigin = require('is-cross-origin');
 const workaroundChromiumBug = require('./chromium_bug_workaround');
 const {shadows, toArray, getFramesArray, getContentWindowOfFrame, getOwnerWindowOfNode} = require('./utils');
 const {Object, getFrameElement} = require('./natives');
 const {forEachOpened} = require('./proxy');
 
+function isWindow(obj) {
+    const o = Object(obj);
+    return o === o.window;
+}
+
+function isCrossOrigin(dst, src) {
+    return Object.getPrototypeOf.call(src, dst) === null;
+}
+
 function findWin(win, frameElement) {
     let i = -1;
     while (win[++i]) {
-        if (isCrossOrigin(win[i], win, Object)) {
+        if (!isWindow(win[i])) {
+            continue;
+        }
+        if (isCrossOrigin(win[i], win)) {
             continue;
         }
         if (getFrameElement(win[i]) === frameElement) {

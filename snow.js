@@ -153,7 +153,6 @@ module.exports = hookCustoms;
 /***/ 228:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const isCrossOrigin = __webpack_require__(851);
 const workaroundChromiumBug = __webpack_require__(750);
 const {
   shadows,
@@ -169,10 +168,20 @@ const {
 const {
   forEachOpened
 } = __webpack_require__(134);
+function isWindow(obj) {
+  const o = Object(obj);
+  return o === o.window;
+}
+function isCrossOrigin(dst, src) {
+  return Object.getPrototypeOf.call(src, dst) === null;
+}
 function findWin(win, frameElement) {
   let i = -1;
   while (win[++i]) {
-    if (isCrossOrigin(win[i], win, Object)) {
+    if (!isWindow(win[i])) {
+      continue;
+    }
+    if (isCrossOrigin(win[i], win)) {
       continue;
     }
     if (getFrameElement(win[i]) === frameElement) {
@@ -1553,47 +1562,6 @@ function hookWorker(win) {
   hook(win);
 }
 module.exports = hookWorker;
-
-/***/ }),
-
-/***/ 626:
-/***/ ((module) => {
-
-module.exports = {
-    SRC_IS_NOT_A_WINDOW: 'provided argument "src" must be a proper window of instance Window',
-    DST_IS_NOT_A_WINDOW: 'provided argument "dst" must be a proper window of instance Window',
-    SRC_IS_NOT_SAME_ORIGIN_AS_WINDOW: 'provided argument "src" must be a window in the same origin as the current context window',
-}
-
-/***/ }),
-
-/***/ 851:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-const {DST_IS_NOT_A_WINDOW, SRC_IS_NOT_A_WINDOW, SRC_IS_NOT_SAME_ORIGIN_AS_WINDOW} = __webpack_require__(626);
-
-function isWindow(obj, Object) {
-    const o = Object(obj);
-    return o === o.window;
-}
-
-function isCrossOrigin(dst, src, Object) {
-    return Object.getPrototypeOf.call(src, dst) === null;
-}
-
-module.exports = function(dst, src = window, Object = window.Object) {
-    if (!isWindow(src, Object)) {
-        throw new Error(SRC_IS_NOT_A_WINDOW);
-    }
-    if (!isWindow(dst, Object)) {
-        throw new Error(DST_IS_NOT_A_WINDOW);
-    }
-    if (isCrossOrigin(window, src, Object)) {
-        throw new Error(SRC_IS_NOT_SAME_ORIGIN_AS_WINDOW);
-    }
-    return isCrossOrigin(dst, src, Object);
-};
-
 
 /***/ })
 

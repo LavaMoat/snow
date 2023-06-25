@@ -1,23 +1,16 @@
 const workaroundChromiumBug = require('./chromium_bug_workaround');
+const {getLength} = require('./common');
 const {shadows, toArray, getFramesArray, getContentWindowOfFrame, getOwnerWindowOfNode} = require('./utils');
-const {Object, getFrameElement} = require('./natives');
+const {Object, getFrameElement, Function} = require('./natives');
 const {forEachOpened} = require('./proxy');
-
-function isWindow(obj) {
-    const o = Object(obj);
-    return o === o.window;
-}
 
 function isCrossOrigin(dst, src) {
     return Object.getPrototypeOf.call(src, dst) === null;
 }
 
 function findWin(win, frameElement) {
-    let i = -1;
-    while (win[++i]) {
-        if (!isWindow(win[i])) {
-            continue;
-        }
+    const length = Function.prototype.call.call(getLength, win);
+    for (let i = 0; i < length; i++) {
         if (isCrossOrigin(win[i], win)) {
             continue;
         }

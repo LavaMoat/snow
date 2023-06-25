@@ -84,12 +84,13 @@ module.exports = workaroundChromiumBug;
 /***/ 407:
 /***/ ((module) => {
 
-const getLength = Object.getOwnPropertyDescriptor(window, 'length').get.bind(window);
+const getLength = Object.getOwnPropertyDescriptor(window, 'length').get;
+const getLengthTop = getLength.bind(window);
 const createElement = Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value.bind(document);
 const appendChild = Object.getOwnPropertyDescriptor(Node.prototype, 'appendChild').value.bind(document.documentElement);
 const removeChild = Object.getOwnPropertyDescriptor(Node.prototype, 'removeChild').value.bind(document.documentElement);
 function runInNewRealm(cb) {
-  const length = getLength();
+  const length = getLengthTop();
   const ifr = createElement('IFRAME');
   appendChild(ifr);
   const ret = cb(window[length]);
@@ -101,6 +102,7 @@ Creating URL objects is not allowed under Snow protection within Web Workers.
 If this prevents your application from running correctly, please visit/report at https://github.com/LavaMoat/snow/pull/89#issuecomment-1589359673.
 Learn more at https://github.com/LavaMoat/snow/pull/89`;
 module.exports = {
+  getLength,
   runInNewRealm,
   BLOCKED_BLOB_URL: URL.createObjectURL(new Blob([BLOCKED_BLOB_MSG], {
     type: 'text/plain'
@@ -155,6 +157,9 @@ module.exports = hookCustoms;
 
 const workaroundChromiumBug = __webpack_require__(750);
 const {
+  getLength
+} = __webpack_require__(407);
+const {
   shadows,
   toArray,
   getFramesArray,
@@ -163,24 +168,18 @@ const {
 } = __webpack_require__(648);
 const {
   Object,
-  getFrameElement
+  getFrameElement,
+  Function
 } = __webpack_require__(14);
 const {
   forEachOpened
 } = __webpack_require__(134);
-function isWindow(obj) {
-  const o = Object(obj);
-  return o === o.window;
-}
 function isCrossOrigin(dst, src) {
   return Object.getPrototypeOf.call(src, dst) === null;
 }
 function findWin(win, frameElement) {
-  let i = -1;
-  while (win[++i]) {
-    if (!isWindow(win[i])) {
-      continue;
-    }
+  const length = Function.prototype.call.call(getLength, win);
+  for (let i = 0; i < length; i++) {
     if (isCrossOrigin(win[i], win)) {
       continue;
     }

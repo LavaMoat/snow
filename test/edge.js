@@ -293,4 +293,22 @@ describe('special cases', () => {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe that tricks the frames array with clobbering of id=n', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                const ifr1 = document.createElement('iframe');
+                const ifr2 = document.createElement('iframe');
+                document.body.appendChild(ifr1);
+                const div = document.createElement('div');
+                div.id = "0";
+                div.window = div; // I am a `window` now
+                setTimeout(() => { bypass([ifr2.contentWindow, ifr1.contentWindow, window]) }, 500);
+                try { ifr1.contentWindow.document.body.appendChild(div); } catch {}
+                try { document.body.appendChild(ifr2); } catch {}
+            }());
+        });
+        expect(result).toBe('V,V,V');
+    });
 });

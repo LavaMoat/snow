@@ -14,6 +14,7 @@ const map = {
     ShadowRoot: ['innerHTML'],
     HTMLIFrameElement: ['srcdoc'],
 };
+const protos = Object.getOwnPropertyNames(map);
 
 function getHook(native, isRange, isSrcDoc) {
     function before(args) {
@@ -40,7 +41,8 @@ function getHook(native, isRange, isSrcDoc) {
 }
 
 function hookDOMInserters(win) {
-    for (const proto in map) {
+    for (let i = 0; i < protos.length; i++) {
+        const proto = protos[i];
         const funcs = map[proto];
         for (let i = 0; i < funcs.length; i++) {
             const func = funcs[i];

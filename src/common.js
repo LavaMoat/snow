@@ -1,10 +1,11 @@
-const getLength = Object.getOwnPropertyDescriptor(window, 'length').get.bind(window);
+const getLength = Object.getOwnPropertyDescriptor(window, 'length').get;
+const getLengthTop = getLength.bind(window);
 const createElement = Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value.bind(document);
 const appendChild = Object.getOwnPropertyDescriptor(Node.prototype, 'appendChild').value.bind(document.documentElement);
 const removeChild = Object.getOwnPropertyDescriptor(Node.prototype, 'removeChild').value.bind(document.documentElement);
 
 function runInNewRealm(cb) {
-    const length = getLength();
+    const length = getLengthTop();
     const ifr = createElement('IFRAME');
     appendChild(ifr);
     const ret = cb(window[length]);
@@ -18,6 +19,7 @@ If this prevents your application from running correctly, please visit/report at
 Learn more at https://github.com/LavaMoat/snow/pull/89`;
 
 module.exports = {
+    getLength,
     runInNewRealm,
     BLOCKED_BLOB_URL: URL.createObjectURL(new Blob([BLOCKED_BLOB_MSG], {type: 'text/plain'})),
     BLOCKED_BLOB_MSG,

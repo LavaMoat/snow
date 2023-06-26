@@ -41,18 +41,20 @@ function getHook(native, isRange, isSrcDoc) {
 
 function hookDOMInserters(win) {
     for (const proto in map) {
-        const funcs = map[proto];
-        for (let i = 0; i < funcs.length; i++) {
-            const func = funcs[i];
-            const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
-            if (!desc) continue;
-            const prop = desc.set ? 'set' : 'value';
-            desc[prop] = getHook(desc[prop], proto === 'Range', func === 'srcdoc');
-            desc.configurable = true;
-            if (prop === 'value') {
-                desc.writable = true;
+        if (Object.hasOwnProperty.call(map, proto)) {
+            const funcs = map[proto];
+            for (let i = 0; i < funcs.length; i++) {
+                const func = funcs[i];
+                const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
+                if (!desc) continue;
+                const prop = desc.set ? 'set' : 'value';
+                desc[prop] = getHook(desc[prop], proto === 'Range', func === 'srcdoc');
+                desc.configurable = true;
+                if (prop === 'value') {
+                    desc.writable = true;
+                }
+                Object.defineProperty(win[proto].prototype, func, desc);
             }
-            Object.defineProperty(win[proto].prototype, func, desc);
         }
     }
 }

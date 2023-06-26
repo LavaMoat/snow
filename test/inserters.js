@@ -184,4 +184,22 @@ describe('test DOM insertions', async function () {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe added after Object.prototype pollution', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                Object.defineProperty(Object.prototype, 'haha', {
+                    enumerable: true,
+                    value: undefined
+                });
+                var f = document.createElement('iframe');
+                try {
+                    document.head.appendChild(f);
+                } catch (e) {}
+                bypass([f.contentWindow]);
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

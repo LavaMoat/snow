@@ -487,6 +487,7 @@ const map = {
   ShadowRoot: ['innerHTML'],
   HTMLIFrameElement: ['srcdoc']
 };
+const protos = Object.getOwnPropertyNames(map);
 function getHook(native, isRange, isSrcDoc) {
   function before(args) {
     resetOnloadAttributes(args);
@@ -509,7 +510,8 @@ function getHook(native, isRange, isSrcDoc) {
   };
 }
 function hookDOMInserters(win) {
-  for (const proto in map) {
+  for (let i = 0; i < protos.length; i++) {
+    const proto = protos[i];
     const funcs = map[proto];
     for (let i = 0; i < funcs.length; i++) {
       const func = funcs[i];
@@ -1151,7 +1153,8 @@ function hook(win, native, cb) {
   };
 }
 function hookRequest(win) {
-  if (!win?.documentPictureInPicture?.requestWindow) {
+  var _win$documentPictureI;
+  if (!(win !== null && win !== void 0 && (_win$documentPictureI = win.documentPictureInPicture) !== null && _win$documentPictureI !== void 0 && _win$documentPictureI.requestWindow)) {
     return;
   }
   win.documentPictureInPicture.requestWindow = hook(win, win.documentPictureInPicture.requestWindow, hookDocumentPictureInPicture);

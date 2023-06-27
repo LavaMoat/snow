@@ -959,10 +959,10 @@ function setup(win) {
     return bag.setAttribute.call(element, attribute, value);
   }
   function addEventListener(element, event, listener, options) {
-    return bag.addEventListener.call(element, event, listener, options);
+    return bag.Function.prototype.call.call(bag.addEventListener, element, event, listener, options);
   }
   function removeEventListener(element, event, listener, options) {
-    return bag.removeEventListener.call(element, event, listener, options);
+    return bag.Function.prototype.call.call(bag.removeEventListener, element, event, listener, options);
   }
   function createElement(document, tagName, options) {
     return bag.createElement.call(document, tagName, options);

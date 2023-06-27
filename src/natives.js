@@ -239,11 +239,11 @@ function setup(win) {
     }
 
     function addEventListener(element, event, listener, options) {
-        return bag.addEventListener.call(element, event, listener, options);
+        return bag.Function.prototype.call.call(bag.addEventListener, element, event, listener, options);
     }
 
     function removeEventListener(element, event, listener, options) {
-        return bag.removeEventListener.call(element, event, listener, options);
+        return bag.Function.prototype.call.call(bag.removeEventListener, element, event, listener, options);
     }
 
     function createElement(document, tagName, options) {

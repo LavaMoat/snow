@@ -44,8 +44,5 @@
   "bugs": {
     "url": "https://github.com/lavamoat/snow/issues"
   },
-  "homepage": "https://lavamoat.github.io/snow/",
-  "dependencies": {
-    "is-cross-origin": "^1.0.1"
-  }
+  "homepage": "https://lavamoat.github.io/snow/"
 }

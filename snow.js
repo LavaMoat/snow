@@ -84,12 +84,13 @@ module.exports = workaroundChromiumBug;
 /***/ 407:
 /***/ ((module) => {
 
-const getLength = Object.getOwnPropertyDescriptor(window, 'length').get.bind(window);
+const getLength = Object.getOwnPropertyDescriptor(window, 'length').get;
+const getLengthTop = getLength.bind(window);
 const createElement = Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value.bind(document);
 const appendChild = Object.getOwnPropertyDescriptor(Node.prototype, 'appendChild').value.bind(document.documentElement);
 const removeChild = Object.getOwnPropertyDescriptor(Node.prototype, 'removeChild').value.bind(document.documentElement);
 function runInNewRealm(cb) {
-  const length = getLength();
+  const length = getLengthTop();
   const ifr = createElement('IFRAME');
   appendChild(ifr);
   const ret = cb(window[length]);
@@ -101,6 +102,7 @@ Creating URL objects is not allowed under Snow protection within Web Workers.
 If this prevents your application from running correctly, please visit/report at https://github.com/LavaMoat/snow/pull/89#issuecomment-1589359673.
 Learn more at https://github.com/LavaMoat/snow/pull/89`;
 module.exports = {
+  getLength,
   runInNewRealm,
   BLOCKED_BLOB_URL: URL.createObjectURL(new Blob([BLOCKED_BLOB_MSG], {
     type: 'text/plain'
@@ -153,8 +155,10 @@ module.exports = hookCustoms;
 /***/ 228:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const isCrossOrigin = __webpack_require__(851);
 const workaroundChromiumBug = __webpack_require__(750);
+const {
+  getLength
+} = __webpack_require__(407);
 const {
   shadows,
   toArray,
@@ -164,15 +168,19 @@ const {
 } = __webpack_require__(648);
 const {
   Object,
-  getFrameElement
+  getFrameElement,
+  Function
 } = __webpack_require__(14);
 const {
   forEachOpened
 } = __webpack_require__(134);
+function isCrossOrigin(dst, src) {
+  return Object.getPrototypeOf.call(src, dst) === null;
+}
 function findWin(win, frameElement) {
-  let i = -1;
-  while (win[++i]) {
-    if (isCrossOrigin(win[i], win, Object)) {
+  const length = Function.prototype.call.call(getLength, win);
+  for (let i = 0; i < length; i++) {
+    if (isCrossOrigin(win[i], win)) {
       continue;
     }
     if (getFrameElement(win[i]) === frameElement) {
@@ -504,6 +512,7 @@ const map = {
   ShadowRoot: ['innerHTML'],
   HTMLIFrameElement: ['srcdoc']
 };
+const protos = Object.getOwnPropertyNames(map);
 function getHook(native, isRange, isSrcDoc) {
   function before(args) {
     resetOnloadAttributes(args);
@@ -526,7 +535,8 @@ function getHook(native, isRange, isSrcDoc) {
   };
 }
 function hookDOMInserters(win) {
-  for (const proto in map) {
+  for (let i = 0; i < protos.length; i++) {
+    const proto = protos[i];
     const funcs = map[proto];
     for (let i = 0; i < funcs.length; i++) {
       const func = funcs[i];
@@ -968,10 +978,10 @@ function setup(win) {
     return bag.setAttribute.call(element, attribute, value);
   }
   function addEventListener(element, event, listener, options) {
-    return bag.addEventListener.call(element, event, listener, options);
+    return bag.Function.prototype.call.call(bag.addEventListener, element, event, listener, options);
   }
   function removeEventListener(element, event, listener, options) {
-    return bag.removeEventListener.call(element, event, listener, options);
+    return bag.Function.prototype.call.call(bag.removeEventListener, element, event, listener, options);
   }
   function createElement(document, tagName, options) {
     return bag.createElement.call(document, tagName, options);
@@ -1575,47 +1585,6 @@ function hookWorker(win) {
   hook(win);
 }
 module.exports = hookWorker;
-
-/***/ }),
-
-/***/ 626:
-/***/ ((module) => {
-
-module.exports = {
-    SRC_IS_NOT_A_WINDOW: 'provided argument "src" must be a proper window of instance Window',
-    DST_IS_NOT_A_WINDOW: 'provided argument "dst" must be a proper window of instance Window',
-    SRC_IS_NOT_SAME_ORIGIN_AS_WINDOW: 'provided argument "src" must be a window in the same origin as the current context window',
-}
-
-/***/ }),
-
-/***/ 851:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-const {DST_IS_NOT_A_WINDOW, SRC_IS_NOT_A_WINDOW, SRC_IS_NOT_SAME_ORIGIN_AS_WINDOW} = __webpack_require__(626);
-
-function isWindow(obj, Object) {
-    const o = Object(obj);
-    return o === o.window;
-}
-
-function isCrossOrigin(dst, src, Object) {
-    return Object.getPrototypeOf.call(src, dst) === null;
-}
-
-module.exports = function(dst, src = window, Object = window.Object) {
-    if (!isWindow(src, Object)) {
-        throw new Error(SRC_IS_NOT_A_WINDOW);
-    }
-    if (!isWindow(dst, Object)) {
-        throw new Error(DST_IS_NOT_A_WINDOW);
-    }
-    if (isCrossOrigin(window, src, Object)) {
-        throw new Error(SRC_IS_NOT_SAME_ORIGIN_AS_WINDOW);
-    }
-    return isCrossOrigin(dst, src, Object);
-};
-
 
 /***/ })
 

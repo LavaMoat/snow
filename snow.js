@@ -240,16 +240,18 @@ module.exports = hook;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
-  getFramesArray
+  getFramesArray,
+  makeWindowUtilSetter
 } = __webpack_require__(648);
 const {
+  document,
+  getPreviousElementSibling,
   Array,
   stringToLowerCase,
   split,
   getAttribute,
   setAttribute,
   getChildElementCount,
-  document,
   getInnerHTML,
   setInnerHTML,
   remove,
@@ -261,8 +263,13 @@ const {
   WARN_SRCDOC_WITH_CSP_BLOCKED
 } = __webpack_require__(312);
 const querySelectorAll = Element.prototype.querySelectorAll;
-function makeStringHook(asFrame, asHtml) {
-  let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(this);';
+makeWindowUtilSetter('SNOW_GET_PREVIOUS_ELEMENT_SIBLING', getPreviousElementSibling)(top);
+const getDocumentCurrentScriptHelper = `
+Object.defineProperty(window, 'SNOW_DOCUMENT_CURRENT_SCRIPT', {value: Object.getOwnPropertyDescriptor(Document.prototype, 'currentScript').get.bind(document)});
+document.currentScript.remove();
+`;
+function makeStringHook(asFrame, asHtml, arg) {
+  let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(' + arg + ');';
   if (asHtml) {
     hook = '<script>' + hook + 'document.currentScript.remove();' + '</script>';
   }
@@ -276,7 +283,7 @@ function dropDeclarativeShadows(shadow, html) {
 function hookOnLoadAttributes(frame) {
   let onload = getAttribute(frame, 'onload');
   if (onload) {
-    onload = makeStringHook(true, false) + onload;
+    onload = makeStringHook(true, false, 'this') + onload;
     setAttribute(frame, 'onload', onload);
     return true;
   }
@@ -286,7 +293,7 @@ function hookJavaScriptURI(frame) {
   let src = getAttribute(frame, 'src') || '';
   const [scheme, js] = split(src, ':');
   if (stringToLowerCase(scheme) === 'javascript') {
-    src = 'javascript:' + makeStringHook(false, false) + js;
+    src = 'javascript:' + makeStringHook(false, false, 'this') + js;
     setAttribute(frame, 'src', src);
     return true;
   }
@@ -295,13 +302,25 @@ function hookJavaScriptURI(frame) {
 function hookSrcDoc(frame) {
   let srcdoc = getAttribute(frame, 'srcdoc');
   if (srcdoc) {
-    srcdoc = makeStringHook(false, true) + srcdoc;
+    srcdoc = makeStringHook(false, true, 'this') + srcdoc;
     const html = new Array(srcdoc);
     handleHTML(html, true);
     setAttribute(frame, 'srcdoc', html[0]);
     return true;
   }
   return false;
+}
+function hookInlineWindow(parent) {
+  const script = document.createElement('script');
+  script.textContent = getDocumentCurrentScriptHelper + makeStringHook(false, false, 'this');
+  parent.insertBefore(script, parent.firstChild);
+  return true;
+}
+function hookInlineFrame(frame) {
+  const script = document.createElement('script');
+  script.textContent = makeStringHook(true, false, 'top.SNOW_GET_PREVIOUS_ELEMENT_SIBLING(SNOW_DOCUMENT_CURRENT_SCRIPT())');
+  frame.after(script);
+  return true;
 }
 function findMetaCSP(template) {
   const metas = querySelectorAll.call(template, 'meta');
@@ -332,10 +351,7 @@ function handleHTML(args, isSrcDoc) {
           continue;
         }
       }
-      const script = document.createElement('script');
-      script.textContent = makeStringHook(false, false);
-      template.insertBefore(script, template.firstChild);
-      modified = true;
+      modified = hookInlineWindow(template);
     }
     const declarativeShadows = querySelectorAll.call(template, 'template[shadowroot]');
     for (let j = 0; j < declarativeShadows.length; j++) {
@@ -345,6 +361,7 @@ function handleHTML(args, isSrcDoc) {
     const frames = getFramesArray(template, false);
     for (let j = 0; j < frames.length; j++) {
       const frame = frames[j];
+      modified = isSrcDoc && hookInlineFrame(frame) || modified;
       modified = hookOnLoadAttributes(frame) || modified;
       modified = hookJavaScriptURI(frame) || modified;
       modified = hookSrcDoc(frame) || modified;
@@ -850,6 +867,7 @@ function setup(win) {
     getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
     getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
     getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
+    getPreviousElementSibling: Object.getOwnPropertyDescriptor(Element.prototype, 'previousElementSibling').get,
     getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get
   });
   return {
@@ -894,6 +912,7 @@ function setup(win) {
     getOwnerDocument,
     getDefaultView,
     getBlobFileType,
+    getPreviousElementSibling,
     getCommonAncestorContainer
   };
   function getContentWindow(element, tag) {
@@ -990,6 +1009,9 @@ function setup(win) {
   }
   function getBlobFileType(blob) {
     return bag.getBlobFileType.call(blob);
+  }
+  function getPreviousElementSibling(node) {
+    return bag.getPreviousElementSibling.call(node);
   }
   function getCommonAncestorContainer(range) {
     return bag.getCommonAncestorContainer.call(range);

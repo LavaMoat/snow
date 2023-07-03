@@ -111,6 +111,7 @@ function setup(win) {
         getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
         getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
         getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
+        getPreviousElementSibling: Object.getOwnPropertyDescriptor(Element.prototype, 'previousElementSibling').get,
         getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get,
     });
 
@@ -156,6 +157,7 @@ function setup(win) {
         getOwnerDocument,
         getDefaultView,
         getBlobFileType,
+        getPreviousElementSibling,
         getCommonAncestorContainer,
     };
 
@@ -280,6 +282,10 @@ function setup(win) {
 
     function getBlobFileType(blob) {
         return bag.getBlobFileType.call(blob);
+    }
+
+    function getPreviousElementSibling(node) {
+        return bag.getPreviousElementSibling.call(node);
     }
 
     function getCommonAncestorContainer(range) {

@@ -37,12 +37,13 @@ describe('window.open API', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                const href = location.href;
                 onmessage = (a) => {
                     const x = a.source;
                     if (!x || !x.location) {
                         return bypass([top]); // give up
                     }
-                    x.location.href = 'https://example.com/';
+                    x.location.href = href;
                     setTimeout(() => {
                         bypass([x]);
                     }, 1000);
@@ -57,12 +58,13 @@ describe('window.open API', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                const href = location.href;
                 addEventListener('message', a => {
                     const x = a.source;
                     if (!x || !x.location) {
                         return bypass([top]); // give up
                     }
-                    x.location.href = 'https://example.com/';
+                    x.location.href = href;
                     setTimeout(() => {
                         bypass([x]);
                     }, 1000);
@@ -79,12 +81,13 @@ describe('window.open API', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                const href = location.href;
                 open('javAscRipt\:opener.win=window;location.href="data:1"');
                 setTimeout(() => {
                     if (!top.win) {
                         return bypass([top]); // give up
                     }
-                    top.win.location.href = 'https://example.com/';
+                    top.win.location.href = href;
                     setTimeout(() => {
                         bypass([top.win]);
                     }, 500);
@@ -147,12 +150,13 @@ describe('document.open API', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                const href = location.href;
                 onmessage = (a) => {
                     const x = a.source;
                     if (!x || !x.location) {
                         return bypass([top]); // give up
                     }
-                    x.location.href = 'https://example.com/';
+                    x.location.href = href;
                     setTimeout(() => {
                         bypass([x]);
                     }, 1000);
@@ -167,12 +171,13 @@ describe('document.open API', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                const href = location.href;
                 addEventListener('message', a => {
                     const x = a.source;
                     if (!x || !x.location) {
                         return bypass([top]); // give up
                     }
-                    x.location.href = 'https://example.com/';
+                    x.location.href = href;
                     setTimeout(() => {
                         bypass([x]);
                     }, 1000);
@@ -189,12 +194,13 @@ describe('document.open API', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
+                const href = location.href;
                 document.open('javAscRipt\:opener.win=window;location.href="data:1"', '', '');
                 setTimeout(() => {
                     if (!top.win) {
                         return bypass([top]); // give up
                     }
-                    top.win.location.href = 'https://example.com/';
+                    top.win.location.href = href;
                     setTimeout(() => {
                         bypass([top.win]);
                     }, 500);

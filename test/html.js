@@ -187,4 +187,54 @@ describe('test HTML injections', async function () {
         });
         expect(result).toBe('V');
     });
+    
+    it('should fail to use atob of an iframe that was loaded via HTML in a new document (with innerHTML)', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                testdiv1.innerHTML = `<iframe srcdoc="<iframe></iframe><script>top.bypass([frames[0]])</script>"></iframe>`;
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an iframe that was loaded via HTML in a new document (with srcdoc)', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                var d = document.createElement('iframe');
+                d.srcdoc = `<iframe></iframe><script>top.bypass([frames[0]])</script>`;
+                testdiv.appendChild(d);
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an object that was loaded via HTML in a new document (with srcdoc)', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                var d = document.createElement('iframe');
+                d.srcdoc = `<object id="temp_id" data="${location.href}"></object><script>top.bypass([frames[0]])</script>`;
+                testdiv.appendChild(d);
+            }());
+        });
+        expect(result).toBe('V');
+    });
+
+    it('should fail to use atob of an embed that was loaded via HTML in a new document (with srcdoc)', async function () {
+        const result = await browser.executeAsync(function(done) {
+            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                top.bypass = bypass;
+                var d = document.createElement('iframe');
+                d.srcdoc = `<embed id="temp_id_1" type="text/html" src="/"><script>top.bypass([frames[0]])</script>`;
+                testdiv.appendChild(d);
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

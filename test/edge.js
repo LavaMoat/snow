@@ -57,7 +57,8 @@ describe('special cases', () => {
         const result = await browser.executeAsync(function(done) {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                testdiv1.innerHTML = ('<embed id="temp_id_1" type="text/html" src="/">');
+                const href = location.href;
+                testdiv1.innerHTML = (`<embed id="temp_id_1" type="text/html" src="${href}">`);
                 testdiv2.innerHTML = ('<embed id="temp_id_2" type="text/html" src="https://lavamoat.github.io/snow/test/index.html">');
                 setTimeout(() => {
                     temp_id_2.src = temp_id_1.src;

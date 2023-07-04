@@ -1,9 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 
+const csp = 'DISABLED' || `
+    script-src 'self';
+    object-src 'none'; 
+    frame-src 'none'; 
+    form-action 'self'; 
+    frame-ancestors 'none'; 
+    navigate-to 'none';
+`.split('\n').join('').split('  ').join('');
+
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();
 
-async function setup(url = 'https://example.com/', noSnow) {
+async function setup(url = 'https://weizman.github.io/CSPer/?csp=' + csp, noSnow) {
     await browser.url(url);
 
     if (noSnow) return;
@@ -25,7 +34,7 @@ async function setup(url = 'https://example.com/', noSnow) {
     // reset test divs
     await browser.execute(function() {
         document.getElementById('testdiv')?.remove();
-        document.querySelector('DIV').innerHTML = '<div id="testdiv"><div id="testdiv1"></div><div id="testdiv2"></div></div>';
+        document.querySelector('BODY').innerHTML = '<div id="testdiv"><div id="testdiv1"></div><div id="testdiv2"></div></div>';
         window.testdiv = document.getElementById('testdiv');
         window.testdiv1 = document.getElementById('testdiv1');
         window.testdiv2 = document.getElementById('testdiv2');

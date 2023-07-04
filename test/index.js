@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const csp = 'DISABLED' || `
+const csp = `
     script-src 'self';
     object-src 'none'; 
     frame-src 'none'; 
@@ -18,11 +18,7 @@ async function setup(url = 'https://weizman.github.io/CSPer/?csp=' + csp, noSnow
     if (noSnow) return;
 
     // inject SNOW
-    await browser.execute(function(js) {
-        const script = document.createElement('script');
-        script.textContent = js;
-        document.head.appendChild(script);
-    }, snow);
+    await browser.execute(new Function(snow));
 
     // use SNOW to disable atob
     await browser.execute(function() {

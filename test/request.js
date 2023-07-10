@@ -9,7 +9,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 document.addEventListener('keydown', async () => {
                     const win = await documentPictureInPicture.requestWindow();
@@ -21,7 +21,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and accessed via "window" property', async function () {
@@ -30,7 +30,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 document.addEventListener('keydown', async () => {
                     await documentPictureInPicture.requestWindow();
@@ -43,7 +43,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and accessed via "onenter" event', async function () {
@@ -52,7 +52,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 document.addEventListener('keydown', async () => {
                     documentPictureInPicture.onenter = (e) => {
@@ -68,7 +68,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe('V,V,V,V');
+        expect(['V,V,V,V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and reloaded to javascript scheme', async function () {
@@ -77,7 +77,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 document.addEventListener('keydown', async () => {
                     const win = await documentPictureInPicture.requestWindow();
@@ -92,6 +92,6 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 });

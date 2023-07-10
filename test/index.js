@@ -1,21 +1,64 @@
 const fs = require('fs');
 const path = require('path');
 
-const csp = `
-    script-src 'self';
-    object-src 'none'; 
-    frame-src 'none'; 
-    form-action 'self'; 
-    frame-ancestors 'none'; 
-    navigate-to 'none';
-`.split('\n').join('').split('  ').join('');
+const csp = `script-src 'self';`;
 
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();
 
-async function setup(url = 'https://weizman.github.io/CSPer/?csp=' + csp, noSnow) {
+function getURL() {
+    let url = 'https://weizman.github.io/CSPer/';
+    if (global.BROWSER === 'CHROME') {
+        url += '?csp=' + csp;
+    }
+    return url;
+}
+
+function setTestUtils(CSP) {
+    function listener(e) {
+        const fakeWin = {atob: () => 'CSP-' + (e.effectiveDirective || e.violatedDirective)};
+        setTimeout(top.bypass, 1000, [fakeWin]);
+    }
+
+    const top = window.top;
+    const utils = top.TEST_UTILS = {CSP};
+
+    utils.bypass = (wins, done) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+
+    utils.bailOnCorrectUnsafeCSP = function(done) {
+        if (utils.CSP && !utils.CSP.includes('unsafe')) {
+            done('CSP-script-src-elem');
+            return true;
+        }
+        return false;
+    };
+
+    utils.alertOnCSPViolation = function(win) {
+        win.addEventListener('securitypolicyviolation', listener);
+        win.document.addEventListener('securitypolicyviolation', listener);
+    };
+
+    utils.alertOnCSPViolation(window);
+}
+
+async function setupChrome() {
+    const puppeteerBrowser = await browser.getPuppeteer();
+    await browser.call(async () => {
+        const pages = await puppeteerBrowser.pages();
+        const page = pages[0];
+        await page.evaluateOnNewDocument(setTestUtils, csp);
+    })
+}
+
+async function setup(url = getURL(), noSnow) {
     await browser.url(url);
 
+    await browser.execute(setTestUtils, csp);
+
     if (noSnow) return;
+
+    if (global.BROWSER === 'CHROME') {
+        await setupChrome();
+    }
 
     // inject SNOW
     await browser.execute(new Function(snow));

@@ -1,5 +1,6 @@
 global.BROWSER = 'CHROME';
 exports.config = {
+    automationProtocol: 'devtools',
     //
     // ====================
     // Runner Configuration

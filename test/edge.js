@@ -225,6 +225,7 @@ describe('special cases', () => {
         }
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            if (top.TEST_UTILS.bailOnCorrectUnsafeCSP(done)) return;
             (function(){
                 document.write('<iframe srcdoc="<iframe src=\'javascript:top.bypass([window])\'</iframe>"></iframe>');
             }());

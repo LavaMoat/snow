@@ -43,6 +43,9 @@ describe('test different views', async function () {
     });
 
     it('should fail to use atob of an object', async function () {
+        if (global.BROWSER === 'FIREFOX') {
+            this.skip(); // requires a fix #59
+        }
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){

@@ -1,14 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
-const csp = `script-src 'self';`;
+const CSP = `script-src 'self'; object-src 'none';`;
+const URL = 'https://weizman.github.io/CSPer/';
 
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();
 
 function getURL() {
-    let url = 'https://weizman.github.io/CSPer/';
+    let url = URL;
     if (global.BROWSER === 'CHROME') {
-        url += '?csp=' + csp;
+        url += '?csp=' + CSP;
     }
     return url;
 }
@@ -45,14 +46,14 @@ async function setupChrome() {
     await browser.call(async () => {
         const pages = await puppeteerBrowser.pages();
         const page = pages[0];
-        await page.evaluateOnNewDocument(setTestUtils, csp);
+        await page.evaluateOnNewDocument(setTestUtils, CSP);
     })
 }
 
 async function setup(url = getURL(), noSnow) {
     await browser.url(url);
 
-    await browser.execute(setTestUtils, csp);
+    await browser.execute(setTestUtils, CSP);
 
     if (noSnow) return;
 

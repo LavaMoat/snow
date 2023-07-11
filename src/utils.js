@@ -16,7 +16,11 @@ function isTrustedHTML(node) {
 function makeWindowUtilSetter(prop, val) {
     const desc = Object.create(null);
     desc.value = val;
-    return function(win) { Object.defineProperty(win, prop, desc) };
+    return function(win) {
+        if (!Object.getOwnPropertyDescriptor(win, prop)) {
+            Object.defineProperty(win, prop, desc)
+        }
+    };
 }
 
 function getPrototype(node) {

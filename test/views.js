@@ -46,8 +46,8 @@ describe('test different views', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                testdiv1.innerHTML = ('<object id="temp_id" data="/" />');
-                setInterval(() => temp_id.contentWindow && bypass([temp_id.contentWindow]), 100);
+                testdiv1.innerHTML = (`<object id="temp_id" data="${location.href}" />`);
+                setTimeout(() => temp_id.contentWindow && bypass([temp_id.contentWindow]), 1000);
             }());
         });
         expect(['V']).toContain(result);

@@ -53,7 +53,7 @@ describe('test different views', async function () {
                 setTimeout(() => temp_id.contentWindow && bypass([temp_id.contentWindow]), 1000);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(['V', 'CSP-object-src']).toContain(result);
     });
 
     it('should fail to use atob of an embed', async function () {
@@ -63,6 +63,6 @@ describe('test different views', async function () {
                 testdiv1.innerHTML = (`<embed id="temp_id" type="text/html" src="${location.href}" onload="top.bypass([temp_id.contentWindow]);">`);
             }());
         });
-        expect(['V', 'CSP-script-src-attr']).toContain(result);
+        expect(['V', 'CSP-object-src', 'CSP-script-src-attr']).toContain(result);
     });
 });

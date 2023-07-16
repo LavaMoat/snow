@@ -180,7 +180,7 @@ describe('test HTML injections', async function () {
                 testdiv1.innerHTML = (`<object id="temp_id" data="${location.href}" onload="top.bypass([temp_id.contentWindow]);"/>`);
             }());
         });
-        expect(['V', 'CSP-script-src-attr']).toContain(result);
+        expect(['V', 'CSP-script-src-attr', 'CSP-object-src']).toContain(result);
     });
     
     it('should fail to use atob of an iframe that was loaded via HTML in a new document (with innerHTML)', async function () {

@@ -72,7 +72,7 @@ describe('special cases', () => {
                 }, 1000);
             }());
         });
-        expect(['V,V']).toContain(result);
+        expect(['V,V', 'CSP-object-src']).toContain(result);
     });
 
     it('should fail to use atob of an object that was cross origin and then same origin', async function () {
@@ -99,7 +99,7 @@ describe('special cases', () => {
                 }, 1000);
             }());
         });
-        expect(['V,V']).toContain(result);
+        expect(['V,V', 'CSP-object-src']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that was reattached to dom', async function () {

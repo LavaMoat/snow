@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const CSP = `script-src 'self'; object-src 'none';`;
+const CSP = 'script-src "self"; object-src "none";';
 const URL = 'https://weizman.github.io/CSPer/';
 
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();

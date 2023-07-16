@@ -46,7 +46,7 @@ to **non extension javascript with the same privileges as the web app**.
 Starting Version [<TBD>](https://github.com/LavaMoat/snow/pull/76) Snow officially doesn't support vulnerabilities that
 can be protected against by disallowing `unsafe-inline` & `unsafe-eval` and by specifying `object-src 'none'`.
 
-To learn more why is that, see [#76](https://github.com/LavaMoat/snow/pull/76).
+To learn more why is that, see [section 3](#install).
 
 ## [Demo](https://lavamoat.github.io/snow/demo/#self-xss-challenge-msg) - The Snow Challenge! 🏆
 
@@ -114,7 +114,7 @@ in order for it to play its role securely.
    (a) `unsafe-inline` & `unsafe-eval` aren't allowed and (b) `object-src` isn't allowed.
    This is because (a) defending against string-JS attacks is basically an endless task and probably impossible, and
    (b) `object`/`embed` elements behaviour is also too unpredictable while these elements shouldn't be even used in the
-   first place. Snow will do its best regardless of what CSP is applied - use at your own risk.
+   first place. Snow will do its best regardless of what CSP is applied - **use at your own risk!** (learn more at [#118](https://github.com/LavaMoat/snow/pull/118/))
 
 
 `SNOW` API can also be required as part of a bundle instead of a script tag:

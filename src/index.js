@@ -50,9 +50,8 @@ function applyHooks(win) {
     hookWorker(win);
 }
 
-function onWin(win, cb) {
-    const hook = shouldHook(win);
-    if (hook) {
+function onWin(win, cb, skip) {
+    if (!skip && shouldHook(win)) {
         applyHooks(win);
         for (let i = 0; i < callbacks.length; i++) {
             const stop = callbacks[i](win);
@@ -77,8 +76,8 @@ function snow(cb) {
     }
     setSnowWindowUtil(top);
     setSnowFrameUtil(top);
-    push(callbacks, cb);
-    onWin(top, cb);
+    const first = push(callbacks, cb) === 1;
+    onWin(top, cb, !first);
 }
 
 module.exports = snow;

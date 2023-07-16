@@ -177,4 +177,4 @@ Maintained and developed by [MetaMask 🦊](https://github.com/MetaMask)
     
 Part of the [LavaMoat 🌋](https://github.com/LavaMoat) Javascript security toolbox
 
-Invented and developed by [Gal Weizman 👋🏻](https://weizman.github.io/)
+Invented and developed by [Gal Weizman 👋🏻](https://weizmangal.com/)

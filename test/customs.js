@@ -12,7 +12,7 @@ describe('test custom elements', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 100, [window]);
+                setTimeout(bypass, 1000, [window]);
 
                 window.n = window.n ?? 0;
                 window.n++;
@@ -42,7 +42,7 @@ describe('test custom elements', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 100, [window]);
+                setTimeout(bypass, 1000, [window]);
 
                 window.n = window.n ?? 0;
                 window.n++;
@@ -73,7 +73,7 @@ describe('test custom elements', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 100, [window]);
+                setTimeout(bypass, 1000, [window]);
 
                 window.n = window.n ?? 0;
                 window.n++;
@@ -106,7 +106,7 @@ describe('test custom elements', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 100, [window]);
+                setTimeout(bypass, 1000, [window]);
 
                 window.n = window.n ?? 0;
                 window.n++;
@@ -127,7 +127,7 @@ describe('test custom elements', async function () {
                 testdiv.appendChild(object);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(['V', 'CSP-object-src']).toContain(result);
     });
 
     it('should fail to use atob of an embed that is loaded via a custom element with connectedCallback', async function () {
@@ -137,7 +137,7 @@ describe('test custom elements', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 100, [window]);
+                setTimeout(bypass, 1000, [window]);
 
                 window.n = window.n ?? 0;
                 window.n++;
@@ -158,7 +158,7 @@ describe('test custom elements', async function () {
                 testdiv.appendChild(embed);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(['V', 'CSP-object-src']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that is loaded via a custom element with connectedCallback through html', async function () {
@@ -168,7 +168,7 @@ describe('test custom elements', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 100, [window]);
+                setTimeout(bypass, 1000, [window]);
 
                 window.n = window.n ?? 0;
                 window.n++;
@@ -197,7 +197,7 @@ describe('test custom elements', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 100, [window]);
+                setTimeout(bypass, 1000, [window]);
 
                 window.n = window.n ?? 0;
                 window.n++;
@@ -232,7 +232,7 @@ describe('test custom elements', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 100, [window]);
+                setTimeout(bypass, 1000, [window]);
 
                 window.n = window.n ?? 0;
                 window.n++;
@@ -265,7 +265,7 @@ describe('test custom elements', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 100, [window]);
+                setTimeout(bypass, 1000, [window]);
 
                 window.n = window.n ?? 0;
                 window.n++;

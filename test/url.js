@@ -9,7 +9,7 @@ describe('test url', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const f = document.createElement('iframe');
                 document.body.appendChild(f);
                 f.src = URL.createObjectURL(new Blob(["<script>top.bypass([window])</script>"], {type: "text/html"}));
@@ -22,7 +22,7 @@ describe('test url', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const enc = new TextEncoder();
                 const by = enc.encode("<script>top.bypass([window])</script>");
                 const blob = new Blob([by], {type: 'text/html'});
@@ -39,7 +39,7 @@ describe('test url', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const enc = new TextEncoder();
                 const by = enc.encode("<script>top.bypass([window])</script>");
                 const blob = new Blob([by]);
@@ -56,7 +56,7 @@ describe('test url', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const f = document.createElement('iframe');
                 document.body.appendChild(f);
                 f.src = URL.createObjectURL(new File(["<script>top.bypass([window])</script>"], 'aaa.txt', {type: "text/html"}));
@@ -69,7 +69,7 @@ describe('test url', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const enc = new TextEncoder();
                 const by = enc.encode("<script>top.bypass([window])</script>");
                 const file = new File([by], 'aaa.txt', {type: 'text/html'});
@@ -86,7 +86,7 @@ describe('test url', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const enc = new TextEncoder();
                 const by = enc.encode("<script>top.bypass([window])</script>");
                 const file = new File([by], 'aaa.txt', {type: 'text/html'});
@@ -134,7 +134,7 @@ describe('test url', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const f = document.createElement('iframe');
                 document.body.appendChild(f);
                 const svg = `<svg xmlns="http://www.w3.org/2000/svg"><script>top.bypass([window])</script></svg>`
@@ -148,7 +148,7 @@ describe('test url', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const f = document.createElement('iframe');
                 document.body.appendChild(f);
                 const xslt = `<?xml version="1.0"?>

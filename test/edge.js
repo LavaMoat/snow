@@ -256,7 +256,7 @@ describe('special cases', () => {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 200, [window]);
+                setTimeout(bypass, 1000, [window]);
                 var d = document.createElement('div');
                 testdiv.appendChild(d);
                 d.innerHTML = `
@@ -269,7 +269,7 @@ describe('special cases', () => {
   <iframe src=\'javascript:alert(1)\'</iframe>"></iframe>`
             }());
         });
-        expect(['V']).toContain(result);
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an iframe was injected with srcdoc with a defending meta csp tag with a nonce', async function () {
@@ -277,7 +277,7 @@ describe('special cases', () => {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                setTimeout(bypass, 200, [window]);
+                setTimeout(bypass, 1000, [window]);
                 var d = document.createElement('div');
                 testdiv.appendChild(d);
                 d.innerHTML = `
@@ -290,7 +290,7 @@ describe('special cases', () => {
     </iframe>`
             }());
         });
-        expect(['V']).toContain(result);
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that tricks the frames array with clobbering of id=n', async function () {

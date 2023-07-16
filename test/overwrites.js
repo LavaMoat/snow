@@ -163,7 +163,7 @@ describe('test overrides of native functions', async function () {
                     }
                 });
                 document.body.appendChild(ifr);
-                setTimeout(bypass, 200, [top]);
+                setTimeout(bypass, 1000, [top]);
             }());
         });
         expect(['V']).toContain(result);

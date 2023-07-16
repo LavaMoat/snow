@@ -17,7 +17,7 @@ function getURL() {
 function setTestUtils(CSP) {
     function listener(e) {
         const fakeWin = {atob: () => 'CSP-' + (e.effectiveDirective || e.violatedDirective)};
-        setTimeout(top.bypass, 1000, [fakeWin]);
+        setTimeout(top.bypass, 500, [fakeWin]);
     }
 
     const top = window.top;

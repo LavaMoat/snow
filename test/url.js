@@ -182,7 +182,7 @@ describe('test url', async function () {
             const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 var xhr = new XMLHttpRequest();
-                xhr.open('GET', 'https://weizman.github.io/content/img/gpt.png', true);
+                xhr.open('GET', 'https://weizmangal.com/content/img/gpt.png', true);
                 xhr.responseType = 'blob';
                 xhr.onload = function(e) {
                     top.bypass = bypass;

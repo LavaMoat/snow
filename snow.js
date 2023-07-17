@@ -1046,30 +1046,30 @@ function hookMessageEvent(win) {
   };
   Object.defineProperty(win.MessageEvent.prototype, 'source', desc);
 }
-function hook(win, native, cb) {
+function hook(win, native, cb, isWindowProxy) {
   cb(win);
   return function open() {
     const args = slice(arguments);
-    const url = args[0] + '',
-      // open accepts non strings too
-      target = args[1],
-      windowFeatures = args[2];
-    if (stringStartsWith(stringToLowerCase(url), 'javascript')) {
-      const blocked = warn(WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url, win);
+    const url = args[0];
+    if (stringStartsWith(stringToLowerCase(url + ''), 'javascript')) {
+      const blocked = warn(WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url + '', win);
       if (blocked) {
         return null;
       }
     }
-    const opened = Function.prototype.call.call(native, this, url, target, windowFeatures);
+    const opened = Function.prototype.apply.call(native, this, args);
     if (!opened) {
       return null;
+    }
+    if (!isWindowProxy && args.length < 3) {
+      return opened;
     }
     return proxy(opened);
   };
 }
 function hookOpen(win) {
-  win.open = hook(win, win.open, hookMessageEvent);
-  win.document.open = hook(win, win.document.open, hookMessageEvent);
+  win.open = hook(win, win.open, hookMessageEvent, true);
+  win.document.open = hook(win, win.document.open, hookMessageEvent, false);
 }
 module.exports = hookOpen;
 

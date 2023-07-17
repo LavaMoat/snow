@@ -44,7 +44,7 @@ to **non extension javascript with the same privileges as the web app**.
 ## 🚨 IMPORTANT UPDATE 🚨
 
 Starting Version [1.6.0](https://github.com/LavaMoat/snow/pull/76) Snow officially doesn't support vulnerabilities that
-can be protected against by disallowing `unsafe-inline` & `unsafe-eval` and by specifying `object-src 'none'`.
+can be protected against by disallowing `unsafe-inline` & `unsafe-eval` and by correctly using the `object-src` directive.
 
 To learn more why is that, see [section 3](#install).
 

@@ -310,4 +310,35 @@ describe('special cases', () => {
         });
         expect(['V,V,V']).toContain(result);
     });
+
+    it('should fail to use atob of an iframe born out of mXSS (srcdoc)', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/91
+        if (global.BROWSER !== 'CHROME') {
+            this.skip();
+        }
+        const result = await browser.executeAsync(function(done) {
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                testdiv.innerHTML =  `<iframe
+                    srcdoc="<form><math><mtext></form><form><mglyph><style></math><iframe src=&quot;javascript:top.bypass([window])&quot;></iframe>"
+                </iframe>`;
+            }());
+        });
+        expect(['CSP-script-src-elem']).toContain(result);
+    });
+
+    it('should fail to use atob of an iframe born out of mXSS (innerHTML)', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/91
+        if (global.BROWSER !== 'CHROME') {
+            this.skip();
+        }
+        const result = await browser.executeAsync(function(done) {
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                testdiv.innerHTML = `<form><math><mtext></form><form><mglyph><style></math><iframe src="javascript:top.bypass([window])"></iframe>`;
+                testdiv.innerHTML = testdiv.innerHTML;
+            }());
+        });
+        expect(['CSP-script-src-elem']).toContain(result);
+    });
 });

@@ -464,7 +464,7 @@ function onWin(win, cb, skip) {
   }
 }
 const callbacks = new Array();
-function snow(cb) {
+function snow(cb, win) {
   if (typeof cb !== 'function') {
     const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
     if (bail) {
@@ -474,7 +474,7 @@ function snow(cb) {
   setSnowWindowUtil(top);
   setSnowFrameUtil(top);
   const first = push(callbacks, cb) === 1;
-  onWin(top, cb, !first);
+  onWin(win || window, cb, !first);
 }
 module.exports = snow;
 
@@ -1653,8 +1653,11 @@ var __webpack_exports__ = {};
 /* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_src_index__WEBPACK_IMPORTED_MODULE_0__);
 
 (function (win) {
+  const func = win === top ? (_src_index__WEBPACK_IMPORTED_MODULE_0___default()) : top.SNOW;
   Object.defineProperty(win, 'SNOW', {
-    value: top.SNOW || (_src_index__WEBPACK_IMPORTED_MODULE_0___default())
+    value: function (cb) {
+      func(cb, win);
+    }
   });
 })(window);
 })();

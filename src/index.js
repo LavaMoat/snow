@@ -77,7 +77,8 @@ function snow(cb, win) {
     setSnowWindowUtil(top);
     setSnowFrameUtil(top);
     const first = push(callbacks, cb) === 1;
-    onWin(win || window, cb, !first);
+    const w = win || window;
+    onWin(w, cb, !first && w === top);
 }
 
 module.exports = snow;

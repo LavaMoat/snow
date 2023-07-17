@@ -474,7 +474,8 @@ function snow(cb, win) {
   setSnowWindowUtil(top);
   setSnowFrameUtil(top);
   const first = push(callbacks, cb) === 1;
-  onWin(win || window, cb, !first);
+  const w = win || window;
+  onWin(w, cb, !first && w === top);
 }
 module.exports = snow;
 
@@ -1653,12 +1654,16 @@ var __webpack_exports__ = {};
 /* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_src_index__WEBPACK_IMPORTED_MODULE_0__);
 
 (function (win) {
-  const func = win === top ? (_src_index__WEBPACK_IMPORTED_MODULE_0___default()) : top.SNOW;
   Object.defineProperty(win, 'SNOW', {
-    value: function (cb) {
-      func(cb, win);
+    value: function (cb, w) {
+      func(cb, w || win);
     }
   });
+  let func = (_src_index__WEBPACK_IMPORTED_MODULE_0___default());
+  if (win !== top) {
+    func = top.SNOW;
+    win.SNOW(() => {}, win);
+  }
 })(window);
 })();
 

@@ -1,10 +1,15 @@
 import snow from "./src/index";
 
 (function(win) {
-    const func = win === top ? snow : top.SNOW;
     Object.defineProperty(win, 'SNOW', {
-        value: function(cb) {
-            func(cb, win);
+        value: function(cb, w) {
+            func(cb, w || win);
         }
     });
+
+    let func = snow;
+    if (win !== top) {
+        func = top.SNOW;
+        win.SNOW(() => {}, win);
+    }
 }(window));

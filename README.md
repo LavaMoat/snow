@@ -115,7 +115,7 @@ in order for it to play its role securely.
    This is because (a) defending against string-JS attacks is basically an endless task and probably impossible, and
    (b) `object`/`embed` elements behaviour is also too unpredictable while these elements shouldn't be even used in the
    first place. Snow will do its best regardless of what CSP is applied - **use at your own risk!** 
-   1. please learn more at [#118](https://github.com/LavaMoat/snow/pull/118/)
+   1. please learn more about this ☝️ at [#118](https://github.com/LavaMoat/snow/pull/118/)
 
 
 `SNOW` API can also be required as part of a bundle instead of a script tag:

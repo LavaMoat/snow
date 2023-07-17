@@ -173,6 +173,39 @@ describe('test HTML injections', async function () {
         expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
+    it('should fail to use atob of an iframe introduced via multiple document.write args', async function () {
+        if (global.BROWSER === 'FIREFOX') {
+            this.skip(); // requires a fix #58
+        }
+        const result = await browser.executeAsync(function(done) {
+            if (top.TEST_UTILS.bailOnCorrectUnsafeCSP(done)) return;
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                var f = document.createElement('iframe');
+                testdiv.appendChild(f);
+                f.contentDocument.write('<iframe id="tst');
+                f.contentDocument.write('"></iframe><script>top.bypass([tst.contentWindow])</script>');
+            }());
+        });
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
+    });
+
+    it('should fail to use atob of an iframe introduced via multiple document.write calls', async function () {
+        if (global.BROWSER === 'FIREFOX') {
+            this.skip(); // requires a fix #58
+        }
+        const result = await browser.executeAsync(function(done) {
+            if (top.TEST_UTILS.bailOnCorrectUnsafeCSP(done)) return;
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                var f = document.createElement('iframe');
+                testdiv.appendChild(f);
+                f.contentDocument.write('<iframe id="tst', '"></iframe><script>top.bypass([tst.contentWindow])</script>');
+            }());
+        });
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
+    });
+
     it('should fail to use atob of an object through onload as html', async function () {
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);

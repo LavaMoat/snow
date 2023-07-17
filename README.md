@@ -44,7 +44,7 @@ to **non extension javascript with the same privileges as the web app**.
 ## 🚨 IMPORTANT UPDATE 🚨
 
 Starting Version [1.6.0](https://github.com/LavaMoat/snow/pull/76) Snow officially doesn't support vulnerabilities that
-can be protected against by disallowing `unsafe-inline` & `unsafe-eval` and by correctly using the `object-src` directive.
+can be protected against by disallowing `unsafe-inline` completely and by correctly using the `object-src` directive to not allow `self`.
 
 To learn more why is that, see [section 3](#install).
 
@@ -111,7 +111,7 @@ in order for it to play its role securely.
 
 3. **Most importantly, it's highly vulnerable without minimal help from CSP** - As of version 1.6.0 the project will
    seize to attempt to defend against vulnerabilities that aren't possible to exploit when 
-   (a) `unsafe-inline` & `unsafe-eval` aren't allowed and (b) `object-src` isn't allowed.
+   (a) `unsafe-inline` isn't allowed and (b) `object-src` to `self` isn't allowed.
    This is because (a) defending against string-JS attacks is basically an endless task and probably impossible, and
    (b) `object`/`embed` elements behaviour is also too unpredictable while these elements shouldn't be even used in the
    first place. Snow will do its best regardless of what CSP is applied - **use at your own risk!** (learn more at [#118](https://github.com/LavaMoat/snow/pull/118/))

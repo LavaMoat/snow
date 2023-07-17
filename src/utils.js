@@ -1,18 +1,26 @@
 const {tagName, nodeType, slice, Array, parse, stringify,
     Node, Document, DocumentFragment, Element, ShadowRoot, getContentWindow,
-    getDefaultView, getOwnerDocument, stringToLowerCase,
+    getDefaultView, getOwnerDocument, stringToLowerCase, Object,
 } = require('./natives');
 
-const shadows = new Array();
+const shadows = new Array(), trustedHTMLs = new Array();
 
 function isShadow(node) {
     return shadows.includes(node);
 }
 
 function isTrustedHTML(node) {
-    const replacer = (k, v) => (!k && node === v) ? v : ''; // avoid own props
-    // normal nodes will parse into objects whereas trusted htmls into strings
-    return typeof parse(stringify(node, replacer)) === 'string';
+    return trustedHTMLs.includes(node);
+}
+
+function makeWindowUtilSetter(prop, val) {
+    const desc = Object.create(null);
+    desc.value = val;
+    return function(win) {
+        if (!Object.getOwnPropertyDescriptor(win, prop)) {
+            Object.defineProperty(win, prop, desc)
+        }
+    };
 }
 
 function getPrototype(node) {
@@ -118,4 +126,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {toArray, isTagFramable, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows};
+module.exports = {makeWindowUtilSetter, toArray, isTagFramable, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows, trustedHTMLs};

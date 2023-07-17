@@ -1,17 +1,10 @@
-function natively(win, cb) {
-    const ifr = win.document.createElement('iframe');
-    const parent = win.document.head || win.document.documentElement;
-    parent.appendChild(ifr);
-    const ret = cb(ifr.contentWindow);
-    ifr.parentElement.removeChild(ifr);
-    return ret;
-}
+const {runInNewRealm} = require('./common');
 
 function natives(win) {
     const {EventTarget} = win; // PR#62
-    return natively(win, function(win) {
+    return runInNewRealm(function(win) {
         const {
-            console,
+            URL,
             Proxy,
             JSON,
             Attr,
@@ -21,19 +14,20 @@ function natives(win) {
             Node,
             Document,
             DocumentFragment,
+            Blob,
             ShadowRoot,
             Object,
             Reflect,
             Array,
             Element,
             HTMLElement,
-            HTMLTemplateElement,
+            Range,
             HTMLIFrameElement,
             HTMLFrameElement,
             HTMLObjectElement,
         } = win;
         const bag = {
-            console,
+            URL,
             Proxy,
             JSON,
             Attr,
@@ -43,20 +37,21 @@ function natives(win) {
             Node,
             Document,
             DocumentFragment,
+            Blob,
             ShadowRoot,
             Object,
             Reflect,
             Array,
             Element,
             HTMLElement,
-            HTMLTemplateElement,
+            Range,
             EventTarget,
             HTMLIFrameElement,
             HTMLFrameElement,
             HTMLObjectElement,
         };
         bag.document = {
-            createElement: win.document.createElement,
+            createElement: win.document.createElement.bind(win.document),
         };
         return bag;
     });
@@ -66,7 +61,8 @@ function setup(win) {
     const bag = natives(win);
 
     const {
-        console,
+        document,
+        URL,
         Proxy,
         Function,
         String,
@@ -74,13 +70,14 @@ function setup(win) {
         Node,
         Document,
         DocumentFragment,
+        Blob,
         ShadowRoot,
         Object,
         Reflect,
         Array,
         Element,
         HTMLElement,
-        HTMLTemplateElement,
+        Range,
         EventTarget,
         HTMLIFrameElement,
         HTMLFrameElement,
@@ -113,10 +110,13 @@ function setup(win) {
         getParentElement: Object.getOwnPropertyDescriptor(Node.prototype, 'parentElement').get,
         getOwnerDocument: Object.getOwnPropertyDescriptor(Node.prototype, 'ownerDocument').get,
         getDefaultView: Object.getOwnPropertyDescriptor(Document.prototype, 'defaultView').get,
+        getBlobFileType: Object.getOwnPropertyDescriptor(Blob.prototype, 'type').get,
+        getPreviousElementSibling: Object.getOwnPropertyDescriptor(Element.prototype, 'previousElementSibling').get,
+        getCommonAncestorContainer: Object.getOwnPropertyDescriptor(Range.prototype, 'commonAncestorContainer').get,
     });
 
     return {
-        console,
+        document,
         Proxy,
         Object,
         Reflect,
@@ -125,6 +125,7 @@ function setup(win) {
         Element,
         Document,
         DocumentFragment,
+        Blob,
         ShadowRoot,
         Array,
         Map,
@@ -155,6 +156,9 @@ function setup(win) {
         getParentElement,
         getOwnerDocument,
         getDefaultView,
+        getBlobFileType,
+        getPreviousElementSibling,
+        getCommonAncestorContainer,
     };
 
     function getContentWindow(element, tag) {
@@ -237,11 +241,11 @@ function setup(win) {
     }
 
     function addEventListener(element, event, listener, options) {
-        return bag.addEventListener.call(element, event, listener, options);
+        return bag.Function.prototype.call.call(bag.addEventListener, element, event, listener, options);
     }
 
     function removeEventListener(element, event, listener, options) {
-        return bag.removeEventListener.call(element, event, listener, options);
+        return bag.Function.prototype.call.call(bag.removeEventListener, element, event, listener, options);
     }
 
     function createElement(document, tagName, options) {
@@ -274,6 +278,18 @@ function setup(win) {
 
     function getDefaultView(document) {
         return bag.getDefaultView.call(document);
+    }
+
+    function getBlobFileType(blob) {
+        return bag.getBlobFileType.call(blob);
+    }
+
+    function getPreviousElementSibling(node) {
+        return bag.getPreviousElementSibling.call(node);
+    }
+
+    function getCommonAncestorContainer(range) {
+        return bag.getCommonAncestorContainer.call(range);
     }
 }
 

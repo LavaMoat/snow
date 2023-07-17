@@ -1,14 +1,14 @@
-const setup = require('./index');
+const {setup} = require('./index');
 
 describe('special cases', () => {
     beforeEach(setup);
 
     it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const ifr = document.createElement('iframe');
-                ifr.src = "https://x.com";
+                ifr.src = "https://lavamoat.github.io/snow/test/index.html";
                 testdiv.appendChild(ifr);
                 const zzz = ifr.contentWindow;
                 setTimeout(() => {
@@ -19,21 +19,21 @@ describe('special cases', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin (complex)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const ifr = document.createElement('iframe');
-                ifr.src = "https://x.com";
+                ifr.src = "https://lavamoat.github.io/snow/test/index.html";
                 testdiv.appendChild(ifr);
                 const zzz = ifr.contentWindow;
                 setTimeout(() => {
                     ifr.src = "about:blank";
                     setTimeout(() => {
-                        ifr.src = "https://x.com";
+                        ifr.src = "https://lavamoat.github.io/snow/test/index.html";
                         setTimeout(() => {
                             ifr.src = "about:blank";
                             setTimeout(() => {
@@ -44,7 +44,7 @@ describe('special cases', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an embed that was cross origin and then same origin', async function () {
@@ -55,13 +55,14 @@ describe('special cases', () => {
             this.skip(); // requires a fix #59
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                testdiv1.innerHTML = ('<embed id="temp_id_1" type="text/html" src="/">');
-                testdiv2.innerHTML = ('<embed id="temp_id_2" type="text/html" src="https://x.com">');
+                const href = location.href;
+                testdiv1.innerHTML = (`<embed id="temp_id_1" type="text/html" src="${href}">`);
+                testdiv2.innerHTML = ('<embed id="temp_id_2" type="text/html" src="https://lavamoat.github.io/snow/test/index.html">');
                 setTimeout(() => {
                     temp_id_2.src = temp_id_1.src;
-                    temp_id_1.src = 'https://x.com';
+                    temp_id_1.src = 'https://lavamoat.github.io/snow/test/index.html';
                     setTimeout(() => {
                         temp_id_1.src = temp_id_2.src;
                         setTimeout(() => {
@@ -71,7 +72,7 @@ describe('special cases', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe('V,V');
+        expect(['V,V', 'CSP-object-src']).toContain(result);
     });
 
     it('should fail to use atob of an object that was cross origin and then same origin', async function () {
@@ -82,13 +83,13 @@ describe('special cases', () => {
             this.skip(); // requires a fix #59
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                testdiv1.innerHTML = ('<object id="temp_id_1" type="text/html" data="/">');
-                testdiv2.innerHTML = ('<object id="temp_id_2" type="text/html" data="https://x.com">');
+                testdiv1.innerHTML = (`<object id="temp_id_1" type="text/html" data="${location.href}">`);
+                testdiv2.innerHTML = ('<object id="temp_id_2" type="text/html" data="https://lavamoat.github.io/snow/test/index.html">');
                 setTimeout(() => {
                     temp_id_2.data = temp_id_1.data;
-                    temp_id_1.data = 'https://x.com';
+                    temp_id_1.data = 'https://lavamoat.github.io/snow/test/index.html';
                     setTimeout(() => {
                         temp_id_1.data = temp_id_2.data;
                         setTimeout(() => {
@@ -98,12 +99,12 @@ describe('special cases', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe('V,V');
+        expect(['V,V', 'CSP-object-src']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that was reattached to dom', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const ifr = document.createElement('iframe');
                 testdiv.appendChild(ifr);
@@ -116,12 +117,12 @@ describe('special cases', () => {
                 });
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe within an iframe within an iframe', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const rnd = Math.random().toString(36).substring(7);
                 window[rnd] = bypass;
@@ -140,7 +141,7 @@ describe('special cases', () => {
                 testdiv.appendChild(ifr);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that had its document written', async function () {
@@ -148,7 +149,8 @@ describe('special cases', () => {
             this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            if (top.TEST_UTILS.bailOnCorrectUnsafeCSP(done)) return;
             (function(){
                 const ifr = document.createElement('iframe');
                 testdiv.appendChild(ifr);
@@ -156,7 +158,7 @@ describe('special cases', () => {
                 bypass([ifr.contentWindow.xxx.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that had its document written-ln', async function () {
@@ -164,7 +166,8 @@ describe('special cases', () => {
             this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            if (top.TEST_UTILS.bailOnCorrectUnsafeCSP(done)) return;
             (function(){
                 const ifr = document.createElement('iframe');
                 testdiv.appendChild(ifr);
@@ -172,13 +175,13 @@ describe('special cases', () => {
                 bypass([ifr.contentWindow.xxx.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an iframe when all element in DOM changed their own toString behaviour', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/9
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const all = document.querySelectorAll('*');
                 const fr = document.createElement('iframe');
@@ -191,31 +194,29 @@ describe('special cases', () => {
                 testdiv.appendChild(fr);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
                 const f = document.createElement('iframe');
                 f.srcdoc = '<iframe src="javasCript\:top.bypass([window])"></iframe>';
                 testdiv.appendChild(f);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with innerHTML', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
                 testdiv.innerHTML = ('<iframe srcdoc="<iframe src=\'javascript:top.bypass([window])\'</iframe>"></iframe>');
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with document.write', async function () {
@@ -223,12 +224,121 @@ describe('special cases', () => {
             this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            if (top.TEST_UTILS.bailOnCorrectUnsafeCSP(done)) return;
             (function(){
-                top.bypass = bypass;
                 document.write('<iframe srcdoc="<iframe src=\'javascript:top.bypass([window])\'</iframe>"></iframe>');
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
+    });
+
+    it('should fail to use atob of an iframe that pretends to be a trusted html', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/95
+        const result = await browser.executeAsync(function(done) {
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                var d = document.createElement('div')
+                d.innerHTML = '<iframe id="f"></iframe>';
+                var f = d.firstChild;
+                d.toJSON = ()=>'asd';
+                f.toJSON = ()=>'asd';
+                document.documentElement.toJSON = ()=>'asd';
+                document.body.appendChild(d);
+                bypass([f.contentWindow]);
+            }());
+        });
+        expect(['V']).toContain(result);
+    });
+
+    it('should fail to use atob of an iframe was injected with srcdoc with a defending meta csp tag and trusted types', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/90
+        const result = await browser.executeAsync(function(done) {
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                setTimeout(bypass, 1000, [window]);
+                var d = document.createElement('div');
+                testdiv.appendChild(d);
+                d.innerHTML = `
+  <iframe srcdoc="
+    <meta http-equiv='Content-Security-pOlicy' content=&quot;require-trusted-types-for 'script';&quot;>. 
+    <script>
+      trustedTypes.createPolicy('default', { createHTML: s=>s, createScript: function (s) { return ''; } });
+      setTimeout(()=>top.bypass([frames[0]]),100);
+    </script>
+  <iframe src=\'javascript:alert(1)\'</iframe>"></iframe>`
+            }());
+        });
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
+    });
+
+    it('should fail to use atob of an iframe was injected with srcdoc with a defending meta csp tag with a nonce', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/94
+        const result = await browser.executeAsync(function(done) {
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                setTimeout(bypass, 1000, [window]);
+                var d = document.createElement('div');
+                testdiv.appendChild(d);
+                d.innerHTML = `
+    <iframe
+        srcdoc="
+        <meta http-equiv='Content-SecuriTy-Policy' content=&quot;script-src 'nonce-pwnd' ;&quot;>
+            <iframe src=&quot;javascript:haha&quot;>
+            </iframe>
+        <script nonce=&quot;pwnd&quot;>top.bypass([frames[0]]);</script>">
+    </iframe>`
+            }());
+        });
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
+    });
+
+    it('should fail to use atob of an iframe that tricks the frames array with clobbering of id=n', async function () {
+        const result = await browser.executeAsync(function(done) {
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                const ifr1 = document.createElement('iframe');
+                const ifr2 = document.createElement('iframe');
+                document.body.appendChild(ifr1);
+                const div = document.createElement('div');
+                div.id = "0";
+                div.window = div; // I am a `window` now
+                setTimeout(() => { bypass([ifr2.contentWindow, ifr1.contentWindow, window]) }, 500);
+                try { ifr1.contentWindow.document.body.appendChild(div); } catch {}
+                try { document.body.appendChild(ifr2); } catch {}
+            }());
+        });
+        expect(['V,V,V']).toContain(result);
+    });
+
+    it('should fail to use atob of an iframe born out of mXSS (srcdoc)', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/91
+        if (global.BROWSER !== 'CHROME') {
+            this.skip();
+        }
+        const result = await browser.executeAsync(function(done) {
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                testdiv.innerHTML =  `<iframe
+                    srcdoc="<form><math><mtext></form><form><mglyph><style></math><iframe src=&quot;javascript:top.bypass([window])&quot;></iframe>"
+                </iframe>`;
+            }());
+        });
+        expect(['CSP-script-src-elem']).toContain(result);
+    });
+
+    it('should fail to use atob of an iframe born out of mXSS (innerHTML)', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/91
+        if (global.BROWSER !== 'CHROME') {
+            this.skip();
+        }
+        const result = await browser.executeAsync(function(done) {
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                testdiv.innerHTML = `<form><math><mtext></form><form><mglyph><style></math><iframe src="javascript:top.bypass([window])"></iframe>`;
+                testdiv.innerHTML = testdiv.innerHTML;
+            }());
+        });
+        expect(['CSP-script-src-elem']).toContain(result);
     });
 });

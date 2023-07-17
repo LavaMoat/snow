@@ -1,21 +1,22 @@
-const {console} = require('./natives');
-
 const ERR_MARK_NEW_WINDOW_FAILED = 1;
 const WARN_OPEN_API_LIMITED = 2;
 const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
 const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
 const WARN_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
-const ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN = 7;
+const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
+const WARN_SRCDOC_WITH_CSP_BLOCKED = 8;
+
+const {console} = top;
 
 function warn(msg, a, b) {
     let bail;
     switch (msg) {
         case WARN_DECLARATIVE_SHADOWS:
-            const shadow = a, html = b;
+            const html = a;
             bail = false;
             console.warn('SNOW:',
-                'removing html string representing a declarative shadow:', shadow, '\n', `"${html}"`, '.', '\n',
+                'removing html string representing a declarative shadow:', '\n', `"${html}"`, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
                 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.',
             );
@@ -39,22 +40,32 @@ function warn(msg, a, b) {
                 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.',
             );
             break;
+        case WARN_SRCDOC_WITH_CSP_BLOCKED:
+            const srcdoc = a, csp = b;
+            bail = true;
+            console.warn('SNOW:',
+                'blocking srcdoc (below) for trying to inject a static meta csp tag: ', csp, '.', '\n',
+                'if this prevents your application from running correctly, please visit/report at',
+                'https://github.com/LavaMoat/snow/issues/???', '.', '\n',
+                `srcdoc content: `, '\n', `"${srcdoc}"`,
+            );
+            break;
         default:
             break;
     }
     return bail;
 }
 
-function error(msg, a, b) {
+function error(msg, a, b, c) {
     let bail;
     switch (msg) {
-        case ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN:
-            const type = a, object = b;
+        case ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN:
+            const object2 = a, kind = b, type = c;
             bail = true;
             console.error('SNOW:',
-                `calling "URL.createObjectURL()" on a "${type}" object is forbidden under snow protection:`, object, '.', '\n',
+                `${kind} object:`, object2, `of type "${type}" is not allowed and therefore is blocked`, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
-                'https://github.com/LavaMoat/snow/issues/43#issuecomment-1434063891', '.', '\n',
+                'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.', '\n',
             );
             break;
         case ERR_EXTENDING_FRAMABLES_BLOCKED:
@@ -100,5 +111,6 @@ module.exports = {
     ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
     WARN_DECLARATIVE_SHADOWS,
     ERR_EXTENDING_FRAMABLES_BLOCKED,
-    ERR_BLOB_FILE_URL_OBJECT_FORBIDDEN,
+    ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN,
+    WARN_SRCDOC_WITH_CSP_BLOCKED,
 };

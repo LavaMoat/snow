@@ -1,16 +1,16 @@
-const setup = require('./index');
+const {setup, setupNoSnow} = require('./index');
 
 describe('test without Snow', async function () {
-    before(setup.bind(null, false));
+    before(setupNoSnow);
 
     it('should succeed to use top.atob normally', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 bypass([top]);
             }());
         });
-        expect(result).toBe('X');
+        expect(['X']).toContain(result);
     });
 });
 
@@ -19,11 +19,11 @@ describe('test normal cases', async function () {
 
     it('should fail to use top.atob normally', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 bypass([top]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 });

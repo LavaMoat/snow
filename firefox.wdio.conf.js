@@ -62,7 +62,10 @@ exports.config = {
         //
         browserName: 'firefox',
         'moz:firefoxOptions': {
-            args: ['--headless', 'disable-gpu'],
+            args: [
+                '--headless',
+                'disable-gpu',
+            ],
         },
         acceptInsecureCerts: true
         // If outputDir is provided WebdriverIO can capture driver session logs

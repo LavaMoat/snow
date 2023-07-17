@@ -1,5 +1,6 @@
 global.BROWSER = 'CHROME';
 exports.config = {
+    automationProtocol: 'devtools',
     //
     // ====================
     // Runner Configuration
@@ -62,7 +63,12 @@ exports.config = {
         //
         browserName: 'chrome',
         'goog:chromeOptions': {
-            args: ['--headless', 'disable-gpu'],
+            args: [
+                '--headless',
+                '-auto-open-devtools-for-tabs',
+                'disable-gpu',
+                '--enable-features=DocumentPictureInPictureAPI'
+            ],
         },
         acceptInsecureCerts: true
         // If outputDir is provided WebdriverIO can capture driver session logs

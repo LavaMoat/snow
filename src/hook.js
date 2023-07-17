@@ -1,12 +1,17 @@
-const isCrossOrigin = require('is-cross-origin');
 const workaroundChromiumBug = require('./chromium_bug_workaround');
+const {getLength} = require('./common');
 const {shadows, toArray, getFramesArray, getContentWindowOfFrame, getOwnerWindowOfNode} = require('./utils');
-const {Object, getFrameElement} = require('./natives');
+const {Object, getFrameElement, Function} = require('./natives');
+const {forEachOpened} = require('./proxy');
+
+function isCrossOrigin(dst, src) {
+    return Object.getPrototypeOf.call(src, dst) === null;
+}
 
 function findWin(win, frameElement) {
-    let i = -1;
-    while (win[++i]) {
-        if (isCrossOrigin(win[i], win, Object)) {
+    const length = Function.prototype.call.call(getLength, win);
+    for (let i = 0; i < length; i++) {
+        if (isCrossOrigin(win[i], win)) {
             continue;
         }
         if (getFrameElement(win[i]) === frameElement) {
@@ -39,19 +44,26 @@ function findWin(win, frameElement) {
     return null;
 }
 
+function hookWin(win) {
+    top['SNOW_WINDOW'](win);
+}
+
+function findAndHookWin(win, frame) {
+    const contentWindow = findWin(win, frame);
+    if (contentWindow) {
+        hookWin(contentWindow);
+    }
+    return !!contentWindow;
+}
+
 function hook(frames) {
     frames = toArray(frames);
     for (let i = 0; i < frames.length; i++) {
         const frame = frames[i];
-        if (typeof frame !== 'object') {
-            continue;
+        if (typeof frame === 'object' && frame !== null) {
+            workaroundChromiumBug(frame);
+            findAndHookWin(top, frame) || forEachOpened(findAndHookWin, frame);
         }
-        workaroundChromiumBug(frame);
-        const contentWindow = findWin(top, frame);
-        if (!contentWindow) {
-            continue;
-        }
-        top['SNOW_WINDOW'](contentWindow);
     }
 }
 

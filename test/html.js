@@ -228,4 +228,34 @@ describe('test HTML injections', async function () {
         });
         expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
+
+    it('should fail to use atob of a window opened with an anchor element', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/80
+        if (global.BROWSER !== 'CHROME') {
+            this.skip();
+        }
+        const result = await browser.executeAsync(function(done) {
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                testdiv.innerHTML = `<a id="pwn" target="lolpwnd" href="javascript:opener.bypass([window])">`;
+                document.querySelector("#pwn").click();
+            }());
+        });
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
+    });
+
+    it('should fail to use atob of a window opened with a form element', async function () {
+        // reference: https://github.com/LavaMoat/snow/issues/80
+        if (global.BROWSER !== 'CHROME') {
+            this.skip();
+        }
+        const result = await browser.executeAsync(function(done) {
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            (function(){
+                testdiv.innerHTML = `<form id="pwn" method="GET" target="lolpwnd" action="javascript:opener.bypass([window])">`;
+                document.querySelector("#pwn").submit();
+            }());
+        });
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
+    });
 });

@@ -5,36 +5,33 @@ describe('test HTML injections', async function () {
 
     it('should fail to use atob of an iframe created by srcdoc (before)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const ifr = document.createElement('iframe');
-                top.bypass = bypass;
                 ifr.srcdoc = `<script>top.bypass([this]);</script>`;
                 testdiv.appendChild(ifr);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an iframe created by srcdoc (after)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const ifr = document.createElement('iframe');
-                top.bypass = bypass;
                 testdiv.appendChild(ifr);
                 ifr.srcdoc = `<script>top.bypass([this]);</script>`;
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an iframe created by srcdoc with onload attribute of a nested iframe', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const ifr = document.createElement('iframe');
-                top.bypass = bypass;
                 ifr.srcdoc = `
 <iframe onload="top.bypass([this.contentWindow]);"></iframe>
 <script>setTimeout(() => top.bypass([window]), 1000)</script>
@@ -42,12 +39,12 @@ describe('test HTML injections', async function () {
                 testdiv.appendChild(ifr);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an iframe created by innerHTML', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const rnd = Math.random().toString(36).substring(7);
                 const div = document.createElement('div');
@@ -56,12 +53,12 @@ describe('test HTML injections', async function () {
                 bypass([window[rnd].contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe created by outerHTML', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const rnd = Math.random().toString(36).substring(7);
                 const div = document.createElement('div');
@@ -70,12 +67,12 @@ describe('test HTML injections', async function () {
                 bypass([window[rnd].contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe created by insertAdjacentHTML', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const rnd = Math.random().toString(36).substring(7);
                 const div = document.createElement('div');
@@ -84,12 +81,12 @@ describe('test HTML injections', async function () {
                 bypass([window[rnd].contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a div\'s child iframe created by innerHTML', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const rnd = Math.random().toString(36).substring(7);
                 const div = document.createElement('div');
@@ -98,12 +95,12 @@ describe('test HTML injections', async function () {
                 bypass([window[rnd].contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of via js execution via innerHTML call', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const div = document.createElement('div');
                 testdiv.appendChild(div);
@@ -111,7 +108,7 @@ describe('test HTML injections', async function () {
                 bypass([xxx.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob by leveraging a TrustedHTML node (with onload)', async function () {
@@ -120,7 +117,7 @@ describe('test HTML injections', async function () {
             this.skip(); // TrustedHTML is not a thing in safari/firefox
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const escapeHTMLPolicy = trustedTypes.createPolicy("myEscapePolicy", {
                     createHTML: (string) => string.replace('', '')
@@ -130,7 +127,7 @@ describe('test HTML injections', async function () {
                 bypass([xxx.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob by leveraging a TrustedHTML node', async function () {
@@ -139,7 +136,7 @@ describe('test HTML injections', async function () {
             this.skip(); // TrustedHTML is not a thing in safari/firefox
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const escapeHTMLPolicy = trustedTypes.createPolicy("myEscapePolicy", {
                     createHTML: (string) => string.replace('', '')
@@ -149,18 +146,17 @@ describe('test HTML injections', async function () {
                 bypass([xxx.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe through onload as html', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
                 testdiv1.innerHTML = ('<iframe id="temp_id" src="/" onload="top.bypass([temp_id.contentWindow]);"/></iframe>');
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-attr']).toContain(result);
     });
 
     it('should fail to use atob of an frame through onload as html', async function () {
@@ -168,73 +164,68 @@ describe('test HTML injections', async function () {
             this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            if (top.TEST_UTILS.bailOnCorrectUnsafeCSP(done)) return;
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
-                document.write(`<frameset><frame id='temp_id' src='/' onload='top.bypass([temp_id.contentWindow]);'/></frame></frameset>`);
+                document.write(`<frameset><frame id='temp_id' src='${location.href}' onload='top.bypass([temp_id.contentWindow]);'/></frame></frameset>`);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an object through onload as html', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
                 testdiv1.innerHTML = (`<object id="temp_id" data="${location.href}" onload="top.bypass([temp_id.contentWindow]);"/>`);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-attr', 'CSP-object-src']).toContain(result);
     });
     
     it('should fail to use atob of an iframe that was loaded via HTML in a new document (with innerHTML)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
                 testdiv1.innerHTML = `<iframe srcdoc="<iframe></iframe><script>top.bypass([frames[0]])</script>"></iframe>`;
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that was loaded via HTML in a new document (with srcdoc)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
                 var d = document.createElement('iframe');
                 d.srcdoc = `<iframe></iframe><script>top.bypass([frames[0]])</script>`;
                 testdiv.appendChild(d);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an object that was loaded via HTML in a new document (with srcdoc)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
                 var d = document.createElement('iframe');
                 d.srcdoc = `<object id="temp_id" data="${location.href}"></object><script>top.bypass([frames[0]])</script>`;
                 testdiv.appendChild(d);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 
     it('should fail to use atob of an embed that was loaded via HTML in a new document (with srcdoc)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
                 var d = document.createElement('iframe');
                 d.srcdoc = `<embed id="temp_id_1" type="text/html" src="/"><script>top.bypass([frames[0]])</script>`;
                 testdiv.appendChild(d);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-script-src-elem']).toContain(result);
     });
 });

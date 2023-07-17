@@ -5,18 +5,18 @@ describe('window.open API', () => {
 
     it('should fail to use atob of a window that was created via open API', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const win = open('');
                 bypass([win]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const win = open('https://lavamoat.github.io/snow/test/index.html');
                 setTimeout(() => {
@@ -30,12 +30,12 @@ describe('window.open API', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin and leaked it via postMessage (onmessage)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const href = location.href;
                 onmessage = (a) => {
@@ -51,12 +51,12 @@ describe('window.open API', () => {
                 open('https://lavamoat.github.io/snow/test/index.html?SET_TIMEOUT_HELPER');
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin and leaked it via postMessage (message)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const href = location.href;
                 addEventListener('message', a => {
@@ -74,12 +74,12 @@ describe('window.open API', () => {
                 open(x);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via open API to javascript: scheme, leaked to opener and then changed to cross origin and back to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const href = location.href;
                 open('javAscRipt\:opener.win=window;location.href="data:1"');
@@ -94,7 +94,7 @@ describe('window.open API', () => {
                 }, 500);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 });
 
@@ -103,13 +103,12 @@ describe('window.open API (same origin)', () => {
 
     it('should fail to use atob of a window that was created via open API which then opened an iframe', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
                 open('https://lavamoat.github.io/snow/test/index.html?OPENER_IFRAME_HELPER');
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 });
 
@@ -118,18 +117,18 @@ describe('document.open API', () => {
 
     it('should fail to use atob of a window that was created via document.open API', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const win = document.open('', '', '');
                 bypass([win]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const win = document.open('https://lavamoat.github.io/snow/test/index.html', '', '');
                 setTimeout(() => {
@@ -143,12 +142,12 @@ describe('document.open API', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin and leaked it via postMessage (onmessage)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const href = location.href;
                 onmessage = (a) => {
@@ -164,12 +163,12 @@ describe('document.open API', () => {
                 document.open('https://lavamoat.github.io/snow/test/index.html?SET_TIMEOUT_HELPER', '', '');
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin and leaked it via postMessage (message)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const href = location.href;
                 addEventListener('message', a => {
@@ -187,12 +186,12 @@ describe('document.open API', () => {
                 document.open(x, '', '');
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of a window that was created via document.open API to javascript: scheme, leaked to opener and then changed to cross origin and back to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 const href = location.href;
                 document.open('javAscRipt\:opener.win=window;location.href="data:1"', '', '');
@@ -207,6 +206,6 @@ describe('document.open API', () => {
                 }, 500);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 });

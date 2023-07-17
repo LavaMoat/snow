@@ -276,7 +276,7 @@ function makeStringHook(asFrame, asHtml, arg) {
   return hook;
 }
 function dropDeclarativeShadows(shadow, html) {
-  warn(WARN_DECLARATIVE_SHADOWS, shadow, html);
+  warn(WARN_DECLARATIVE_SHADOWS, html);
   remove(shadow);
   return true;
 }
@@ -636,10 +636,9 @@ function warn(msg, a, b) {
   let bail;
   switch (msg) {
     case WARN_DECLARATIVE_SHADOWS:
-      const shadow = a,
-        html = b;
+      const html = a;
       bail = false;
-      console.warn('SNOW:', 'removing html string representing a declarative shadow:', shadow, '\n', `"${html}"`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
+      console.warn('SNOW:', 'removing html string representing a declarative shadow:', '\n', `"${html}"`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
       break;
     case WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:
       const url2 = a,

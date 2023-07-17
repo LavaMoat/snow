@@ -7,24 +7,22 @@ describe('test url', async function () {
 
     it('should fail to use atob of an iframe that is loading a blob url (text)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const f = document.createElement('iframe');
                 document.body.appendChild(f);
                 f.src = URL.createObjectURL(new Blob(["<script>top.bypass([window])</script>"], {type: "text/html"}));
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that is loading a blob url (binary)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const enc = new TextEncoder();
                 const by = enc.encode("<script>top.bypass([window])</script>");
                 const blob = new Blob([by], {type: 'text/html'});
@@ -34,15 +32,14 @@ describe('test url', async function () {
                 ifr.src = url;
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that is loading a blob url (binary and empty type)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const enc = new TextEncoder();
                 const by = enc.encode("<script>top.bypass([window])</script>");
                 const blob = new Blob([by]);
@@ -52,29 +49,27 @@ describe('test url', async function () {
                 ifr.src = url;
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that is loading a file url (text)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const f = document.createElement('iframe');
                 document.body.appendChild(f);
                 f.src = URL.createObjectURL(new File(["<script>top.bypass([window])</script>"], 'aaa.txt', {type: "text/html"}));
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that is loading a file url (binary)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const enc = new TextEncoder();
                 const by = enc.encode("<script>top.bypass([window])</script>");
                 const file = new File([by], 'aaa.txt', {type: 'text/html'});
@@ -84,15 +79,14 @@ describe('test url', async function () {
                 ifr.src = url;
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that is loading a file url (webkitURL)', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const enc = new TextEncoder();
                 const by = enc.encode("<script>top.bypass([window])</script>");
                 const file = new File([by], 'aaa.txt', {type: 'text/html'});
@@ -102,15 +96,14 @@ describe('test url', async function () {
                 ifr.src = url;
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that is loading a blob url that was created in a web worker', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 2000, [top]);
                 const workerJs = `postMessage(URL.createObjectURL(new Blob(["<script>top.bypass([window])</script>"], {type: "text/html"})));`
                 for (const type of [
                     "",
@@ -121,41 +114,41 @@ describe('test url', async function () {
                     "text/html",
                     "application/html",
                 ]) {
-                    const w1 = new Worker(URL.createObjectURL(new Blob([workerJs], {type})))
-                    const w2 = new Worker(`data:${type},${workerJs}`);
-                    w2.onmessage = w1.onmessage = (msg) => {
-                        console.log(msg);
-                        const f = document.createElement("iframe");
-                        document.body.appendChild(f)
-                        f.src = msg.data;
-                    }
+                    try {
+                        const w1 = new Worker(URL.createObjectURL(new Blob([workerJs], {type})))
+                        const w2 = new Worker(`data:${type},${workerJs}`);
+                        w2.onmessage = w1.onmessage = (msg) => {
+                            console.log(msg);
+                            const f = document.createElement("iframe");
+                            document.body.appendChild(f)
+                            f.src = msg.data;
+                        }
+                    } catch {}
                 }
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-worker-src']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that is loading a blob url of an svg', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const f = document.createElement('iframe');
                 document.body.appendChild(f);
                 const svg = `<svg xmlns="http://www.w3.org/2000/svg"><script>top.bypass([window])</script></svg>`
                 f.src = URL.createObjectURL(new Blob([svg], {type: "image/svg+xml"}));
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that is loading a blob url of an xml document', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
-                top.bypass = bypass;
-                setTimeout(top.bypass, 200, [top]);
+                setTimeout(top.bypass, 1000, [top]);
                 const f = document.createElement('iframe');
                 document.body.appendChild(f);
                 const xslt = `<?xml version="1.0"?>
@@ -174,19 +167,18 @@ describe('test url', async function () {
                 f.src = URL.createObjectURL(new Blob([xml], {type: "text/xml"}));
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should fail to use atob of an iframe that is loading a blob url constructed of a native blob by the browser', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', 'https://weizmangal.com/content/img/gpt.png', true);
                 xhr.responseType = 'blob';
                 xhr.onload = function(e) {
-                    top.bypass = bypass;
-                    setTimeout(top.bypass, 200, [top]);
+                    setTimeout(top.bypass, 2000, [top]);
                     if (this.status === 200) {
                         const f = document.createElement('iframe');
                         document.body.appendChild(f);
@@ -197,6 +189,6 @@ describe('test url', async function () {
                 xhr.send();
             }());
         });
-        expect(result).toBe('V');
+        expect(['V', 'CSP-frame-src']).toContain(result);
     });
 });

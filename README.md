@@ -41,6 +41,13 @@ to **non extension javascript with the same privileges as the web app**.
     
 > _Read more about Snow and the motivation behind it [here](https://github.com/lavamoat/snow/wiki/Introducing-Snow)_
 
+## 🚨 IMPORTANT UPDATE 🚨
+
+Starting Version [1.6.0](https://github.com/LavaMoat/snow/pull/76) Snow officially doesn't support vulnerabilities that
+can be protected against by disallowing `unsafe-inline` completely and by correctly using the `object-src` directive to not allow `self`.
+
+To learn more why is that, see [section 3](#install).
+
 ## [Demo](https://lavamoat.github.io/snow/demo/#self-xss-challenge-msg) - The Snow Challenge! 🏆
 
 <div align="center">
@@ -102,6 +109,15 @@ in order for it to play its role securely.
    the modified version might contain flaws that attackers might use to cancel its effect (for further
    explanation see [natives](https://github.com/lavamoat/snow/wiki/Introducing-Snow#natives) section). 
 
+3. **Most importantly, it's highly vulnerable without minimal help from CSP** - As of version 1.6.0 the project will
+   seize to attempt to defend against vulnerabilities that aren't possible to exploit when 
+   (a) `unsafe-inline` isn't allowed and (b) `object-src` to `self` isn't allowed.
+   This is because (a) defending against string-JS attacks is basically an endless task and probably impossible, and
+   (b) `object`/`embed` elements behaviour is also too unpredictable while these elements shouldn't be even used in the
+   first place. Snow will do its best regardless of what CSP is applied - **use at your own risk!** 
+   1. please learn more about this ☝️ at [#118](https://github.com/LavaMoat/snow/pull/118/)
+
+
 `SNOW` API can also be required as part of a bundle instead of a script tag:
 
 ```
@@ -122,13 +138,11 @@ Until `snow` becomes a platform builtin API, we have to attempt to overcome seve
 
 ### Support
 
-`snow` should support Chrome, Firefox, Safari and all other Chromium based browsers (Opera, Edge, Brave, etc).
-
-Although, when running on Firefox please pay attention to [issue-59](https://github.com/LavaMoat/snow/issues/59).
+`snow` supports Chrome, Firefox, Safari and all other Chromium based browsers (Opera, Edge, Brave, etc).
 
 ### Performance
 
-Achieving an hermetic solution costs in performance. Injecting this script into some major
+Achieving a hermetic solution costs in performance. Injecting this script into some major
 websites went smoothly while with some others it caused them some performance issues.
 
 ### Security

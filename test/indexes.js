@@ -7,7 +7,7 @@ describe('test numeric indexes overrides', async function () {
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Object.prototype property n override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 Object.defineProperty(Object.prototype, '0', {
                     get() {
@@ -29,12 +29,12 @@ describe('test numeric indexes overrides', async function () {
                 bypass([fr.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 
     it('should crash snow via property n override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
             (function(){
                 for (let i = 0; i < 10000; i++) {
                     Object.defineProperty(Object.prototype, i + '', {
@@ -65,6 +65,6 @@ describe('test numeric indexes overrides', async function () {
                 bypass([fr.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(['V']).toContain(result);
     });
 });

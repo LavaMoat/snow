@@ -3,14 +3,14 @@ function bypass(wins) {
 }
 
 function run(js) {
-    const script = document.createElement('script');
-    script.textContent = '{' + js + '}';
-    document.head.appendChild(script);
+    const b = new Blob([js], {type: 'text/javascript'});
+    const u = URL.createObjectURL(b);
+    const s = document.createElement('script');
+    s.src = u;
+    document.head.appendChild(s);
 }
 
 (function(){
-    location.href.includes('self-xss-challenge-msg') && (msg.style.display = 'block');
-
     location.search.includes('disable') || SNOW((win) => {
         win.alert = (msg) => {
             console.log('Snow: ', 'alert API is disabled, message is printed to console instead: ', msg);

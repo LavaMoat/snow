@@ -1,6 +1,31 @@
 <html>
     <head>
-        <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none';">
+        <script>
+            const xssChallenge = location.href.includes('self-xss-challenge-msg');
+            if (xssChallenge) {
+                const s = 'background-color: red; color: yellow; font-size: 20px';
+                console.log(`%cYou are currently running under the lax Snow demo app version!`, s);
+                console.log(`%cVisit ${location.href.split('#')[0]} for the strict version!`, s);
+                console.log(`%cREMEMBER: For a Snow bypass to count, it has to work on the strict version too!`, s);
+                setTimeout(() => msg.style.display = 'block', 100);
+                onclick = (e) => {
+                    let {target} = e;
+                    let out = true;
+                    while (target) {
+                        if (target === msg) {
+                            out = false;
+                            break;
+                        }
+                        target = target.parentElement;
+                    }
+                    if (out) {
+                        location.href = location.href.split('#')[0];
+                    }
+                }
+            } else {
+                document.write(`<meta http-equiv="Content-Security-Policy" content="script-src 'self' blob:; object-src 'none';">`);
+            }
+        </script>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❄️</text></svg>">
         <title> Snow </title>
         <script src="../snow.js"></script>
@@ -32,7 +57,7 @@
     </head>
     <body style="background-color: #eef3f5;">
         <div id="msg" class="msg">
-            <a style="font-size: 30px; color: black; text-decoration: none;" href="javascript:msg.remove()">X X X</a>
+            <a style="font-size: 30px; color: black; text-decoration: none;" href="javascript:location.href = location.href.split('#')[0]">X X X</a>
             <div align="center" >
                 <h3>The Ultimate (Self) XSS Challenge 😈</h3>
                 <i style="font-size: 24px">~ Can you pop an <a href="javascript:alert(123)">alert</a> in this page?</i>

@@ -46,7 +46,7 @@ function w(msg, a, b) {
             warn('SNOW:',
                 'blocking srcdoc (below) for trying to inject a static meta csp tag: ', csp, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
-                'https://github.com/LavaMoat/snow/issues/???', '.', '\n',
+                'https://github.com/LavaMoat/snow/issues/104', '.', '\n',
                 `srcdoc content: `, '\n', `"${srcdoc}"`,
             );
             break;

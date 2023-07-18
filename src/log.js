@@ -7,15 +7,15 @@ const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
 const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
 const WARN_SRCDOC_WITH_CSP_BLOCKED = 8;
 
-const {console} = top;
+const {warn, error} = window.console;
 
-function warn(msg, a, b) {
+function w(msg, a, b) {
     let bail;
     switch (msg) {
         case WARN_DECLARATIVE_SHADOWS:
             const html = a;
             bail = false;
-            console.warn('SNOW:',
+            warn('SNOW:',
                 'removing html string representing a declarative shadow:', '\n', `"${html}"`, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
                 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.',
@@ -24,7 +24,7 @@ function warn(msg, a, b) {
         case WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:
             const url2 = a, win2 = b;
             bail = true;
-            console.warn('SNOW:',
+            warn('SNOW:',
                 bail ? '' : 'NOT',
                 'blocking open attempt to "javascript:" url:', url2, 'by window: ', win2, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
@@ -34,7 +34,7 @@ function warn(msg, a, b) {
         case WARN_OPEN_API_LIMITED:
             const property = a, win3 = b;
             bail = true;
-            console.warn('SNOW:',
+            warn('SNOW:',
                 'blocking access to property:', `"${property}"`, 'of opened window: ', win3, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
                 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.',
@@ -43,7 +43,7 @@ function warn(msg, a, b) {
         case WARN_SRCDOC_WITH_CSP_BLOCKED:
             const srcdoc = a, csp = b;
             bail = true;
-            console.warn('SNOW:',
+            warn('SNOW:',
                 'blocking srcdoc (below) for trying to inject a static meta csp tag: ', csp, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
                 'https://github.com/LavaMoat/snow/issues/???', '.', '\n',
@@ -56,13 +56,13 @@ function warn(msg, a, b) {
     return bail;
 }
 
-function error(msg, a, b, c) {
+function e(msg, a, b, c) {
     let bail;
     switch (msg) {
         case ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN:
             const object2 = a, kind = b, type = c;
             bail = true;
-            console.error('SNOW:',
+            error('SNOW:',
                 `${kind} object:`, object2, `of type "${type}" is not allowed and therefore is blocked`, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
                 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.', '\n',
@@ -71,7 +71,7 @@ function error(msg, a, b, c) {
         case ERR_EXTENDING_FRAMABLES_BLOCKED:
             const name = a, options = b;
             bail = true;
-            console.error('SNOW:',
+            error('SNOW:',
                 `"${name}"`, 'extending attempt', 'of framable elements such as provided', options, 'is blocked to prevent bypass', '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
                 'https://github.com/LavaMoat/snow/issues/56#issuecomment-1374899809', '.', '\n',
@@ -80,7 +80,7 @@ function error(msg, a, b, c) {
         case ERR_MARK_NEW_WINDOW_FAILED:
             const win = a, err = b;
             bail = true;
-            console.error('SNOW:',
+            error('SNOW:',
                 'failed to mark new window:', win, '.', '\n',
                 'if this prevents your application from running correctly, please visit/report at',
                 'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', '\n',
@@ -92,7 +92,7 @@ function error(msg, a, b, c) {
         case ERR_PROVIDED_CB_IS_NOT_A_FUNCTION:
             const cb = a;
             bail = true;
-            console.error('SNOW:',
+            error('SNOW:',
                 'first argument must be of type "function", instead got:', cb, '.', '\n',
                 'therefore, snow bailed and is not applied to the page until this is fixed.',
             );
@@ -104,7 +104,7 @@ function error(msg, a, b, c) {
 }
 
 module.exports = {
-    warn, error,
+    warn: w, error: e,
     ERR_MARK_NEW_WINDOW_FAILED,
     WARN_OPEN_API_LIMITED,
     WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,

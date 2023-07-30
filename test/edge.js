@@ -334,9 +334,6 @@ describe('special cases', () => {
 
     it('should fail to use atob of an iframe born out of mXSS (srcdoc)', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/91
-        if (global.BROWSER !== 'CHROME') {
-            this.skip();
-        }
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
@@ -352,9 +349,6 @@ describe('special cases', () => {
 
     it('should fail to use atob of an iframe born out of mXSS (innerHTML)', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/91
-        if (global.BROWSER !== 'CHROME') {
-            this.skip();
-        }
         const result = await browser.executeAsync(function(done) {
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){

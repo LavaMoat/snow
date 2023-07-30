@@ -1,6 +1,5 @@
 global.BROWSER = 'CHROME';
 exports.config = {
-    automationProtocol: 'devtools',
     //
     // ====================
     // Runner Configuration
@@ -65,7 +64,6 @@ exports.config = {
         'goog:chromeOptions': {
             args: [
                 '--headless',
-                '-auto-open-devtools-for-tabs',
                 'disable-gpu',
                 '--enable-features=DocumentPictureInPictureAPI'
             ],

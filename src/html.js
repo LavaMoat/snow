@@ -20,7 +20,7 @@ function makeStringHook(asFrame, asHtml, arg) {
 }
 
 function dropDeclarativeShadows(shadow, html) {
-    warn(WARN_DECLARATIVE_SHADOWS, html);
+    warn(WARN_DECLARATIVE_SHADOWS, shadow, html);
     remove(shadow);
     return true;
 }

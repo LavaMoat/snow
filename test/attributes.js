@@ -5,7 +5,7 @@ describe('test DOM attributes', async function () {
 
     it('should fail to use atob of an iframe that calls atob via onload setAttribute', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 ifr.setAttribute('onload', 'top.myatob = this.contentWindow.atob.bind(top);');
@@ -18,7 +18,7 @@ describe('test DOM attributes', async function () {
 
     it('should fail to use atob of an iframe that calls atob via onload setAttributeNS', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 ifr.setAttributeNS('', 'onload', 'top.myatob = this.contentWindow.atob.bind(top);');
@@ -31,7 +31,7 @@ describe('test DOM attributes', async function () {
 
     it('should fail to use atob of an iframe that calls atob via onload setAttributeNode', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 document.body.setAttributeNS('', 'onload', 'top.myatob = this.contentWindow.atob.bind(top);');
@@ -45,7 +45,7 @@ describe('test DOM attributes', async function () {
 
     it('should fail to use atob of an iframe that calls atob via onload setAttributeNodeNS', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 document.body.setAttributeNS('', 'onload', 'top.myatob = this.contentWindow.atob.bind(top);');
@@ -59,7 +59,7 @@ describe('test DOM attributes', async function () {
 
     it('should fail to use atob of an iframe that calls atob via onload setNamedItem', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 document.body.setAttributeNS('', 'onload', 'top.myatob = this.contentWindow.atob.bind(top);');
@@ -73,7 +73,7 @@ describe('test DOM attributes', async function () {
 
     it('should fail to use atob of an iframe that calls atob via onload setNamedItemNS', async function () {
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 document.body.setAttributeNS('', 'onload', 'top.myatob = this.contentWindow.atob.bind(top);');

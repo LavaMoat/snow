@@ -1,6 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
+global.CONFIG = {
+    // Scenarios Snow can't protect against, and instead relies on 'unsafe-inline' to be forbidden
+    SKIP_CSP_UNSAFE_INLINE_CHECKS: true,
+    // Scenarios Snow can't protect against, and instead relies on 'object-src' to same-origin to be forbidden
+    SKIP_CSP_OBJECT_SRC_CHECKS: true,
+}
+
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();
 
 async function setup(url = 'https://example.com/', noSnow) {
@@ -9,11 +16,7 @@ async function setup(url = 'https://example.com/', noSnow) {
     if (noSnow) return;
 
     // inject SNOW
-    await browser.execute(function(js) {
-        const script = document.createElement('script');
-        script.textContent = js;
-        document.head.appendChild(script);
-    }, snow);
+    await browser.execute(new Function(snow));
 
     // use SNOW to disable atob
     await browser.execute(function() {
@@ -25,7 +28,7 @@ async function setup(url = 'https://example.com/', noSnow) {
     // reset test divs
     await browser.execute(function() {
         document.getElementById('testdiv')?.remove();
-        document.querySelector('DIV').innerHTML = '<div id="testdiv"><div id="testdiv1"></div><div id="testdiv2"></div></div>';
+        document.querySelector('BODY').innerHTML = '<div id="testdiv"><div id="testdiv1"></div><div id="testdiv2"></div></div>';
         window.testdiv = document.getElementById('testdiv');
         window.testdiv1 = document.getElementById('testdiv1');
         window.testdiv2 = document.getElementById('testdiv2');

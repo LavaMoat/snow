@@ -16,7 +16,7 @@ const map = {
 };
 const protos = Object.getOwnPropertyNames(map);
 
-function getHook(native, isRange, isSrcDoc) {
+function getHook(native, isRange, isSrcDoc, isWrite) {
     function before(args) {
         resetOnloadAttributes(args);
         resetOnloadAttributes(shadows);
@@ -31,6 +31,9 @@ function getHook(native, isRange, isSrcDoc) {
     }
 
     return function() {
+        if (isWrite && this !== top.document) {
+            throw new Error('NOPE2');
+        }
         const args = slice(arguments);
         const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;
         before(args);
@@ -49,7 +52,11 @@ function hookDOMInserters(win) {
             const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
             if (!desc) continue;
             const prop = desc.set ? 'set' : 'value';
-            desc[prop] = getHook(desc[prop], proto === 'Range', func === 'srcdoc');
+            const
+                isRange = proto === 'Range',
+                isSrcDoc = func === 'srcdoc',
+                isWrite = func === 'write' || func === 'writeln';
+            desc[prop] = getHook(desc[prop], isRange, isSrcDoc, isWrite);
             desc.configurable = true;
             if (prop === 'value') {
                 desc.writable = true;

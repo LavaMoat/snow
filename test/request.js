@@ -9,7 +9,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 document.addEventListener('keydown', async () => {
                     const win = await documentPictureInPicture.requestWindow();
@@ -30,7 +30,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 document.addEventListener('keydown', async () => {
                     await documentPictureInPicture.requestWindow();
@@ -52,7 +52,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 document.addEventListener('keydown', async () => {
                     documentPictureInPicture.onenter = (e) => {
@@ -77,7 +77,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 document.addEventListener('keydown', async () => {
                     const win = await documentPictureInPicture.requestWindow();

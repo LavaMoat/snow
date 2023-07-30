@@ -10,7 +10,7 @@ describe('test custom elements', async function () {
             this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 100, [window]);
 
@@ -40,7 +40,7 @@ describe('test custom elements', async function () {
             this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 100, [window]);
 
@@ -71,7 +71,7 @@ describe('test custom elements', async function () {
             this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 100, [window]);
 
@@ -104,7 +104,7 @@ describe('test custom elements', async function () {
             this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 100, [window]);
 
@@ -135,7 +135,7 @@ describe('test custom elements', async function () {
             this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 100, [window]);
 
@@ -166,7 +166,7 @@ describe('test custom elements', async function () {
             this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 100, [window]);
 
@@ -184,7 +184,10 @@ describe('test custom elements', async function () {
                 }
 
                 customElements.define(`legit-element${n}`, NotFrame, {extends: 'iframe'});
-                testdiv.innerHTML = `<iframe is="legit-element${n}"></iframe>`;
+                testdiv.innerHTML = `<iframe id="xxx" is="legit-element${n}"></iframe>`;
+                if (!window.xxx) {
+                    bypass([window]);
+                }
             }());
         });
         expect(result).toBe('V');
@@ -195,7 +198,7 @@ describe('test custom elements', async function () {
             this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 100, [window]);
 
@@ -230,7 +233,7 @@ describe('test custom elements', async function () {
             this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 100, [window]);
 
@@ -263,9 +266,9 @@ describe('test custom elements', async function () {
             this.skip(); // extending iframes is not supported in Safari
         }
         const result = await browser.executeAsync(function(done) {
-            const bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                setTimeout(bypass, 100, [window]);
+                setTimeout(bypass, 200, [window]);
 
                 window.n = window.n ?? 0;
                 window.n++;
@@ -284,7 +287,9 @@ describe('test custom elements', async function () {
                 document.body.appendChild(ifr2);
                 customElements.define(`legit-element${n}`, NotFrame, {extends: 'iframe'});
                 testdiv.innerHTML = `<iframe id="xxx" is="legit-element${n}"></iframe>`
-                setTimeout(() => ifr2.contentDocument.body.appendChild(xxx), 100);
+                setTimeout(() => {
+                    ifr2.contentDocument.body.appendChild(xxx);
+                }, 100);
             }());
         });
         expect(result).toBe('V');

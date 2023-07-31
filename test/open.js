@@ -1,21 +1,24 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_OPEN_API_LIMITED, ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME} = require('../src/log');
 
 describe('window.open API', () => {
     beforeEach(setup);
 
     it('should fail to use atob of a window that was created via open API', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const win = open('');
                 bypass([win]);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const win = open('https://lavamoat.github.io/snow/test/index.html');
@@ -30,11 +33,12 @@ describe('window.open API', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin and leaked it via postMessage (onmessage)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const href = location.href;
@@ -51,11 +55,12 @@ describe('window.open API', () => {
                 open('https://lavamoat.github.io/snow/test/index.html?SET_TIMEOUT_HELPER');
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin and leaked it via postMessage (message)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const href = location.href;
@@ -74,11 +79,12 @@ describe('window.open API', () => {
                 open(x);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via open API to javascript: scheme, leaked to opener and then changed to cross origin and back to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const href = location.href;
@@ -94,7 +100,7 @@ describe('window.open API', () => {
                 }, 500);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME));
     });
 });
 
@@ -103,6 +109,7 @@ describe('window.open API (same origin)', () => {
 
     it('should fail to use atob of a window that was created via open API which then opened an iframe', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 open('https://lavamoat.github.io/snow/test/index.html?OPENER_IFRAME_HELPER');
@@ -117,17 +124,19 @@ describe('document.open API', () => {
 
     it('should fail to use atob of a window that was created via document.open API', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const win = document.open('', '', '');
                 bypass([win]);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const win = document.open('https://lavamoat.github.io/snow/test/index.html', '', '');
@@ -142,11 +151,12 @@ describe('document.open API', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin and leaked it via postMessage (onmessage)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const href = location.href;
@@ -163,11 +173,12 @@ describe('document.open API', () => {
                 document.open('https://lavamoat.github.io/snow/test/index.html?SET_TIMEOUT_HELPER', '', '');
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin and leaked it via postMessage (message)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const href = location.href;
@@ -186,11 +197,12 @@ describe('document.open API', () => {
                 document.open(x, '', '');
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via document.open API to javascript: scheme, leaked to opener and then changed to cross origin and back to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const href = location.href;
@@ -206,6 +218,6 @@ describe('document.open API', () => {
                 }, 500);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME));
     });
 });

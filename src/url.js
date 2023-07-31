@@ -1,4 +1,3 @@
-const {BLOCKED_BLOB_URL} = require('./common');
 const {Object, Array, getBlobFileType} = require('./natives');
 const {error, ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN} = require('./log');
 
@@ -68,23 +67,22 @@ function isBlobArtificial(object) {
     return artificialBlobs.includes(object);
 
 }
-function isTypeForbidden(object) {
+
+function assertTypeIsForbidden(object) {
     const kind = object[KIND];
-    if (kind !== BLOB && kind !== FILE) {
-        return false;
+    if (kind === BLOB || kind === FILE) {
+        const type = object[TYPE];
+        if (!allowedTypes.includes(type)) {
+            throw error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
+        }
     }
-    const type = object[TYPE];
-    if (allowedTypes.includes(type)) {
-        return false;
-    }
-    return error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
 }
 
 function hook(win) {
     const native = win.URL.createObjectURL;
     function createObjectURL(object) {
-        if (isBlobArtificial(object) && isTypeForbidden(object)) {
-            return BLOCKED_BLOB_URL;
+        if (isBlobArtificial(object)) {
+            assertTypeIsForbidden(object);
         }
         return native(object);
     }

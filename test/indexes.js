@@ -1,4 +1,5 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_HTML_FRAMES} = require('../src/log');
 
 describe('test numeric indexes overrides', async function () {
     beforeEach(setup);
@@ -7,6 +8,7 @@ describe('test numeric indexes overrides', async function () {
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Object.prototype property n override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 Object.defineProperty(Object.prototype, '0', {
@@ -34,6 +36,7 @@ describe('test numeric indexes overrides', async function () {
 
     it('should crash snow via property n override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 for (let i = 0; i < 10000; i++) {

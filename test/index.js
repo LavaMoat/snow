@@ -15,6 +15,11 @@ async function setup(url = 'https://example.com/', noSnow) {
 
     if (noSnow) return;
 
+    // intercept Error constructor to propagate errors to be caught by tests infra
+    await browser.execute(function() {
+        window.Error = function (e) { top.done(e) };
+    });
+
     // inject SNOW
     await browser.execute(new Function(snow));
 

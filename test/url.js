@@ -1,4 +1,5 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN} = require('../src/log');
 
 describe('test url', async function () {
     beforeEach(setup);
@@ -7,6 +8,7 @@ describe('test url', async function () {
 
     it('should fail to use atob of an iframe that is loading a blob url (text)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(top.bypass, 200, [top]);
@@ -15,11 +17,12 @@ describe('test url', async function () {
                 f.src = URL.createObjectURL(new Blob(["<script>top.bypass([window])</script>"], {type: "text/html"}));
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
     });
 
     it('should fail to use atob of an iframe that is loading a blob url (binary)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(top.bypass, 200, [top]);
@@ -32,11 +35,12 @@ describe('test url', async function () {
                 ifr.src = url;
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
     });
 
     it('should fail to use atob of an iframe that is loading a blob url (binary and empty type)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(top.bypass, 200, [top]);
@@ -54,6 +58,7 @@ describe('test url', async function () {
 
     it('should fail to use atob of an iframe that is loading a file url (text)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(top.bypass, 200, [top]);
@@ -67,6 +72,7 @@ describe('test url', async function () {
 
     it('should fail to use atob of an iframe that is loading a file url (binary)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(top.bypass, 200, [top]);
@@ -84,6 +90,7 @@ describe('test url', async function () {
 
     it('should fail to use atob of an iframe that is loading a file url (webkitURL)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(top.bypass, 200, [top]);
@@ -101,6 +108,7 @@ describe('test url', async function () {
 
     it('should fail to use atob of an iframe that is loading a blob url that was created in a web worker', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(top.bypass, 200, [top]);
@@ -125,11 +133,12 @@ describe('test url', async function () {
                 }
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
     });
 
     it('should fail to use atob of an iframe that is loading a blob url of an svg', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(top.bypass, 200, [top]);
@@ -139,11 +148,12 @@ describe('test url', async function () {
                 f.src = URL.createObjectURL(new Blob([svg], {type: "image/svg+xml"}));
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
     });
 
     it('should fail to use atob of an iframe that is loading a blob url of an xml document', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(top.bypass, 200, [top]);
@@ -165,11 +175,12 @@ describe('test url', async function () {
                 f.src = URL.createObjectURL(new Blob([xml], {type: "text/xml"}));
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
     });
 
     it('should fail to use atob of an iframe that is loading a blob url constructed of a native blob by the browser', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 var xhr = new XMLHttpRequest();
@@ -187,6 +198,6 @@ describe('test url', async function () {
                 xhr.send();
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
     });
 });

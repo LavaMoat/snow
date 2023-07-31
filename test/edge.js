@@ -1,10 +1,12 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_HTML_FRAMES, ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN} = require('../src/log');
 
 describe('special cases', () => {
     beforeEach(setup);
 
     it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
@@ -24,6 +26,7 @@ describe('special cases', () => {
 
     it('should fail to use atob of an iframe that was attached as cross origin and then redirected back to same origin (complex)', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
@@ -55,6 +58,7 @@ describe('special cases', () => {
             this.skip(); // requires a fix #59
         }
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const href = location.href;
@@ -76,7 +80,7 @@ describe('special cases', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 
     it('should fail to use atob of an object that was cross origin and then same origin', async function () {
@@ -87,6 +91,7 @@ describe('special cases', () => {
             this.skip(); // requires a fix #59
         }
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 testdiv1.innerHTML = (`<object id="temp_id_1" type="text/html" data="${location.href}">`);
@@ -107,11 +112,12 @@ describe('special cases', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 
     it('should fail to use atob of an iframe that was reattached to dom', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
@@ -130,6 +136,7 @@ describe('special cases', () => {
 
     it('should fail to use atob of an iframe within an iframe within an iframe', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const rnd = Math.random().toString(36).substring(7);
@@ -157,21 +164,16 @@ describe('special cases', () => {
             this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 testdiv.appendChild(ifr);
-                try {
-                    ifr.contentDocument.write('<iframe id="xxx"></iframe>');
-                } catch (e) {
-                    if (e.message === 'NOPE2') {
-                        bypass([window]);
-                    }
-                }
+                ifr.contentDocument.write('<iframe id="xxx"></iframe>');
                 bypass([ifr.contentWindow?.xxx?.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN));
     });
 
     it('should fail to use atob of an iframe that had its document written-ln', async function () {
@@ -179,26 +181,22 @@ describe('special cases', () => {
             this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 testdiv.appendChild(ifr);
-                try {
-                    ifr.contentDocument.writeln('<iframe id="xxx"></iframe>');
-                } catch (e) {
-                    if (e.message === 'NOPE2') {
-                        bypass([window]);
-                    }
-                }
+                ifr.contentDocument.writeln('<iframe id="xxx"></iframe>');
                 bypass([ifr.contentWindow?.xxx?.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN));
     });
 
     it('should fail to use atob of an iframe when all element in DOM changed their own toString behaviour', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/9
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const all = document.querySelectorAll('*');
@@ -217,6 +215,7 @@ describe('special cases', () => {
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const f = document.createElement('iframe');
@@ -225,18 +224,19 @@ describe('special cases', () => {
                 setTimeout(top.bypass, 100, [window]);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with innerHTML', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 testdiv.innerHTML = ('<iframe srcdoc="<iframe src=\'javascript:top.bypass([window])\'</iframe>"></iframe>');
                 setTimeout(top.bypass, 100, [window]);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with document.write', async function () {
@@ -244,18 +244,20 @@ describe('special cases', () => {
             this.skip(); // requires a fix #58
         }
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 document.write('<iframe srcdoc="<iframe src=\'javascript:top.bypass([window])\'</iframe>"></iframe>');
                 setTimeout(top.bypass, 100, [window]);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 
     it('should fail to use atob of an iframe that pretends to be a trusted html', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/95
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 var d = document.createElement('div')
@@ -269,12 +271,13 @@ describe('special cases', () => {
                 bypass([f.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 
     it('should fail to use atob of an iframe was injected with srcdoc with a defending meta csp tag and trusted types', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/90
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 200, [window]);
@@ -290,12 +293,13 @@ describe('special cases', () => {
   <iframe src=\'javascript:alert(1)\'</iframe>"></iframe>`
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 
     it('should fail to use atob of an iframe was injected with srcdoc with a defending meta csp tag with a nonce', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/94
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 200, [window]);
@@ -311,11 +315,12 @@ describe('special cases', () => {
     </iframe>`
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 
     it('should fail to use atob of an iframe that tricks the frames array with clobbering of id=n', async function () {
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr1 = document.createElement('iframe');
@@ -335,6 +340,7 @@ describe('special cases', () => {
     it('should fail to use atob of an iframe born out of mXSS (srcdoc)', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/91
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 setTimeout(bypass, 100, [window,window,window]);
@@ -344,25 +350,20 @@ describe('special cases', () => {
                 bypass([window[0] && window[0][0], window[0], window]);
             }());
         });
-        expect(result).toBe('V,V,V');
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 
     it('should fail to use atob of an iframe born out of mXSS (innerHTML)', async function () {
         // reference: https://github.com/LavaMoat/snow/issues/91
         const result = await browser.executeAsync(function(done) {
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                try {
-                    testdiv.innerHTML = `<form><math><mtext></form><form><mglyph><style></math><iframe src="javascript:top.bypass([window])"></iframe>`;
-                    const x = testdiv.innerHTML;
-                    testdiv.innerHTML = x;
-                } catch (e) {
-                    if (e.message === 'NOPE') {
-                        top.bypass([window]);
-                    }
-                }
+                testdiv.innerHTML = `<form><math><mtext></form><form><mglyph><style></math><iframe src="javascript:top.bypass([window])"></iframe>`;
+                const x = testdiv.innerHTML;
+                testdiv.innerHTML = x;
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 });

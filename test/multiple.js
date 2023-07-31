@@ -1,4 +1,5 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_HTML_FRAMES} = require('../src/log');
 
 describe('test multiple callbacks provided', async function () {
     beforeEach(setup);

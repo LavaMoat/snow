@@ -8,10 +8,7 @@ function getHook(win, native) {
         if (options) {
             const extend = options.extends;
             if (isTagFramable(extend+'')) {
-                const blocked = error(ERR_EXTENDING_FRAMABLES_BLOCKED, name, options);
-                if (blocked) {
-                    opts = undefined;
-                }
+                throw error(ERR_EXTENDING_FRAMABLES_BLOCKED, name, options);
             }
         }
         return Function.prototype.call.call(native, this, name, constructor, opts);

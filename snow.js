@@ -97,17 +97,9 @@ function runInNewRealm(cb) {
   removeChild(ifr);
   return ret;
 }
-const BLOCKED_BLOB_MSG = `BLOCKED BY SNOW:
-Creating URL objects is not allowed under Snow protection within Web Workers.
-If this prevents your application from running correctly, please visit/report at https://github.com/LavaMoat/snow/pull/89#issuecomment-1589359673.
-Learn more at https://github.com/LavaMoat/snow/pull/89`;
 module.exports = {
   getLength,
-  runInNewRealm,
-  BLOCKED_BLOB_URL: URL.createObjectURL(new Blob([BLOCKED_BLOB_MSG], {
-    type: 'text/plain'
-  })),
-  BLOCKED_BLOB_MSG
+  runInNewRealm
 };
 
 /***/ }),
@@ -132,10 +124,7 @@ function getHook(win, native) {
     if (options) {
       const extend = options.extends;
       if (isTagFramable(extend + '')) {
-        const blocked = error(ERR_EXTENDING_FRAMABLES_BLOCKED, name, options);
-        if (blocked) {
-          opts = undefined;
-        }
+        throw error(ERR_EXTENDING_FRAMABLES_BLOCKED, name, options);
       }
     }
     return Function.prototype.call.call(native, this, name, constructor, opts);
@@ -241,28 +230,18 @@ module.exports = hook;
 
 const {
   getFramesArray,
-  makeWindowUtilSetter
+  getDeclarativeShadows
 } = __webpack_require__(648);
 const {
   document,
-  getPreviousElementSibling,
-  Array,
-  stringToLowerCase,
-  split,
-  getAttribute,
-  setAttribute,
   getChildElementCount,
-  getInnerHTML,
-  setInnerHTML,
-  remove,
-  Element
+  setInnerHTML
 } = __webpack_require__(14);
 const {
-  warn,
-  WARN_DECLARATIVE_SHADOWS,
-  WARN_HTML_FRAMES
+  error,
+  ERR_DECLARATIVE_SHADOWS,
+  ERR_HTML_FRAMES
 } = __webpack_require__(312);
-const querySelectorAll = Element.prototype.querySelectorAll;
 function makeStringHook(asFrame, asHtml, arg) {
   let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(' + arg + ');';
   if (asHtml) {
@@ -270,48 +249,25 @@ function makeStringHook(asFrame, asHtml, arg) {
   }
   return hook;
 }
-function dropDeclarativeShadow(shadow, html) {
-  warn(WARN_DECLARATIVE_SHADOWS, shadow, html);
-  remove(shadow);
-  return true;
-}
-function dropFrame(frame, html) {
-  warn(WARN_HTML_FRAMES, frame, html);
-  remove(frame);
-  return true;
-}
-function handleHTML(args, isSrcDoc) {
+function assertHTML(args, isSrcDoc) {
   for (let i = 0; i < args.length; i++) {
-    let modified = false;
+    const template = document.createElement('html');
     if (isSrcDoc) {
       args[i] = makeStringHook(false, true, 'this') + args[i];
-      modified = true;
     }
-    const template = document.createElement('html');
     setInnerHTML(template, args[i]);
-    if (!getChildElementCount(template)) {
-      continue;
-    }
-    if (querySelectorAll.call(template, 'malignmark,mglyph').length > 0) {
-      throw new Error('NOPE');
-    }
-    const declarativeShadows = querySelectorAll.call(template, 'template[shadowroot]');
-    for (let j = 0; j < declarativeShadows.length; j++) {
-      const shadow = declarativeShadows[j];
-      modified = dropDeclarativeShadow(shadow, args[i]) || modified;
-    }
-    const frames = getFramesArray(template, false);
-    for (let j = 0; j < frames.length; j++) {
-      const frame = frames[j];
-      modified = dropFrame(frame, args[i]) || modified;
-    }
-    if (modified) {
-      args[i] = getInnerHTML(template);
+    if (getChildElementCount(template)) {
+      if (getDeclarativeShadows(template).length > 0) {
+        throw error(ERR_DECLARATIVE_SHADOWS, args[i]);
+      }
+      if (getFramesArray(template, false).length > 0) {
+        throw error(ERR_HTML_FRAMES, args[i]);
+      }
     }
   }
 }
 module.exports = {
-  handleHTML
+  assertHTML
 };
 
 /***/ }),
@@ -424,6 +380,10 @@ module.exports = snow;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
+  error,
+  ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN
+} = __webpack_require__(312);
+const {
   protectShadows
 } = __webpack_require__(373);
 const resetOnloadAttributes = __webpack_require__(586);
@@ -439,7 +399,7 @@ const {
   Function
 } = __webpack_require__(14);
 const {
-  handleHTML
+  assertHTML
 } = __webpack_require__(328);
 const hook = __webpack_require__(228);
 const map = {
@@ -456,7 +416,7 @@ function getHook(native, isRange, isSrcDoc, isWrite) {
   function before(args) {
     resetOnloadAttributes(args);
     resetOnloadAttributes(shadows);
-    handleHTML(args, isSrcDoc);
+    assertHTML(args, isSrcDoc);
   }
   function after(args, element) {
     const frames = getFramesArray(element, false);
@@ -466,7 +426,7 @@ function getHook(native, isRange, isSrcDoc, isWrite) {
   }
   return function () {
     if (isWrite && this !== top.document) {
-      throw new Error('NOPE2');
+      throw error(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN, this);
     }
     const args = slice(arguments);
     const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;
@@ -568,85 +528,78 @@ module.exports = hookEventListenersSetters;
 /***/ ((module) => {
 
 const ERR_MARK_NEW_WINDOW_FAILED = 1;
-const WARN_OPEN_API_LIMITED = 2;
-const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
-const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
-const WARN_DECLARATIVE_SHADOWS = 5;
+const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 2;
+const ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
+const ERR_OPEN_API_LIMITED = 4;
+const ERR_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
 const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
-const WARN_SRCDOC_WITH_CSP_BLOCKED = 8;
+const ERR_HTML_FRAMES = 8;
+const ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN = 9;
 const {
-  warn,
-  error
-} = window.console;
-function w(msg, a, b) {
-  let bail;
-  switch (msg) {
-    case WARN_DECLARATIVE_SHADOWS:
-      const html = a;
-      bail = false;
-      warn('SNOW:', 'removing html string representing a declarative shadow:', '\n', `"${html}"`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
-      break;
-    case WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:
-      const url2 = a,
-        win2 = b;
-      bail = true;
-      warn('SNOW:', bail ? '' : 'NOT', 'blocking open attempt to "javascript:" url:', url2, 'by window: ', win2, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/44#issuecomment-1369687802', '.');
-      break;
-    case WARN_OPEN_API_LIMITED:
-      const property = a,
-        win3 = b;
-      bail = true;
-      warn('SNOW:', 'blocking access to property:', `"${property}"`, 'of opened window: ', win3, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
-      break;
-    default:
-      break;
-  }
-  return bail;
+  Error
+} = globalThis;
+const {
+  from
+} = Array;
+const error = Function.prototype.apply.bind(console.error, console);
+function err(code) {
+  const args = from(arguments);
+  error(args);
+  return new Error(code);
+}
+function generateErrorMessage(code) {
+  return `SNOW ERROR (CODE:${code}):`;
 }
 function e(msg, a, b, c) {
-  let bail;
   switch (msg) {
     case ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN:
-      const object2 = a,
+      const object = a,
         kind = b,
         type = c;
-      bail = true;
-      error('SNOW:', `${kind} object:`, object2, `of type "${type}" is not allowed and therefore is blocked`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.', '\n');
-      break;
+      return err(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN), `blocking ${kind} object:`, object, `of type "${type}" (not in allow list)`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.');
     case ERR_EXTENDING_FRAMABLES_BLOCKED:
       const name = a,
         options = b;
-      bail = true;
-      error('SNOW:', `"${name}"`, 'extending attempt', 'of framable elements such as provided', options, 'is blocked to prevent bypass', '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/56#issuecomment-1374899809', '.', '\n');
-      break;
+      return err(generateErrorMessage(ERR_EXTENDING_FRAMABLES_BLOCKED), `blocking extension attempt ("${name}") of framable elements such as provided`, options, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/56#issuecomment-1374899809', '.');
     case ERR_MARK_NEW_WINDOW_FAILED:
       const win = a,
-        err = b;
-      bail = true;
-      error('SNOW:', 'failed to mark new window:', win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', '\n', 'in order to maintain a bulletproof defense mechanism, failing to mark a new window typically causes an infinite loop', '.', '\n', 'error caught:', '\n', err);
-      break;
+        exception = b;
+      return err(generateErrorMessage(ERR_MARK_NEW_WINDOW_FAILED), 'failed to mark new window:', win, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', 'in order to maintain a bulletproof defense mechanism, failing to mark a new window typically causes an infinite loop', '.', 'error caught:', exception);
     case ERR_PROVIDED_CB_IS_NOT_A_FUNCTION:
       const cb = a;
-      bail = true;
-      error('SNOW:', 'first argument must be of type "function", instead got:', cb, '.', '\n', 'therefore, snow bailed and is not applied to the page until this is fixed.');
-      break;
-    default:
-      break;
+      return err(generateErrorMessage(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION), 'first argument must be of type "function", instead got:', cb, '.', 'therefore, snow bailed and is not applied to the page until this is fixed.');
+    case ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:
+      const url = a,
+        win2 = b;
+      return err(generateErrorMessage(ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME), 'blocking open attempt to "javascript:" url:', url, 'by window: ', win2, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/44#issuecomment-1369687802', '.');
+    case ERR_OPEN_API_LIMITED:
+      const property = a,
+        win3 = b;
+      return err(generateErrorMessage(ERR_OPEN_API_LIMITED), 'blocking access to property:', `"${property}"`, 'of opened window: ', win3, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
+    case ERR_DECLARATIVE_SHADOWS:
+      const html = a;
+      return err(generateErrorMessage(ERR_DECLARATIVE_SHADOWS), 'blocking html string that includes a representation of a declarative shadow:', `"${html}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
+    case ERR_HTML_FRAMES:
+      const html2 = a;
+      return err(generateErrorMessage(ERR_HTML_FRAMES), 'blocking html string that includes a representation of a framable element:', `"${html2}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
+    case ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN:
+      const document = a;
+      return err(generateErrorMessage(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN), 'blocking document.write\\ln action on a document that is not the top most document:', document, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
   }
-  return bail;
 }
 module.exports = {
-  warn: w,
   error: e,
+  generateErrorMessage,
   ERR_MARK_NEW_WINDOW_FAILED,
-  WARN_OPEN_API_LIMITED,
-  WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
+  ERR_OPEN_API_LIMITED,
+  ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
   ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
-  WARN_DECLARATIVE_SHADOWS,
+  ERR_DECLARATIVE_SHADOWS,
   ERR_EXTENDING_FRAMABLES_BLOCKED,
   ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN,
-  WARN_SRCDOC_WITH_CSP_BLOCKED
+  ERR_HTML_FRAMES,
+  ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN
 };
 
 /***/ }),
@@ -785,6 +738,7 @@ function setup(win) {
     objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElement.prototype, 'contentWindow').get,
     createElement: Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value,
     slice: Object.getOwnPropertyDescriptor(Array.prototype, 'slice').value,
+    join: Object.getOwnPropertyDescriptor(Array.prototype, 'join').value,
     push: Object.getOwnPropertyDescriptor(Array.prototype, 'push').value,
     split: Object.getOwnPropertyDescriptor(String.prototype, 'split').value,
     nodeType: Object.getOwnPropertyDescriptor(Node.prototype, 'nodeType').get,
@@ -829,6 +783,7 @@ function setup(win) {
     parse,
     stringify,
     slice,
+    join,
     push,
     split,
     nodeType,
@@ -882,6 +837,9 @@ function setup(win) {
   }
   function slice(arr, start, end) {
     return bag.slice.call(arr, start, end);
+  }
+  function join(arr, d) {
+    return bag.join.call(arr, d);
   }
   function push(arr, item) {
     return bag.push.call(arr, item);
@@ -971,8 +929,8 @@ const {
   Object
 } = __webpack_require__(14);
 const {
-  warn,
-  WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
+  error,
+  ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
 } = __webpack_require__(312);
 const {
   proxy,
@@ -993,10 +951,7 @@ function hook(win, native, cb, isWindowProxy) {
     const args = slice(arguments);
     const url = args[0];
     if (stringStartsWith(stringToLowerCase(url + ''), 'javascript')) {
-      const blocked = warn(WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url + '', win);
-      if (blocked) {
-        return null;
-      }
+      throw error(ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url + '', win);
     }
     const opened = Function.prototype.apply.call(native, this, args);
     if (!opened) {
@@ -1026,8 +981,8 @@ const {
   Map
 } = __webpack_require__(14);
 const {
-  warn,
-  WARN_OPEN_API_LIMITED
+  error,
+  ERR_OPEN_API_LIMITED
 } = __webpack_require__(312);
 const openeds = new Map();
 function getProxyByOpened(opened) {
@@ -1069,10 +1024,7 @@ function proxy(opened) {
           return ret;
         }
         if (Reflect.has(opened, property)) {
-          const blocked = warn(WARN_OPEN_API_LIMITED, property, opened);
-          if (!blocked) {
-            ret = Reflect.get(opened, property);
-          }
+          throw error(ERR_OPEN_API_LIMITED, property, opened);
         }
         return ret;
       },
@@ -1211,9 +1163,6 @@ module.exports = hookTrustedHTMLs;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
-  BLOCKED_BLOB_URL
-} = __webpack_require__(407);
-const {
   Object,
   Array,
   getBlobFileType
@@ -1288,22 +1237,22 @@ function hookMediaSource(win) {
 function isBlobArtificial(object) {
   return artificialBlobs.includes(object);
 }
-function isTypeForbidden(object) {
+function assertTypeIsForbidden(object) {
   const kind = object[KIND];
   if (kind !== BLOB && kind !== FILE) {
-    return false;
+    return;
   }
   const type = object[TYPE];
   if (allowedTypes.includes(type)) {
-    return false;
+    return;
   }
-  return error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
+  throw error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
 }
 function hook(win) {
   const native = win.URL.createObjectURL;
   function createObjectURL(object) {
-    if (isBlobArtificial(object) && isTypeForbidden(object)) {
-      return BLOCKED_BLOB_URL;
+    if (isBlobArtificial(object)) {
+      assertTypeIsForbidden(object);
     }
     return native(object);
   }
@@ -1411,6 +1360,10 @@ function canNodeRunQuerySelector(node) {
   const type = nodeType(node);
   return type === Element.prototype.ELEMENT_NODE || type === Element.prototype.DOCUMENT_FRAGMENT_NODE || type === Element.prototype.DOCUMENT_NODE;
 }
+function getDeclarativeShadows(element) {
+  const querySelectorAll = getPrototype(element).prototype.querySelectorAll;
+  return querySelectorAll.call(element, 'template[shadowroot]');
+}
 function getFramesArray(element, includingParent) {
   const frames = new Array();
   if (null === element || typeof element !== 'object') {
@@ -1438,6 +1391,7 @@ function fillArrayUniques(arr, items) {
   return isArrUpdated;
 }
 module.exports = {
+  getDeclarativeShadows,
   makeWindowUtilSetter,
   toArray,
   isTagFramable,
@@ -1455,8 +1409,6 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
-  BLOCKED_BLOB_URL,
-  BLOCKED_BLOB_MSG,
   runInNewRealm
 } = __webpack_require__(407);
 const {
@@ -1470,6 +1422,11 @@ const {
   createObjectURL,
   revokeObjectURL
 } = URL;
+const BLOCKED_BLOB_MSG = `
+BLOCKED BY SNOW:
+Creating URL objects is not allowed under Snow protection within Web Workers.
+If this prevents your application from running correctly, please visit/report at https://github.com/LavaMoat/snow/pull/89#issuecomment-1589359673.
+Learn more at https://github.com/LavaMoat/snow/pull/89`;
 function syncGet(url) {
   return runInNewRealm(function (win) {
     let content;
@@ -1487,14 +1444,8 @@ function syncGet(url) {
 function swap(url) {
   if (!blobs.has(url)) {
     const content = syncGet(url);
-    const js = `(function() {
-                Object.defineProperty(URL, 'createObjectURL', {value:() => {
-                    console.log(\`${BLOCKED_BLOB_MSG}\`);
-                    return '${BLOCKED_BLOB_URL}';
-                }})
-            }());
-            
-            ` + content;
+    const prefix = `(function() { Object.defineProperty(URL, 'createObjectURL', { value: () => { throw new Error(\`${BLOCKED_BLOB_MSG}\`) }}) }())`;
+    const js = prefix + '\n\n' + content;
     blobs.set(url, createObjectURL(new Blob([js], {
       type: 'text/javascript'
     })));

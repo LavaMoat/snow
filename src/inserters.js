@@ -1,8 +1,9 @@
+const {error, ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN} = require('./log');
 const {protectShadows} = require('./shadow');
 const resetOnloadAttributes = require('./attributes');
 const {getFramesArray, shadows} = require('./utils');
 const {getParentElement, getCommonAncestorContainer, slice, Object, Function} = require('./natives');
-const {handleHTML} = require('./html');
+const {assertHTML} = require('./html');
 const hook = require('./hook');
 
 const map = {
@@ -14,13 +15,14 @@ const map = {
     ShadowRoot: ['innerHTML'],
     HTMLIFrameElement: ['srcdoc'],
 };
+
 const protos = Object.getOwnPropertyNames(map);
 
 function getHook(native, isRange, isSrcDoc, isWrite) {
     function before(args) {
         resetOnloadAttributes(args);
         resetOnloadAttributes(shadows);
-        handleHTML(args, isSrcDoc);
+        assertHTML(args, isSrcDoc);
     }
 
     function after(args, element) {
@@ -32,7 +34,7 @@ function getHook(native, isRange, isSrcDoc, isWrite) {
 
     return function() {
         if (isWrite && this !== top.document) {
-            throw new Error('NOPE2');
+            throw error(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN, this);
         }
         const args = slice(arguments);
         const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;

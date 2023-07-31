@@ -1,4 +1,5 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_OPEN_API_LIMITED} = require('../src/log');
 
 describe('window.documentPictureInPicture.requestWindow API', () => {
     beforeEach(setup);
@@ -9,6 +10,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 document.addEventListener('keydown', async () => {
@@ -21,7 +23,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and accessed via "window" property', async function () {
@@ -30,6 +32,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 document.addEventListener('keydown', async () => {
@@ -43,7 +46,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and accessed via "onenter" event', async function () {
@@ -52,6 +55,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 document.addEventListener('keydown', async () => {
@@ -68,7 +72,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe('V,V,V,V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and reloaded to javascript scheme', async function () {
@@ -77,6 +81,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         }
         await browser.execute(function() {
             const done = (result) => top.result = result;
+            top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 document.addEventListener('keydown', async () => {
@@ -92,6 +97,6 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
     });
 });

@@ -178,9 +178,6 @@ describe('test shadow DOM', async function () {
     });
 
     it('should fail to use atob of an iframe that is attached via declarative shadow DOM through document.write', async function () {
-        if (global.BROWSER === 'FIREFOX') {
-            this.skip(); // requires a fix #58
-        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));

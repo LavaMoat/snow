@@ -54,8 +54,79 @@ describe('special cases', () => {
         if (global.BROWSER === 'SAFARI') {
             this.skip(); // redirecting EMBED by updating src does not work in safari
         }
-        if (global.BROWSER === 'FIREFOX') {
-            this.skip(); // requires a fix #59
+        const result = await browser.executeAsync(function(done) {
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                function make(tag, id, type, src, parent) {
+                    const e = document.createElement(tag);
+                    e.id = id;
+                    e.type = type;
+                    e.src = src;
+                    parent.appendChild(e);
+                }
+                const href = location.href;
+                make('embed', 'temp_id_1', 'text/html', href, testdiv1);
+                make('embed', 'temp_id_2', 'text/html', 'https://lavamoat.github.io/snow/test/index.html', testdiv2);
+                setTimeout(() => {
+                    if (!window.temp_id_2 && !window.temp_id_1) {
+                        bypass([top]);
+                        return;
+                    }
+                    temp_id_2.src = temp_id_1.src;
+                    temp_id_1.src = 'https://lavamoat.github.io/snow/test/index.html';
+                    setTimeout(() => {
+                        temp_id_1.src = temp_id_2.src;
+                        setTimeout(() => {
+                            bypass([window[0], window[1]]);
+                        }, 1000);
+                    }, 1000);
+                }, 1000);
+            }());
+        });
+        expect(result).toBe('V,V');
+    });
+
+    it('should fail to use atob of an object that was cross origin and then same origin', async function () {
+        if (global.BROWSER === 'SAFARI') {
+            this.skip(); // redirecting EMBED by updating src does not work in safari
+        }
+        const result = await browser.executeAsync(function(done) {
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                function make(tag, id, type, src, parent) {
+                    const e = document.createElement(tag);
+                    e.id = id;
+                    e.type = type;
+                    e.data = src;
+                    parent.appendChild(e);
+                }
+                const href = location.href;
+                make('object', 'temp_id_1', 'text/html', href, testdiv1);
+                make('object', 'temp_id_2', 'text/html', 'https://lavamoat.github.io/snow/test/index.html', testdiv2);
+                setTimeout(() => {
+                    if (!window.temp_id_2 && !window.temp_id_1) {
+                        bypass([top]);
+                        return;
+                    }
+                    temp_id_2.data = temp_id_1.data;
+                    temp_id_1.data = 'https://lavamoat.github.io/snow/test/index.html';
+                    setTimeout(() => {
+                        temp_id_1.data = temp_id_2.data;
+                        setTimeout(() => {
+                            bypass([window[0], window[1]]);
+                        }, 1000);
+                    }, 1000);
+                }, 1000);
+            }());
+        });
+        expect(result).toBe('V,V');
+    });
+
+    it('should fail to use atob of an embed that was cross origin and then same origin (html)', async function () {
+        if (global.BROWSER === 'SAFARI') {
+            this.skip(); // redirecting EMBED by updating src does not work in safari
         }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
@@ -83,12 +154,9 @@ describe('special cases', () => {
         expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
     });
 
-    it('should fail to use atob of an object that was cross origin and then same origin', async function () {
+    it('should fail to use atob of an object that was cross origin and then same origin (html)', async function () {
         if (global.BROWSER === 'SAFARI') {
             this.skip(); // redirecting EMBED by updating src does not work in safari
-        }
-        if (global.BROWSER === 'FIREFOX') {
-            this.skip(); // requires a fix #59
         }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
@@ -160,9 +228,6 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an iframe that had its document written', async function () {
-        if (global.BROWSER === 'FIREFOX') {
-            this.skip(); // requires a fix #58
-        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -177,9 +242,6 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an iframe that had its document written-ln', async function () {
-        if (global.BROWSER === 'FIREFOX') {
-            this.skip(); // requires a fix #58
-        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -240,9 +302,6 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with document.write', async function () {
-        if (global.BROWSER === 'FIREFOX') {
-            this.skip(); // requires a fix #58
-        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -260,8 +319,8 @@ describe('special cases', () => {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                var d = document.createElement('div')
-                d.innerHTML = '<iframe id="f"></iframe>';
+                var d = document.createElement('div');
+                d.appendChild(document.createElement('iframe'));
                 var f = d.firstChild;
                 if (!f) return bypass([window]);
                 d.toJSON = ()=>'asd';
@@ -271,7 +330,7 @@ describe('special cases', () => {
                 bypass([f.contentWindow]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe was injected with srcdoc with a defending meta csp tag and trusted types', async function () {

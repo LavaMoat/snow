@@ -711,7 +711,6 @@ function setup(win) {
   const bag = natives(win);
   const {
     document,
-    URL,
     Proxy,
     Function,
     String,
@@ -738,7 +737,6 @@ function setup(win) {
     objectContentWindow: Object.getOwnPropertyDescriptor(HTMLObjectElement.prototype, 'contentWindow').get,
     createElement: Object.getOwnPropertyDescriptor(Document.prototype, 'createElement').value,
     slice: Object.getOwnPropertyDescriptor(Array.prototype, 'slice').value,
-    join: Object.getOwnPropertyDescriptor(Array.prototype, 'join').value,
     push: Object.getOwnPropertyDescriptor(Array.prototype, 'push').value,
     split: Object.getOwnPropertyDescriptor(String.prototype, 'split').value,
     nodeType: Object.getOwnPropertyDescriptor(Node.prototype, 'nodeType').get,
@@ -783,7 +781,6 @@ function setup(win) {
     parse,
     stringify,
     slice,
-    join,
     push,
     split,
     nodeType,
@@ -837,9 +834,6 @@ function setup(win) {
   }
   function slice(arr, start, end) {
     return bag.slice.call(arr, start, end);
-  }
-  function join(arr, d) {
-    return bag.join.call(arr, d);
   }
   function push(arr, item) {
     return bag.push.call(arr, item);
@@ -1239,14 +1233,12 @@ function isBlobArtificial(object) {
 }
 function assertTypeIsForbidden(object) {
   const kind = object[KIND];
-  if (kind !== BLOB && kind !== FILE) {
-    return;
+  if (kind === BLOB || kind === FILE) {
+    const type = object[TYPE];
+    if (!allowedTypes.includes(type)) {
+      throw error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
+    }
   }
-  const type = object[TYPE];
-  if (allowedTypes.includes(type)) {
-    return;
-  }
-  throw error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
 }
 function hook(win) {
   const native = win.URL.createObjectURL;

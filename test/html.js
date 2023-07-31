@@ -32,6 +32,37 @@ describe('test HTML injections', async function () {
         expect(result).toBe('V,V');
     });
 
+    it('should fail to use atob of an iframe created by srcdoc as attribute (before)', async function () {
+        const result = await browser.executeAsync(function(done) {
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                const ifr = document.createElement('iframe');
+                ifr.setAttribute('srcdoc', `<script>top.bypass([this, window]);</script>`);
+                testdiv.appendChild(ifr);
+                setTimeout(bypass, 100, [ifr.contentWindow[0], ifr.contentWindow]);
+            }());
+        });
+        expect(result).toBe('V,V');
+    });
+
+    it('should fail to use atob of an iframe created by srcdoc as attribute (after)', async function () {
+        if (global.CONFIG.SKIP_CSP_UNSAFE_INLINE_CHECKS) {
+            this.skip();
+        }
+        const result = await browser.executeAsync(function(done) {
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                const ifr = document.createElement('iframe');
+                testdiv.appendChild(ifr);
+                ifr.setAttribute('srcdoc', `<script>top.bypass([this, window]);</script>`);
+                setTimeout(bypass, 100, [ifr.contentWindow[0], ifr.contentWindow]);
+            }());
+        });
+        expect(result).toBe('V,V');
+    });
+
     it('should fail to use atob of an iframe created by srcdoc with onload attribute of a nested iframe', async function () {
         const result = await browser.executeAsync(function(done) {
             top.done = done;

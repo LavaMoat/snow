@@ -3,9 +3,9 @@ const path = require('path');
 
 global.CONFIG = {
     // Scenarios Snow can't protect against, and instead relies on 'unsafe-inline' to be forbidden
-    SKIP_CSP_UNSAFE_INLINE_CHECKS: true,
+    SKIP_CSP_UNSAFE_INLINE_CHECKS: !!parseInt(process.env.CSP),
     // Scenarios Snow can't protect against, and instead relies on 'object-src' to same-origin to be forbidden
-    SKIP_CSP_OBJECT_SRC_CHECKS: true,
+    SKIP_CSP_OBJECT_SRC_CHECKS: !!parseInt(process.env.CSP),
 }
 
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();

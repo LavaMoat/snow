@@ -1,6 +1,6 @@
 const {getFramesArray, getDeclarativeShadows} = require('./utils');
 const {document, getChildElementCount, setInnerHTML} = require('./natives');
-const {error, ERR_DECLARATIVE_SHADOWS, ERR_HTML_FRAMES} = require('./log');
+const {error, ERR_DECLARATIVE_SHADOWS, ERR_HTML_FRAMES_WITH_SRCDOC} = require('./log');
 
 function makeStringHook(asFrame, asHtml, arg) {
     let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(' + arg + ');';
@@ -21,8 +21,12 @@ function assertHTML(args, isSrcDoc) {
             if (getDeclarativeShadows(template).length > 0) {
                 throw error(ERR_DECLARATIVE_SHADOWS, args[i]);
             }
-            if (getFramesArray(template, false).length > 0) {
-                throw error(ERR_HTML_FRAMES, args[i]);
+            const frames = getFramesArray(template, false);
+            for (let j = 0; j < frames.length; j++) {
+                const frame = frames[j];
+                if (template.getAttribute.call(frame, 'srcdoc')) {
+                    throw error(ERR_HTML_FRAMES_WITH_SRCDOC, args[i]);
+                }
             }
         }
     }

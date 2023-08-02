@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_HTML_FRAMES, ERR_DECLARATIVE_SHADOWS} = require('../src/log');
+const {generateErrorMessage, ERR_HTML_FRAMES_WITH_SRCDOC, ERR_DECLARATIVE_SHADOWS} = require('../src/log');
 
 describe('test shadow DOM', async function () {
     beforeEach(setup);
@@ -16,7 +16,7 @@ describe('test shadow DOM', async function () {
                 bypass([s?.firstChild?.contentWindow, window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V,V');
     });
 
     it('should fail to use atob of an iframe that is innerHTML attached as part of a shadow DOM inside another shadow DOM', async function () {
@@ -34,7 +34,7 @@ describe('test shadow DOM', async function () {
                 bypass([s2?.firstChild?.contentWindow, window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V,V');
     });
 
     it('should fail to use atob of an iframe attached as part of a shadow DOM inside another shadow DOM where both shadows belong to different realms', async function () {
@@ -53,7 +53,7 @@ describe('test shadow DOM', async function () {
                 setTimeout(bypass, 100, [window[0] && window[0][0], window[0], window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
     });
 
     it('should fail to use atob of an iframe that is DOM inserted as part of a shadow DOM', async function () {
@@ -119,10 +119,13 @@ describe('test shadow DOM', async function () {
                 bypass([{atob: top.myatob || atob, alert: top.myalert || alert}]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that is attached to an already attached shadow DOM', async function () {
+        if (global.CONFIG.SKIP_CSP_UNSAFE_INLINE_CHECKS) {
+            this.skip();
+        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -134,7 +137,7 @@ describe('test shadow DOM', async function () {
                 bypass([{atob: top.myatob || atob, alert: top.myalert || alert}]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
     });
 
     it('should fail to use atob of an iframe that is attached via declarative shadow DOM through srcdoc and javascript URI', async function () {

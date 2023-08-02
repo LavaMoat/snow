@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_HTML_FRAMES} = require('../src/log');
+const {generateErrorMessage, ERR_HTML_FRAMES_WITH_SRCDOC} = require('../src/log');
 
 describe('test different views', async function () {
     beforeEach(setup);
@@ -44,7 +44,7 @@ describe('test different views', async function () {
                 bypass([ifr.contentWindow[0], window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V,V');
     });
 
     it('should fail to use atob of an object (html)', async function () {
@@ -56,7 +56,7 @@ describe('test different views', async function () {
                 bypass([window?.temp_id?.contentWindow, window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V,V');
     });
 
     it('should fail to use atob of an object', async function () {
@@ -102,7 +102,7 @@ describe('test different views', async function () {
                 setTimeout(bypass, 100, [window?.temp_id?.contentWindow, window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V,V');
     });
 
     it('should fail to use atob of an embed', async function () {

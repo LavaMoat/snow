@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_HTML_FRAMES, ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN} = require('../src/log');
+const {generateErrorMessage, ERR_HTML_FRAMES_WITH_SRCDOC, ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN} = require('../src/log');
 
 describe('special cases', () => {
     beforeEach(setup);
@@ -151,7 +151,7 @@ describe('special cases', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V,V');
     });
 
     it('should fail to use atob of an object that was cross origin and then same origin (html)', async function () {
@@ -180,7 +180,7 @@ describe('special cases', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V,V');
     });
 
     it('should fail to use atob of an iframe that was reattached to dom', async function () {
@@ -276,6 +276,9 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc', async function () {
+        if (global.CONFIG.SKIP_CSP_UNSAFE_INLINE_CHECKS) {
+            this.skip();
+        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -286,7 +289,7 @@ describe('special cases', () => {
                 setTimeout(top.bypass, 100, [window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with innerHTML', async function () {
@@ -298,7 +301,7 @@ describe('special cases', () => {
                 setTimeout(top.bypass, 100, [window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with document.write', async function () {
@@ -310,7 +313,7 @@ describe('special cases', () => {
                 setTimeout(top.bypass, 100, [window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
     });
 
     it('should fail to use atob of an iframe that pretends to be a trusted html', async function () {
@@ -352,7 +355,7 @@ describe('special cases', () => {
   <iframe src=\'javascript:alert(1)\'</iframe>"></iframe>`
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
     });
 
     it('should fail to use atob of an iframe was injected with srcdoc with a defending meta csp tag with a nonce', async function () {
@@ -374,7 +377,7 @@ describe('special cases', () => {
     </iframe>`
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
     });
 
     it('should fail to use atob of an iframe that tricks the frames array with clobbering of id=n', async function () {
@@ -409,7 +412,7 @@ describe('special cases', () => {
                 bypass([window[0] && window[0][0], window[0], window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
     });
 
     it('should fail to use atob of an iframe born out of mXSS (innerHTML)', async function () {
@@ -423,6 +426,6 @@ describe('special cases', () => {
                 testdiv.innerHTML = x;
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 });

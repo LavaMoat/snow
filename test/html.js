@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_HTML_FRAMES, ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN} = require('../src/log');
+const {generateErrorMessage, ERR_HTML_FRAMES_WITH_SRCDOC, ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN} = require('../src/log');
 
 describe('test HTML injections', async function () {
     beforeEach(setup);
@@ -67,6 +67,9 @@ describe('test HTML injections', async function () {
     });
 
     it('should fail to use atob of an iframe created by srcdoc with onload attribute of a nested iframe', async function () {
+        if (global.CONFIG.SKIP_CSP_UNSAFE_INLINE_CHECKS) {
+            this.skip();
+        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -77,7 +80,7 @@ describe('test HTML injections', async function () {
                 setTimeout(() => top.bypass([window]), 100)
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe created by innerHTML', async function () {
@@ -92,7 +95,7 @@ describe('test HTML injections', async function () {
                 bypass([window[rnd]?.contentWindow || window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe created by outerHTML', async function () {
@@ -107,7 +110,7 @@ describe('test HTML injections', async function () {
                 bypass([window[rnd]?.contentWindow || window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe created by insertAdjacentHTML', async function () {
@@ -122,7 +125,7 @@ describe('test HTML injections', async function () {
                 bypass([window[rnd]?.contentWindow || window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of a div\'s child iframe created by innerHTML', async function () {
@@ -137,7 +140,7 @@ describe('test HTML injections', async function () {
                 bypass([window[rnd]?.contentWindow || window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of via js execution via innerHTML call', async function () {
@@ -151,7 +154,7 @@ describe('test HTML injections', async function () {
                 bypass([window['xxx']?.contentWindow || window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob by leveraging a TrustedHTML node (with onload)', async function () {
@@ -171,7 +174,7 @@ describe('test HTML injections', async function () {
                 bypass([window['xxx']?.contentWindow || window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob by leveraging a TrustedHTML node', async function () {
@@ -191,7 +194,7 @@ describe('test HTML injections', async function () {
                 bypass([window['xxx']?.contentWindow || window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe through onload as html', async function () {
@@ -203,7 +206,7 @@ describe('test HTML injections', async function () {
                 setTimeout(top.bypass, 100, [window])
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an frame through onload as html', async function () {
@@ -215,7 +218,7 @@ describe('test HTML injections', async function () {
                 setTimeout(top.bypass, 100, [window])
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe introduced via multiple document.write args', async function () {
@@ -254,7 +257,7 @@ describe('test HTML injections', async function () {
                 setTimeout(top.bypass, 100, [window])
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
     
     it('should fail to use atob of an iframe that was loaded via HTML in a new document (with innerHTML)', async function () {
@@ -266,10 +269,13 @@ describe('test HTML injections', async function () {
                 setTimeout(top.bypass, 100, [window])
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
     });
 
     it('should fail to use atob of an iframe that was loaded via HTML in a new document (with srcdoc)', async function () {
+        if (global.CONFIG.SKIP_CSP_UNSAFE_INLINE_CHECKS) {
+            this.skip();
+        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -280,7 +286,7 @@ describe('test HTML injections', async function () {
                 setTimeout(top.bypass, 100, [window])
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an object that was loaded via HTML in a new document (with srcdoc)', async function () {
@@ -294,7 +300,7 @@ describe('test HTML injections', async function () {
                 setTimeout(top.bypass, 100, [window])
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an embed that was loaded via HTML in a new document (with srcdoc)', async function () {
@@ -308,7 +314,7 @@ describe('test HTML injections', async function () {
                 setTimeout(top.bypass, 100, [window])
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of a window opened with an anchor element', async function () {
@@ -324,7 +330,7 @@ describe('test HTML injections', async function () {
                 document.querySelector("#pwn").click();
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of a window opened with a form element', async function () {
@@ -340,6 +346,6 @@ describe('test HTML injections', async function () {
                 document.querySelector("#pwn").submit();
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES));
+        expect(result).toBe('V');
     });
 });

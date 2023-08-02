@@ -11,7 +11,7 @@
     "@wdio/mocha-framework": "^7.5.3",
     "@wdio/spec-reporter": "^7.5.3",
     "babel-loader": "^8.2.2",
-    "chromedriver": "^113.0.0",
+    "chromedriver": "^114.0.0",
     "geckodriver": "^3.2.0",
     "wdio-chromedriver-service": "7.0.0",
     "wdio-safaridriver-service": "^2.0.0",
@@ -20,6 +20,7 @@
     "webpack-cli": "^4.6.0"
   },
   "scripts": {
+    "demo": "npx serve .",
     "use-strict-dev": "node -p 'fs.writeFileSync(`snow.js`, `(function(){\n\"use strict\";\nif (typeof SNOW === \"function\") return;\n` + fs.readFileSync(`snow.js`)+ `\n}())`) , `successfully wrapped snow.js with use-strict scope`'",
     "use-strict-prod": "node -p 'fs.writeFileSync(`snow.prod.js`, `(function(){\"use strict\";if (typeof SNOW === \"function\") return;` + fs.readFileSync(`snow.prod.js`)+ `}())`) , `successfully wrapped snow.prod.js with use-strict scope`'",
     "build-dev": "webpack --config ./webpack.config.js && yarn use-strict-dev",

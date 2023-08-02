@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_HTML_FRAMES} = require('../src/log');
+const {generateErrorMessage, ERR_HTML_FRAMES_WITH_SRCDOC} = require('../src/log');
 
 describe('test marking mechanism is safe', async function () {
     beforeEach(setup);

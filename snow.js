@@ -240,7 +240,7 @@ const {
 const {
   error,
   ERR_DECLARATIVE_SHADOWS,
-  ERR_HTML_FRAMES
+  ERR_HTML_FRAMES_WITH_SRCDOC
 } = __webpack_require__(312);
 function makeStringHook(asFrame, asHtml, arg) {
   let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(' + arg + ');';
@@ -260,8 +260,12 @@ function assertHTML(args, isSrcDoc) {
       if (getDeclarativeShadows(template).length > 0) {
         throw error(ERR_DECLARATIVE_SHADOWS, args[i]);
       }
-      if (getFramesArray(template, false).length > 0) {
-        throw error(ERR_HTML_FRAMES, args[i]);
+      const frames = getFramesArray(template, false);
+      for (let j = 0; j < frames.length; j++) {
+        const frame = frames[j];
+        if (template.getAttribute.call(frame, 'srcdoc')) {
+          throw error(ERR_HTML_FRAMES_WITH_SRCDOC, args[i]);
+        }
       }
     }
   }
@@ -534,7 +538,7 @@ const ERR_OPEN_API_LIMITED = 4;
 const ERR_DECLARATIVE_SHADOWS = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
 const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
-const ERR_HTML_FRAMES = 8;
+const ERR_HTML_FRAMES_WITH_SRCDOC = 8;
 const ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN = 9;
 const {
   Error
@@ -580,9 +584,9 @@ function e(msg, a, b, c) {
     case ERR_DECLARATIVE_SHADOWS:
       const html = a;
       return err(generateErrorMessage(ERR_DECLARATIVE_SHADOWS), 'blocking html string that includes a representation of a declarative shadow:', `"${html}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
-    case ERR_HTML_FRAMES:
+    case ERR_HTML_FRAMES_WITH_SRCDOC:
       const html2 = a;
-      return err(generateErrorMessage(ERR_HTML_FRAMES), 'blocking html string that includes a representation of a framable element:', `"${html2}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
+      return err(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC), 'blocking html string that includes a representation of a framable element with the "srcdoc" attribute:', `"${html2}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
     case ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN:
       const document = a;
       return err(generateErrorMessage(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN), 'blocking document.write\\ln action on a document that is not the top most document:', document, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
@@ -598,7 +602,7 @@ module.exports = {
   ERR_DECLARATIVE_SHADOWS,
   ERR_EXTENDING_FRAMABLES_BLOCKED,
   ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN,
-  ERR_HTML_FRAMES,
+  ERR_HTML_FRAMES_WITH_SRCDOC,
   ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN
 };
 

@@ -51,6 +51,9 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an embed that was cross origin and then same origin', async function () {
+        if (global.CONFIG.SKIP_CSP_OBJECT_SRC_CHECKS) {
+            this.skip();
+        }
         if (global.BROWSER === 'SAFARI') {
             this.skip(); // redirecting EMBED by updating src does not work in safari
         }
@@ -88,6 +91,9 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an object that was cross origin and then same origin', async function () {
+        if (global.CONFIG.SKIP_CSP_OBJECT_SRC_CHECKS) {
+            this.skip();
+        }
         if (global.BROWSER === 'SAFARI') {
             this.skip(); // redirecting EMBED by updating src does not work in safari
         }
@@ -125,6 +131,9 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an embed that was cross origin and then same origin (html)', async function () {
+        if (global.CONFIG.SKIP_CSP_OBJECT_SRC_CHECKS) {
+            this.skip();
+        }
         if (global.BROWSER === 'SAFARI') {
             this.skip(); // redirecting EMBED by updating src does not work in safari
         }
@@ -155,6 +164,9 @@ describe('special cases', () => {
     });
 
     it('should fail to use atob of an object that was cross origin and then same origin (html)', async function () {
+        if (global.CONFIG.SKIP_CSP_OBJECT_SRC_CHECKS) {
+            this.skip();
+        }
         if (global.BROWSER === 'SAFARI') {
             this.skip(); // redirecting EMBED by updating src does not work in safari
         }

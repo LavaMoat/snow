@@ -23,6 +23,7 @@
                     }
                 }
             } else {
+                location.search.includes('disable_csp') ||
                 document.write(`<meta http-equiv="Content-Security-Policy" content="script-src 'self' blob:; object-src 'none';">`);
             }
         </script>

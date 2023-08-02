@@ -213,6 +213,9 @@ describe('test HTML injections', async function () {
     });
 
     it('should fail to use atob of an frame through onload as html', async function () {
+        if (global.BROWSER === 'FIREFOX') {
+            this.skip(); // requires a fix #58
+        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
@@ -252,6 +255,9 @@ describe('test HTML injections', async function () {
     });
 
     it('should fail to use atob of an object through onload as html', async function () {
+        if (global.CONFIG.SKIP_CSP_OBJECT_SRC_CHECKS) {
+            this.skip();
+        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));

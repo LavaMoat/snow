@@ -242,19 +242,9 @@ const {
   ERR_DECLARATIVE_SHADOWS,
   ERR_HTML_FRAMES_WITH_SRCDOC
 } = __webpack_require__(312);
-function makeStringHook(asFrame, asHtml, arg) {
-  let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(' + arg + ');';
-  if (asHtml) {
-    hook = '<script>' + hook + 'document.currentScript.remove();' + '</script>';
-  }
-  return hook;
-}
-function assertHTML(args, isSrcDoc) {
+function assertHTML(args) {
   for (let i = 0; i < args.length; i++) {
     const template = document.createElement('html');
-    if (isSrcDoc) {
-      args[i] = makeStringHook(false, true, 'this') + args[i];
-    }
     setInnerHTML(template, args[i]);
     if (getChildElementCount(template)) {
       if (getDeclarativeShadows(template).length > 0) {
@@ -416,11 +406,11 @@ const map = {
   HTMLIFrameElement: ['srcdoc']
 };
 const protos = Object.getOwnPropertyNames(map);
-function getHook(native, isRange, isSrcDoc, isWrite) {
+function getHook(native, isRange, isWrite) {
   function before(args) {
     resetOnloadAttributes(args);
     resetOnloadAttributes(shadows);
-    assertHTML(args, isSrcDoc);
+    assertHTML(args);
   }
   function after(args, element) {
     const frames = getFramesArray(element, false);
@@ -450,9 +440,8 @@ function hookDOMInserters(win) {
       if (!desc) continue;
       const prop = desc.set ? 'set' : 'value';
       const isRange = proto === 'Range',
-        isSrcDoc = func === 'srcdoc',
         isWrite = func === 'write' || func === 'writeln';
-      desc[prop] = getHook(desc[prop], isRange, isSrcDoc, isWrite);
+      desc[prop] = getHook(desc[prop], isRange, isWrite);
       desc.configurable = true;
       if (prop === 'value') {
         desc.writable = true;

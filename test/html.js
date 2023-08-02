@@ -19,6 +19,9 @@ describe('test HTML injections', async function () {
     });
 
     it('should fail to use atob of an iframe created by srcdoc (after)', async function () {
+        if (global.CONFIG.SKIP_CSP_UNSAFE_INLINE_CHECKS) {
+            this.skip();
+        }
         const result = await browser.executeAsync(function(done) {
             top.done = done;
             top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));

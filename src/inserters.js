@@ -18,11 +18,11 @@ const map = {
 
 const protos = Object.getOwnPropertyNames(map);
 
-function getHook(native, isRange, isSrcDoc, isWrite) {
+function getHook(native, isRange, isWrite) {
     function before(args) {
         resetOnloadAttributes(args);
         resetOnloadAttributes(shadows);
-        assertHTML(args, isSrcDoc);
+        assertHTML(args);
     }
 
     function after(args, element) {
@@ -56,9 +56,8 @@ function hookDOMInserters(win) {
             const prop = desc.set ? 'set' : 'value';
             const
                 isRange = proto === 'Range',
-                isSrcDoc = func === 'srcdoc',
                 isWrite = func === 'write' || func === 'writeln';
-            desc[prop] = getHook(desc[prop], isRange, isSrcDoc, isWrite);
+            desc[prop] = getHook(desc[prop], isRange, isWrite);
             desc.configurable = true;
             if (prop === 'value') {
                 desc.writable = true;

@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_HTML_FRAMES_WITH_SRCDOC, ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN} = require('../src/log');
+const {generateErrorMessage, ERR_HTML_FRAMES_SRCDOC_BLOCKED, ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED} = require('../src/log');
 
 describe('test HTML injections', async function () {
     beforeEach(setup);
@@ -241,7 +241,7 @@ describe('test HTML injections', async function () {
                 f.contentDocument.write('"></iframe><script>top.bypass([tst.contentWindow])</script>');
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN));
+        expect(result).toBe(generateErrorMessage(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED));
     });
 
     it('should fail to use atob of an iframe introduced via multiple document.write calls', async function () {
@@ -254,7 +254,7 @@ describe('test HTML injections', async function () {
                 f.contentDocument.write('<iframe id="tst', '"></iframe><script>top.bypass([tst.contentWindow])</script>');
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN));
+        expect(result).toBe(generateErrorMessage(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED));
     });
 
     it('should fail to use atob of an object through onload as html', async function () {
@@ -281,7 +281,7 @@ describe('test HTML injections', async function () {
                 setTimeout(top.bypass, 100, [window])
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that was loaded via HTML in a new document (with srcdoc)', async function () {

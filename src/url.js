@@ -1,5 +1,5 @@
 const {Object, Array, getBlobFileType} = require('./natives');
-const {error, ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN} = require('./log');
+const {error, ERR_BLOB_TYPE_BLOCKED} = require('./log');
 
 const KIND = 'KIND', TYPE = 'TYPE';
 const BLOB = 'Blob', FILE = 'File', MEDIA_SOURCE = 'MediaSource';
@@ -73,7 +73,7 @@ function assertTypeIsForbidden(object) {
     if (kind === BLOB || kind === FILE) {
         const type = object[TYPE];
         if (!allowedTypes.includes(type)) {
-            throw error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
+            throw error(ERR_BLOB_TYPE_BLOCKED, object, kind, type);
         }
     }
 }

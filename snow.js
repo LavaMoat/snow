@@ -239,8 +239,8 @@ const {
 } = __webpack_require__(14);
 const {
   error,
-  ERR_DECLARATIVE_SHADOWS,
-  ERR_HTML_FRAMES_WITH_SRCDOC
+  ERR_DECLARATIVE_SHADOWS_BLOCKED,
+  ERR_HTML_FRAMES_SRCDOC_BLOCKED
 } = __webpack_require__(312);
 function assertHTML(args) {
   for (let i = 0; i < args.length; i++) {
@@ -248,13 +248,13 @@ function assertHTML(args) {
     setInnerHTML(template, args[i]);
     if (getChildElementCount(template)) {
       if (getDeclarativeShadows(template).length > 0) {
-        throw error(ERR_DECLARATIVE_SHADOWS, args[i]);
+        throw error(ERR_DECLARATIVE_SHADOWS_BLOCKED, args[i]);
       }
       const frames = getFramesArray(template, false);
       for (let j = 0; j < frames.length; j++) {
         const frame = frames[j];
         if (template.getAttribute.call(frame, 'srcdoc')) {
-          throw error(ERR_HTML_FRAMES_WITH_SRCDOC, args[i]);
+          throw error(ERR_HTML_FRAMES_SRCDOC_BLOCKED, args[i]);
         }
       }
     }
@@ -296,7 +296,7 @@ const {
 } = __webpack_require__(111);
 const {
   error,
-  ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
+  ERR_CB_MUST_BE_FUNCTION,
   ERR_MARK_NEW_WINDOW_FAILED
 } = __webpack_require__(312);
 const setSnowWindowUtil = makeWindowUtilSetter('SNOW_WINDOW', function (win) {
@@ -355,7 +355,7 @@ function onWin(win, cb, skip) {
 const callbacks = new Array();
 function snow(cb, win) {
   if (typeof cb !== 'function') {
-    const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
+    const bail = error(ERR_CB_MUST_BE_FUNCTION, cb);
     if (bail) {
       return;
     }
@@ -375,7 +375,7 @@ module.exports = snow;
 
 const {
   error,
-  ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN
+  ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED
 } = __webpack_require__(312);
 const {
   protectShadows
@@ -420,7 +420,7 @@ function getHook(native, isRange, isWrite) {
   }
   return function () {
     if (isWrite && this !== top.document) {
-      throw error(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN, this);
+      throw error(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED, this);
     }
     const args = slice(arguments);
     const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;
@@ -521,14 +521,14 @@ module.exports = hookEventListenersSetters;
 /***/ ((module) => {
 
 const ERR_MARK_NEW_WINDOW_FAILED = 1;
-const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 2;
-const ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
-const ERR_OPEN_API_LIMITED = 4;
-const ERR_DECLARATIVE_SHADOWS = 5;
+const ERR_CB_MUST_BE_FUNCTION = 2;
+const ERR_OPEN_JS_SCHEME_BLOCKED = 3;
+const ERR_OPENED_PROP_ACCESS_BLOCKED = 4;
+const ERR_DECLARATIVE_SHADOWS_BLOCKED = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
-const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
-const ERR_HTML_FRAMES_WITH_SRCDOC = 8;
-const ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN = 9;
+const ERR_BLOB_TYPE_BLOCKED = 7;
+const ERR_HTML_FRAMES_SRCDOC_BLOCKED = 8;
+const ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED = 9;
 const {
   Error
 } = globalThis;
@@ -546,11 +546,11 @@ function generateErrorMessage(code) {
 }
 function e(msg, a, b, c) {
   switch (msg) {
-    case ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN:
+    case ERR_BLOB_TYPE_BLOCKED:
       const object = a,
         kind = b,
         type = c;
-      return err(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN), `blocking ${kind} object:`, object, `of type "${type}" (not in allow list)`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.');
+      return err(generateErrorMessage(ERR_BLOB_TYPE_BLOCKED), `blocking ${kind} object:`, object, `of type "${type}" (not in allow list)`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.');
     case ERR_EXTENDING_FRAMABLES_BLOCKED:
       const name = a,
         options = b;
@@ -559,40 +559,40 @@ function e(msg, a, b, c) {
       const win = a,
         exception = b;
       return err(generateErrorMessage(ERR_MARK_NEW_WINDOW_FAILED), 'failed to mark new window:', win, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', 'in order to maintain a bulletproof defense mechanism, failing to mark a new window typically causes an infinite loop', '.', 'error caught:', exception);
-    case ERR_PROVIDED_CB_IS_NOT_A_FUNCTION:
+    case ERR_CB_MUST_BE_FUNCTION:
       const cb = a;
-      return err(generateErrorMessage(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION), 'first argument must be of type "function", instead got:', cb, '.', 'therefore, snow bailed and is not applied to the page until this is fixed.');
-    case ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:
+      return err(generateErrorMessage(ERR_CB_MUST_BE_FUNCTION), 'first argument must be of type "function", instead got:', cb, '.', 'therefore, snow bailed and is not applied to the page until this is fixed.');
+    case ERR_OPEN_JS_SCHEME_BLOCKED:
       const url = a,
         win2 = b;
-      return err(generateErrorMessage(ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME), 'blocking open attempt to "javascript:" url:', url, 'by window: ', win2, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/44#issuecomment-1369687802', '.');
-    case ERR_OPEN_API_LIMITED:
+      return err(generateErrorMessage(ERR_OPEN_JS_SCHEME_BLOCKED), 'blocking open attempt to "javascript:" url:', url, 'by window: ', win2, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/44#issuecomment-1369687802', '.');
+    case ERR_OPENED_PROP_ACCESS_BLOCKED:
       const property = a,
         win3 = b;
-      return err(generateErrorMessage(ERR_OPEN_API_LIMITED), 'blocking access to property:', `"${property}"`, 'of opened window: ', win3, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
-    case ERR_DECLARATIVE_SHADOWS:
+      return err(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED), 'blocking access to property:', `"${property}"`, 'of opened window: ', win3, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
+    case ERR_DECLARATIVE_SHADOWS_BLOCKED:
       const html = a;
-      return err(generateErrorMessage(ERR_DECLARATIVE_SHADOWS), 'blocking html string that includes a representation of a declarative shadow:', `"${html}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
-    case ERR_HTML_FRAMES_WITH_SRCDOC:
+      return err(generateErrorMessage(ERR_DECLARATIVE_SHADOWS_BLOCKED), 'blocking html string that includes a representation of a declarative shadow:', `"${html}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
+    case ERR_HTML_FRAMES_SRCDOC_BLOCKED:
       const html2 = a;
-      return err(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC), 'blocking html string that includes a representation of a framable element with the "srcdoc" attribute:', `"${html2}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
-    case ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN:
+      return err(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED), 'blocking html string that includes a representation of a framable element with the "srcdoc" attribute:', `"${html2}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
+    case ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED:
       const document = a;
-      return err(generateErrorMessage(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN), 'blocking document.write\\ln action on a document that is not the top most document:', document, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
+      return err(generateErrorMessage(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED), 'blocking document.write\\ln action on a document that is not the top most document:', document, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
   }
 }
 module.exports = {
   error: e,
   generateErrorMessage,
   ERR_MARK_NEW_WINDOW_FAILED,
-  ERR_OPEN_API_LIMITED,
-  ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
-  ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
-  ERR_DECLARATIVE_SHADOWS,
+  ERR_OPENED_PROP_ACCESS_BLOCKED,
+  ERR_OPEN_JS_SCHEME_BLOCKED,
+  ERR_CB_MUST_BE_FUNCTION,
+  ERR_DECLARATIVE_SHADOWS_BLOCKED,
   ERR_EXTENDING_FRAMABLES_BLOCKED,
-  ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN,
-  ERR_HTML_FRAMES_WITH_SRCDOC,
-  ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN
+  ERR_BLOB_TYPE_BLOCKED,
+  ERR_HTML_FRAMES_SRCDOC_BLOCKED,
+  ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED
 };
 
 /***/ }),
@@ -917,7 +917,7 @@ const {
 } = __webpack_require__(14);
 const {
   error,
-  ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
+  ERR_OPEN_JS_SCHEME_BLOCKED
 } = __webpack_require__(312);
 const {
   proxy,
@@ -938,7 +938,7 @@ function hook(win, native, cb, isWindowProxy) {
     const args = slice(arguments);
     const url = args[0];
     if (stringStartsWith(stringToLowerCase(url + ''), 'javascript')) {
-      throw error(ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url + '', win);
+      throw error(ERR_OPEN_JS_SCHEME_BLOCKED, url + '', win);
     }
     const opened = Function.prototype.apply.call(native, this, args);
     if (!opened) {
@@ -969,7 +969,7 @@ const {
 } = __webpack_require__(14);
 const {
   error,
-  ERR_OPEN_API_LIMITED
+  ERR_OPENED_PROP_ACCESS_BLOCKED
 } = __webpack_require__(312);
 const openeds = new Map();
 function getProxyByOpened(opened) {
@@ -1011,7 +1011,7 @@ function proxy(opened) {
           return ret;
         }
         if (Reflect.has(opened, property)) {
-          throw error(ERR_OPEN_API_LIMITED, property, opened);
+          throw error(ERR_OPENED_PROP_ACCESS_BLOCKED, property, opened);
         }
         return ret;
       },
@@ -1156,7 +1156,7 @@ const {
 } = __webpack_require__(14);
 const {
   error,
-  ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN
+  ERR_BLOB_TYPE_BLOCKED
 } = __webpack_require__(312);
 const KIND = 'KIND',
   TYPE = 'TYPE';
@@ -1229,7 +1229,7 @@ function assertTypeIsForbidden(object) {
   if (kind === BLOB || kind === FILE) {
     const type = object[TYPE];
     if (!allowedTypes.includes(type)) {
-      throw error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
+      throw error(ERR_BLOB_TYPE_BLOCKED, object, kind, type);
     }
   }
 }

@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_HTML_FRAMES_WITH_SRCDOC} = require('../src/log');
+const {generateErrorMessage, ERR_HTML_FRAMES_SRCDOC_BLOCKED} = require('../src/log');
 
 describe('test DOM insertions', async function () {
     beforeEach(setup);

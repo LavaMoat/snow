@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_HTML_FRAMES_WITH_SRCDOC, ERR_DECLARATIVE_SHADOWS} = require('../src/log');
+const {generateErrorMessage, ERR_HTML_FRAMES_SRCDOC_BLOCKED, ERR_DECLARATIVE_SHADOWS_BLOCKED} = require('../src/log');
 
 describe('test shadow DOM', async function () {
     beforeEach(setup);
@@ -53,7 +53,7 @@ describe('test shadow DOM', async function () {
                 setTimeout(bypass, 100, [window[0] && window[0][0], window[0], window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is DOM inserted as part of a shadow DOM', async function () {
@@ -137,7 +137,7 @@ describe('test shadow DOM', async function () {
                 bypass([{atob: top.myatob || atob, alert: top.myalert || alert}]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is attached via declarative shadow DOM through srcdoc and javascript URI', async function () {
@@ -157,7 +157,7 @@ describe('test shadow DOM', async function () {
                 document.body.appendChild(f);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_DECLARATIVE_SHADOWS));
+        expect(result).toBe(generateErrorMessage(ERR_DECLARATIVE_SHADOWS_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is attached via declarative shadow DOM through srcdoc', async function () {
@@ -177,7 +177,7 @@ describe('test shadow DOM', async function () {
                 document.body.appendChild(f);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_DECLARATIVE_SHADOWS));
+        expect(result).toBe(generateErrorMessage(ERR_DECLARATIVE_SHADOWS_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is attached via declarative shadow DOM through document.write', async function () {
@@ -195,6 +195,6 @@ describe('test shadow DOM', async function () {
                 `);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_DECLARATIVE_SHADOWS));
+        expect(result).toBe(generateErrorMessage(ERR_DECLARATIVE_SHADOWS_BLOCKED));
     });
 });

@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN} = require('../src/log');
+const {generateErrorMessage, ERR_BLOB_TYPE_BLOCKED} = require('../src/log');
 
 describe('test url', async function () {
     beforeEach(setup);
@@ -17,7 +17,7 @@ describe('test url', async function () {
                 f.src = URL.createObjectURL(new Blob(["<script>top.bypass([window])</script>"], {type: "text/html"}));
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_TYPE_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is loading a blob url (binary)', async function () {
@@ -35,7 +35,7 @@ describe('test url', async function () {
                 ifr.src = url;
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_TYPE_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is loading a blob url (binary and empty type)', async function () {
@@ -133,7 +133,7 @@ describe('test url', async function () {
                 }
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_TYPE_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is loading a blob url of an svg', async function () {
@@ -148,7 +148,7 @@ describe('test url', async function () {
                 f.src = URL.createObjectURL(new Blob([svg], {type: "image/svg+xml"}));
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_TYPE_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is loading a blob url of an xml document', async function () {
@@ -175,7 +175,7 @@ describe('test url', async function () {
                 f.src = URL.createObjectURL(new Blob([xml], {type: "text/xml"}));
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_TYPE_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is loading a blob url constructed of a native blob by the browser', async function () {
@@ -198,6 +198,6 @@ describe('test url', async function () {
                 xhr.send();
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN));
+        expect(result).toBe(generateErrorMessage(ERR_BLOB_TYPE_BLOCKED));
     });
 });

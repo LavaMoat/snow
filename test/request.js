@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_OPEN_API_LIMITED} = require('../src/log');
+const {generateErrorMessage, ERR_OPENED_PROP_ACCESS_BLOCKED} = require('../src/log');
 
 describe('window.documentPictureInPicture.requestWindow API', () => {
     beforeEach(setup);
@@ -23,7 +23,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and accessed via "window" property', async function () {
@@ -46,7 +46,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and accessed via "onenter" event', async function () {
@@ -72,7 +72,7 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and reloaded to javascript scheme', async function () {
@@ -97,6 +97,6 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
         const result = await browser.execute(function() {
             return top.result
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 });

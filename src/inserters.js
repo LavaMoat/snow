@@ -1,4 +1,4 @@
-const {error, ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN} = require('./log');
+const {error, ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED} = require('./log');
 const {protectShadows} = require('./shadow');
 const resetOnloadAttributes = require('./attributes');
 const {getFramesArray, shadows} = require('./utils');
@@ -34,7 +34,7 @@ function getHook(native, isRange, isWrite) {
 
     return function() {
         if (isWrite && this !== top.document) {
-            throw error(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN, this);
+            throw error(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED, this);
         }
         const args = slice(arguments);
         const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;

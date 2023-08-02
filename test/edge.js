@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_HTML_FRAMES_WITH_SRCDOC, ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN} = require('../src/log');
+const {generateErrorMessage, ERR_HTML_FRAMES_SRCDOC_BLOCKED, ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED} = require('../src/log');
 
 describe('special cases', () => {
     beforeEach(setup);
@@ -250,7 +250,7 @@ describe('special cases', () => {
                 bypass([ifr.contentWindow?.xxx?.contentWindow]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN));
+        expect(result).toBe(generateErrorMessage(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that had its document written-ln', async function () {
@@ -264,7 +264,7 @@ describe('special cases', () => {
                 bypass([ifr.contentWindow?.xxx?.contentWindow]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_DOCUMENT_WRITE_NOT_IN_TOP_FORBIDDEN));
+        expect(result).toBe(generateErrorMessage(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED));
     });
 
     it('should fail to use atob of an iframe when all element in DOM changed their own toString behaviour', async function () {
@@ -301,7 +301,7 @@ describe('special cases', () => {
                 setTimeout(top.bypass, 100, [window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with innerHTML', async function () {
@@ -313,7 +313,7 @@ describe('special cases', () => {
                 setTimeout(top.bypass, 100, [window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with document.write', async function () {
@@ -325,7 +325,7 @@ describe('special cases', () => {
                 setTimeout(top.bypass, 100, [window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that pretends to be a trusted html', async function () {
@@ -367,7 +367,7 @@ describe('special cases', () => {
   <iframe src=\'javascript:alert(1)\'</iframe>"></iframe>`
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe was injected with srcdoc with a defending meta csp tag with a nonce', async function () {
@@ -389,7 +389,7 @@ describe('special cases', () => {
     </iframe>`
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that tricks the frames array with clobbering of id=n', async function () {
@@ -424,7 +424,7 @@ describe('special cases', () => {
                 bypass([window[0] && window[0][0], window[0], window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_WITH_SRCDOC));
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe born out of mXSS (innerHTML)', async function () {

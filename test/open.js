@@ -1,5 +1,5 @@
 const {setup} = require('./index');
-const {generateErrorMessage, ERR_OPEN_API_LIMITED, ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME} = require('../src/log');
+const {generateErrorMessage, ERR_OPENED_PROP_ACCESS_BLOCKED, ERR_OPEN_JS_SCHEME_BLOCKED} = require('../src/log');
 
 describe('window.open API', () => {
     beforeEach(setup);
@@ -13,7 +13,7 @@ describe('window.open API', () => {
                 bypass([win]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin', async function () {
@@ -33,7 +33,7 @@ describe('window.open API', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin and leaked it via postMessage (onmessage)', async function () {
@@ -55,7 +55,7 @@ describe('window.open API', () => {
                 open('https://lavamoat.github.io/snow/test/index.html?SET_TIMEOUT_HELPER');
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via open API to cross origin and then changed to same origin and leaked it via postMessage (message)', async function () {
@@ -79,7 +79,7 @@ describe('window.open API', () => {
                 open(x);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via open API to javascript: scheme, leaked to opener and then changed to cross origin and back to same origin', async function () {
@@ -100,7 +100,7 @@ describe('window.open API', () => {
                 }, 500);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME));
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_JS_SCHEME_BLOCKED));
     });
 });
 
@@ -131,7 +131,7 @@ describe('document.open API', () => {
                 bypass([win]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin', async function () {
@@ -151,7 +151,7 @@ describe('document.open API', () => {
                 }, 1000);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin and leaked it via postMessage (onmessage)', async function () {
@@ -173,7 +173,7 @@ describe('document.open API', () => {
                 document.open('https://lavamoat.github.io/snow/test/index.html?SET_TIMEOUT_HELPER', '', '');
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via document.open API to cross origin and then changed to same origin and leaked it via postMessage (message)', async function () {
@@ -197,7 +197,7 @@ describe('document.open API', () => {
                 document.open(x, '', '');
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_LIMITED));
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via document.open API to javascript: scheme, leaked to opener and then changed to cross origin and back to same origin', async function () {
@@ -218,6 +218,6 @@ describe('document.open API', () => {
                 }, 500);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME));
+        expect(result).toBe(generateErrorMessage(ERR_OPEN_JS_SCHEME_BLOCKED));
     });
 });

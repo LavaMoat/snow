@@ -11,7 +11,7 @@ const {hookShadowDOM} = require('./shadow');
 const {Array, push, addEventListener, getFrameElement} = require('./natives');
 const {makeWindowUtilSetter} = require('./utils');
 const {isMarked, mark} = require('./mark');
-const {error, ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
+const {error, ERR_CB_MUST_BE_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
 const setSnowWindowUtil = makeWindowUtilSetter('SNOW_WINDOW', function(win) { onWin(win) });
 const setSnowFrameUtil = makeWindowUtilSetter('SNOW_FRAME', function(frame) { hook(frame); });
@@ -69,7 +69,7 @@ const callbacks = new Array();
 
 function snow(cb, win) {
     if (typeof cb !== 'function') {
-        const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
+        const bail = error(ERR_CB_MUST_BE_FUNCTION, cb);
         if (bail) {
             return;
         }

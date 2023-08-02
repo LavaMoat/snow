@@ -1,5 +1,5 @@
 const {stringToLowerCase, stringStartsWith, slice, Function, Object} = require('./natives');
-const {error, ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME} = require('./log');
+const {error, ERR_OPEN_JS_SCHEME_BLOCKED} = require('./log');
 const {proxy, getProxyByOpened} = require('./proxy');
 
 function hookMessageEvent(win) {
@@ -19,7 +19,7 @@ function hook(win, native, cb, isWindowProxy) {
 
         const url = args[0];
         if (stringStartsWith(stringToLowerCase(url + ''), 'javascript')) {
-            throw error(ERR_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url + '', win);
+            throw error(ERR_OPEN_JS_SCHEME_BLOCKED, url + '', win);
         }
 
         const opened = Function.prototype.apply.call(native, this, args);

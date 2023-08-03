@@ -1,25 +1,28 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_HTML_FRAMES_SRCDOC_BLOCKED, ERR_DECLARATIVE_SHADOWS_BLOCKED} = require('../src/log');
 
 describe('test shadow DOM', async function () {
     beforeEach(setup);
 
     it('should fail to use atob of an iframe that is innerHTML attached as part of a shadow DOM', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'closed'});
                 s.innerHTML = '<iframe></iframe>';
                 testdiv.append(a);
-                bypass([s.firstChild.contentWindow]);
+                bypass([s?.firstChild?.contentWindow, window]);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V,V');
     });
 
     it('should fail to use atob of an iframe that is innerHTML attached as part of a shadow DOM inside another shadow DOM', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'closed'});
@@ -28,15 +31,16 @@ describe('test shadow DOM', async function () {
                 const s2 = d.attachShadow({mode: 'closed'});
                 s2.innerHTML = '<iframe></iframe>';
                 testdiv.append(a);
-                bypass([s2.firstChild.contentWindow]);
+                bypass([s2?.firstChild?.contentWindow, window]);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V,V');
     });
 
     it('should fail to use atob of an iframe attached as part of a shadow DOM inside another shadow DOM where both shadows belong to different realms', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'closed'});
@@ -44,16 +48,18 @@ describe('test shadow DOM', async function () {
                 const d = document.createElement('div');
                 s.appendChild(d);
                 const s2 = ifr.contentWindow.document.body.attachShadow.call(d, {mode: 'closed'});
-                s2.innerHTML = `<iframe srcdoc="<iframe onload='top.bypass([this.contentWindow])'></iframe>"></iframe>`;
+                s2.innerHTML = `<iframe srcdoc="<iframe onload='top.bypass([this.contentWindow, window, window])'></iframe>"></iframe>`;
                 testdiv.append(a);
+                setTimeout(bypass, 100, [window[0] && window[0][0], window[0], window]);
             }());
         });
-        expect(['V', 'CSP-script-src-elem']).toContain(result);
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is DOM inserted as part of a shadow DOM', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'closed'});
@@ -62,12 +68,13 @@ describe('test shadow DOM', async function () {
                 bypass([s.firstChild.contentWindow]);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe load event that is DOM inserted as part of a shadow DOM', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'closed'});
@@ -79,12 +86,13 @@ describe('test shadow DOM', async function () {
                 testdiv.append(a);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe onload that is DOM inserted as part of a shadow DOM', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'closed'});
@@ -96,12 +104,13 @@ describe('test shadow DOM', async function () {
                 testdiv.append(a);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that is innerHTML attached with onload attribute as part of a shadow DOM', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'closed'});
@@ -110,12 +119,16 @@ describe('test shadow DOM', async function () {
                 bypass([{atob: top.myatob || atob, alert: top.myalert || alert}]);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that is attached to an already attached shadow DOM', async function () {
+        if (global.CONFIG.SKIP_CSP_UNSAFE_INLINE_CHECKS) {
+            this.skip();
+        }
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const a = document.createElement('div');
                 const s = a.attachShadow({mode: 'closed'});
@@ -124,12 +137,13 @@ describe('test shadow DOM', async function () {
                 bypass([{atob: top.myatob || atob, alert: top.myalert || alert}]);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is attached via declarative shadow DOM through srcdoc and javascript URI', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const f = document.createElement('iframe');
                 f.srcdoc = `
@@ -143,12 +157,13 @@ describe('test shadow DOM', async function () {
                 document.body.appendChild(f);
             }());
         });
-        expect(['V', 'CSP-script-src-elem']).toContain(result);
+        expect(result).toBe(generateErrorMessage(ERR_DECLARATIVE_SHADOWS_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is attached via declarative shadow DOM through srcdoc', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const f = document.createElement('iframe');
                 f.srcdoc = `
@@ -162,16 +177,13 @@ describe('test shadow DOM', async function () {
                 document.body.appendChild(f);
             }());
         });
-        expect(['V', 'CSP-script-src-elem']).toContain(result);
+        expect(result).toBe(generateErrorMessage(ERR_DECLARATIVE_SHADOWS_BLOCKED));
     });
 
     it('should fail to use atob of an iframe that is attached via declarative shadow DOM through document.write', async function () {
-        if (global.BROWSER === 'FIREFOX') {
-            this.skip(); // requires a fix #58
-        }
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
-            if (top.TEST_UTILS.bailOnCorrectUnsafeCSP(done)) return;
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 document.write(`
                     <my-element>
@@ -183,6 +195,6 @@ describe('test shadow DOM', async function () {
                 `);
             }());
         });
-        expect(['V', 'CSP-script-src-elem']).toContain(result);
+        expect(result).toBe(generateErrorMessage(ERR_DECLARATIVE_SHADOWS_BLOCKED));
     });
 });

@@ -62,7 +62,6 @@ function setup(win) {
 
     const {
         document,
-        URL,
         Proxy,
         Function,
         String,

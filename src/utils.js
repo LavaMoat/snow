@@ -91,6 +91,11 @@ function canNodeRunQuerySelector(node) {
     );
 }
 
+function getDeclarativeShadows(element) {
+    const querySelectorAll = getPrototype(element).prototype.querySelectorAll;
+    return querySelectorAll.call(element, 'template[shadowroot]')
+}
+
 function getFramesArray(element, includingParent) {
     const frames = new Array();
 
@@ -126,4 +131,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {makeWindowUtilSetter, toArray, isTagFramable, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows, trustedHTMLs};
+module.exports = {getDeclarativeShadows, makeWindowUtilSetter, toArray, isTagFramable, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows, trustedHTMLs};

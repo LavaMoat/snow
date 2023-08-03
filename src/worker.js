@@ -1,8 +1,14 @@
-const {BLOCKED_BLOB_URL, BLOCKED_BLOB_MSG, runInNewRealm} = require('./common');
+const {runInNewRealm} = require('./common');
 const {Map, toString, stringStartsWith, Blob} = require('./natives');
 
 const blobs = new Map();
 const {createObjectURL, revokeObjectURL} = URL;
+
+const BLOCKED_BLOB_MSG = `
+BLOCKED BY SNOW:
+Creating URL objects is not allowed under Snow protection within Web Workers.
+If this prevents your application from running correctly, please visit/report at https://github.com/LavaMoat/snow/pull/89#issuecomment-1589359673.
+Learn more at https://github.com/LavaMoat/snow/pull/89`;
 
 function syncGet(url) {
     return runInNewRealm(function(win) {
@@ -22,14 +28,8 @@ function syncGet(url) {
 function swap(url) {
     if (!blobs.has(url)) {
         const content = syncGet(url);
-        const js = `(function() {
-                Object.defineProperty(URL, 'createObjectURL', {value:() => {
-                    console.log(\`${BLOCKED_BLOB_MSG}\`);
-                    return '${BLOCKED_BLOB_URL}';
-                }})
-            }());
-            
-            ` + content;
+        const prefix = `(function() { Object.defineProperty(URL, 'createObjectURL', { value: () => { throw new Error(\`${BLOCKED_BLOB_MSG}\`) }}) }())`;
+        const js = prefix + '\n\n' + content;
         blobs.set(url, createObjectURL(new Blob([js], {type: 'text/javascript'})));
     }
     return blobs.get(url);

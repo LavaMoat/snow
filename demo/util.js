@@ -11,7 +11,7 @@ function run(js) {
 }
 
 (function(){
-    location.search.includes('disable') || SNOW((win) => {
+    location.search.includes('disable_snow') || SNOW((win) => {
         win.alert = (msg) => {
             console.log('Snow: ', 'alert API is disabled, message is printed to console instead: ', msg);
         }

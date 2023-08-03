@@ -1,65 +1,26 @@
 const fs = require('fs');
 const path = require('path');
 
-const CSP = 'script-src "self"; object-src "none";';
-const URL = 'https://weizman.github.io/CSPer/';
+const CSP = !!parseInt(process.env.CSP);
+
+global.CONFIG = {
+    // Scenarios Snow can't protect against, and instead relies on 'unsafe-inline' to be forbidden
+    SKIP_CSP_UNSAFE_INLINE_CHECKS: CSP,
+    // Scenarios Snow can't protect against, and instead relies on 'object-src' to same-origin to be forbidden
+    SKIP_CSP_OBJECT_SRC_CHECKS: CSP,
+}
 
 const snow = fs.readFileSync(path.join(__dirname, '../snow.prod.js')).toString();
 
-function getURL() {
-    let url = URL;
-    if (global.BROWSER === 'CHROME') {
-        url += '?csp=' + CSP;
-    }
-    return url;
-}
-
-function setTestUtils(CSP) {
-    function listener(e) {
-        const fakeWin = {atob: () => 'CSP-' + (e.effectiveDirective || e.violatedDirective)};
-        setTimeout(top.bypass, 500, [fakeWin]);
-    }
-
-    const top = window.top;
-    const utils = top.TEST_UTILS = {CSP};
-
-    utils.bypass = (wins, done) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
-
-    utils.bailOnCorrectUnsafeCSP = function(done) {
-        if (utils.CSP && !utils.CSP.includes('unsafe')) {
-            done('CSP-script-src-elem');
-            return true;
-        }
-        return false;
-    };
-
-    utils.alertOnCSPViolation = function(win) {
-        win.addEventListener('securitypolicyviolation', listener);
-        win.document.addEventListener('securitypolicyviolation', listener);
-    };
-
-    utils.alertOnCSPViolation(window);
-}
-
-async function setupChrome() {
-    const puppeteerBrowser = await browser.getPuppeteer();
-    await browser.call(async () => {
-        const pages = await puppeteerBrowser.pages();
-        const page = pages[0];
-        await page.evaluateOnNewDocument(setTestUtils, CSP);
-    })
-}
-
-async function setup(url = getURL(), noSnow) {
+async function setup(url = 'https://example.com/', noSnow) {
     await browser.url(url);
-
-    await browser.execute(setTestUtils, CSP);
 
     if (noSnow) return;
 
-    if (global.BROWSER === 'CHROME') {
-        await setupChrome();
-    }
+    // intercept console.error to propagate errors to be caught by tests infra
+    await browser.execute(function() {
+        console.error = function (e) { top.done(e) };
+    });
 
     // inject SNOW
     await browser.execute(new Function(snow));

@@ -1,9 +1,34 @@
-name: CI
-on: [push, pull_request]
+name: Tests
+on: [pull_request]
 
 jobs:
-  test:
-    name: Tests
+  test-with-csp:
+    env:
+      CSP: '1'
+    name: +CSP
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install Dependencies
+        run: yarn
+      - name: Test Chrome
+        run: yarn build-test-chrome
+      - name: Test FireFox
+        run: yarn build-test-firefox
+      - name: Test Safari
+        run: yarn build-test-safari
+  test-without-csp:
+    env:
+      CSP: '0'
+    name: -CSP
     runs-on: macos-latest
     strategy:
       matrix:

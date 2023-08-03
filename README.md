@@ -108,17 +108,17 @@ Not like standard third party libraries, `snow` has special requirements (securi
    its purpose completely (that's why `snow` can never overpower extensions).
    In order to achieve that, when loading via a script tag it must load script synchronously (do not use `async=true`!).
 
-3. **It has to be served as-is** - If it goes through any bundlers that might change it,
+2. **It has to be served as-is** - If it goes through any bundlers that might change it,
    the modified version might contain flaws that attackers might use to cancel its effect (for further
    explanation see [natives](https://github.com/lavamoat/snow/wiki/Introducing-Snow#natives) section).
 
-4. **Snow needs to be set and called in every HTML page served from your web app** - Even though this is the attack vector
+3. **Snow needs to be set and called in every HTML page served from your web app** - Even though this is the attack vector
    Snow tries to protect the app against, there are types of attacks Snow won't be able to defend against (which is why
    we want Snow to become a native browser feature so bad!). This mainly refers to the [#73 discovery](https://github.com/LavaMoat/snow/issues/73).
    The only way to defend the app against such an attack it to make sure all HTML files served by the app load Snow themselves.
    Does this make Snow useless? No - there are planty other types of attacks Snow defends your app against.
 
-5. **Most importantly, it's highly vulnerable without minimal help from CSP** - As of version 2.0.1 the project will
+4. **Most importantly, it's highly vulnerable without minimal help from CSP** - As of version 2.0.1 the project will
    seize to attempt to defend against vulnerabilities that aren't possible to exploit when 
    (a) `unsafe-inline` isn't allowed and (b) `object-src` to `self` isn't allowed.
    This is because (a) defending against string-JS attacks is basically an endless task and probably impossible, and

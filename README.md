@@ -45,13 +45,11 @@ to **non extension javascript with the same privileges as the web app**.
 
 Starting Version [2.0.1](https://github.com/LavaMoat/snow/pull/134) Snow officially doesn't support vulnerabilities that
 can be protected against by disallowing `unsafe-inline` completely and by correctly using the `object-src` directive to not allow `self`.
-
-To learn more why is that, see [section 3](#install).
+* To learn more why is that, see [section 3](#install).
 
 In addition, Snow ["stops playing nice"](https://github.com/LavaMoat/snow/pull/133) - operations that are considered insecure will be intercepted and cause Snow to throw an exception.
 This is part of the realization we reached as part of the work on Snow, where "nice security" leaves Snow vulnerable, and true security can only be shipped with a more "aggresive" approach.
-
-To learn more why is that, see [#133](https://github.com/LavaMoat/snow/pull/133).
+* To learn more why is that, see [#133](https://github.com/LavaMoat/snow/pull/133).
 
 ## [Demo](https://lavamoat.github.io/snow/demo/#self-xss-challenge-msg) - The Snow Challenge! 🏆
 
@@ -120,7 +118,7 @@ in order for it to play its role securely.
    This is because (a) defending against string-JS attacks is basically an endless task and probably impossible, and
    (b) `object`/`embed` elements behaviour is also too unpredictable while these elements shouldn't be even used in the
    first place. Snow will do its best regardless of what CSP is applied - **use at your own risk!** 
-   * please learn more about this ☝️ at [#118](https://github.com/LavaMoat/snow/pull/118/) & [#134](https://github.com/LavaMoat/snow/pull/134/)
+   * please learn more about this ☝️ at [#118](https://github.com/LavaMoat/snow/pull/118/) & [#133](https://github.com/LavaMoat/snow/pull/133/)
 
 
 `SNOW` API can also be required as part of a bundle instead of a script tag:

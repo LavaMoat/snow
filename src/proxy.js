@@ -1,5 +1,5 @@
 const {Object, Proxy, Reflect, Map} = require('./natives');
-const {warn, WARN_OPEN_API_LIMITED} = require('./log');
+const {error, ERR_OPENED_PROP_ACCESS_BLOCKED} = require('./log');
 
 const openeds = new Map();
 
@@ -46,10 +46,7 @@ function proxy(opened) {
                     return ret;
                 }
                 if (Reflect.has(opened, property)) {
-                    const blocked = warn(WARN_OPEN_API_LIMITED, property, opened);
-                    if (!blocked) {
-                        ret = Reflect.get(opened, property);
-                    }
+                    throw error(ERR_OPENED_PROP_ACCESS_BLOCKED, property, opened);
                 }
                 return ret;
             },

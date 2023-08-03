@@ -1,11 +1,13 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_HTML_FRAMES_SRCDOC_BLOCKED} = require('../src/log');
 
 describe('test different iframe src', async function () {
     beforeEach(setup);
 
     it('should fail to use atob of an iframe with src about:blank', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 ifr.src = 'about:blank';
@@ -13,12 +15,13 @@ describe('test different iframe src', async function () {
                 bypass([ifr.contentWindow]);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe with src javascript:', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 ifr.src = 'javascript:;';
@@ -26,12 +29,13 @@ describe('test different iframe src', async function () {
                 bypass([ifr.contentWindow]);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe with src javascript: via the javascript: (src then inject)', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const rnd = Math.random().toString(36).substring(7);
                 window[rnd] = bypass;
@@ -40,12 +44,13 @@ describe('test different iframe src', async function () {
                 testdiv.appendChild(ifr);
             }());
         });
-        expect(['V', 'CSP-script-src-elem']).toContain(result);
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe with src javascript: via the javascript: (inject then src)', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const rnd = Math.random().toString(36).substring(7);
                 window[rnd] = bypass;
@@ -54,6 +59,6 @@ describe('test different iframe src', async function () {
                 ifr.src = `javascript:top["${rnd}"]([this])`;
             }());
         });
-        expect(['V', 'CSP-script-src-elem']).toContain(result);
+        expect(result).toBe('V');
     });
 });

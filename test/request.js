@@ -1,4 +1,5 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_OPENED_PROP_ACCESS_BLOCKED} = require('../src/log');
 
 describe('window.documentPictureInPicture.requestWindow API', () => {
     beforeEach(setup);
@@ -8,25 +9,21 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
             this.skip();
         }
         await browser.execute(function() {
-            const done = (result) => sessionStorage.result_1 = sessionStorage.result_1 || result;
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            const done = (result) => top.result = result;
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                window.addEventListener('keydown', async () => {
+                document.addEventListener('keydown', async () => {
                     const win = await documentPictureInPicture.requestWindow();
                     bypass([win]);
                 });
             }());
         });
-        await browser.keys(["", "a"]);
-        await browser.keys(["", "a"]);
-        await browser.keys(["", "a"]);
+        await browser.keys(['Enter']);
         const result = await browser.execute(function() {
-            if (!window.documentPictureInPicture) {
-                return 'V';
-            }
-            return sessionStorage.result_1
+            return top.result
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and accessed via "window" property', async function () {
@@ -34,26 +31,22 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
             this.skip();
         }
         await browser.execute(function() {
-            const done = (result) => sessionStorage.result_2 = sessionStorage.result_2 || result;
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            const done = (result) => top.result = result;
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                window.addEventListener('keydown', async () => {
+                document.addEventListener('keydown', async () => {
                     await documentPictureInPicture.requestWindow();
                     const win = documentPictureInPicture.window;
                     bypass([win]);
                 });
             }());
         });
-        await browser.keys(["", "a"]);
-        await browser.keys(["", "a"]);
-        await browser.keys(["", "a"]);
+        await browser.keys(['Enter']);
         const result = await browser.execute(function() {
-            if (!window.documentPictureInPicture) {
-                return 'V';
-            }
-            return sessionStorage.result_2
+            return top.result
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and accessed via "onenter" event', async function () {
@@ -61,10 +54,11 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
             this.skip();
         }
         await browser.execute(function() {
-            const done = (result) => sessionStorage.result_3 = sessionStorage.result_3 || result;
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            const done = (result) => top.result = result;
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                window.addEventListener('keydown', async () => {
+                document.addEventListener('keydown', async () => {
                     documentPictureInPicture.onenter = (e) => {
                         bypass(['', 'currentTarget', 'srcElement', 'target']
                             .sort(() => Math.random() - 0.5)
@@ -74,16 +68,11 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
                 });
             }());
         });
-        await browser.keys(["", "a"]);
-        await browser.keys(["", "a"]);
-        await browser.keys(["", "a"]);
+        await browser.keys(['Enter']);
         const result = await browser.execute(function() {
-            if (!window.documentPictureInPicture) {
-                return 'V';
-            }
-            return sessionStorage.result_3
+            return top.result
         });
-        expect(['V,V,V,V', 'V']).toContain(result);
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 
     it('should fail to use atob of a window that was created via requestWindow API and reloaded to javascript scheme', async function () {
@@ -91,10 +80,11 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
             this.skip();
         }
         await browser.execute(function() {
-            const done = (result) => sessionStorage.result_4 = sessionStorage.result_4 || result;
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            const done = (result) => top.result = result;
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
-                window.addEventListener('keydown', async () => {
+                document.addEventListener('keydown', async () => {
                     const win = await documentPictureInPicture.requestWindow();
                     if (!win?.location?.href) {
                         bypass([win]);
@@ -103,15 +93,10 @@ describe('window.documentPictureInPicture.requestWindow API', () => {
                 });
             }());
         });
-        await browser.keys(["", "a"]);
-        await browser.keys(["", "a"]);
-        await browser.keys(["", "a"]);
+        await browser.keys(['Enter']);
         const result = await browser.execute(function() {
-            if (!window.documentPictureInPicture) {
-                return 'V';
-            }
-            return sessionStorage.result_4
+            return top.result
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 });

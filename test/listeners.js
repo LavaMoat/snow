@@ -1,11 +1,13 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_HTML_FRAMES_SRCDOC_BLOCKED} = require('../src/log');
 
 describe('test listeners', async function () {
     beforeEach(setup);
 
     it('should fail to use atob of an iframe added load event listener', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 ifr.addEventListener('load', () => {
@@ -14,12 +16,13 @@ describe('test listeners', async function () {
                 testdiv.appendChild(ifr);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V');
     });
 
     it('should attach same load event listener only once', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 let count = 0;
@@ -39,7 +42,8 @@ describe('test listeners', async function () {
 
     it('should successfully remove a load event listener', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 const cb = () => {
@@ -60,7 +64,8 @@ describe('test listeners', async function () {
 
     it('should successfully add a load event listener more than once when options are different', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 const ifr = document.createElement('iframe');
                 let count = 0;

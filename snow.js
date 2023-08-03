@@ -97,17 +97,9 @@ function runInNewRealm(cb) {
   removeChild(ifr);
   return ret;
 }
-const BLOCKED_BLOB_MSG = `BLOCKED BY SNOW:
-Creating URL objects is not allowed under Snow protection within Web Workers.
-If this prevents your application from running correctly, please visit/report at https://github.com/LavaMoat/snow/pull/89#issuecomment-1589359673.
-Learn more at https://github.com/LavaMoat/snow/pull/89`;
 module.exports = {
   getLength,
-  runInNewRealm,
-  BLOCKED_BLOB_URL: URL.createObjectURL(new Blob([BLOCKED_BLOB_MSG], {
-    type: 'text/plain'
-  })),
-  BLOCKED_BLOB_MSG
+  runInNewRealm
 };
 
 /***/ }),
@@ -132,10 +124,7 @@ function getHook(win, native) {
     if (options) {
       const extend = options.extends;
       if (isTagFramable(extend + '')) {
-        const blocked = error(ERR_EXTENDING_FRAMABLES_BLOCKED, name, options);
-        if (blocked) {
-          opts = undefined;
-        }
+        throw error(ERR_EXTENDING_FRAMABLES_BLOCKED, name, options);
       }
     }
     return Function.prototype.call.call(native, this, name, constructor, opts);
@@ -241,138 +230,38 @@ module.exports = hook;
 
 const {
   getFramesArray,
-  makeWindowUtilSetter
+  getDeclarativeShadows
 } = __webpack_require__(648);
 const {
   document,
-  getPreviousElementSibling,
-  Array,
-  stringToLowerCase,
-  split,
-  getAttribute,
-  setAttribute,
   getChildElementCount,
-  getInnerHTML,
-  setInnerHTML,
-  remove,
-  Element
+  setInnerHTML
 } = __webpack_require__(14);
 const {
-  warn,
-  WARN_DECLARATIVE_SHADOWS,
-  WARN_SRCDOC_WITH_CSP_BLOCKED
+  error,
+  ERR_DECLARATIVE_SHADOWS_BLOCKED,
+  ERR_HTML_FRAMES_SRCDOC_BLOCKED
 } = __webpack_require__(312);
-const querySelectorAll = Element.prototype.querySelectorAll;
-makeWindowUtilSetter('SNOW_GET_PREVIOUS_ELEMENT_SIBLING', getPreviousElementSibling)(top);
-const getDocumentCurrentScriptHelper = `
-Object.defineProperty(window, 'SNOW_DOCUMENT_CURRENT_SCRIPT', {value: Object.getOwnPropertyDescriptor(Document.prototype, 'currentScript').get.bind(document)});
-document.currentScript.remove();
-`;
-function makeStringHook(asFrame, asHtml, arg) {
-  let hook = 'top.' + (asFrame ? 'SNOW_FRAME' : 'SNOW_WINDOW') + '(' + arg + ');';
-  if (asHtml) {
-    hook = '<script>' + hook + 'document.currentScript.remove();' + '</script>';
-  }
-  return hook;
-}
-function dropDeclarativeShadows(shadow, html) {
-  warn(WARN_DECLARATIVE_SHADOWS, html);
-  remove(shadow);
-  return true;
-}
-function hookOnLoadAttributes(frame) {
-  let onload = getAttribute(frame, 'onload');
-  if (onload) {
-    onload = makeStringHook(true, false, 'this') + onload;
-    setAttribute(frame, 'onload', onload);
-    return true;
-  }
-  return false;
-}
-function hookJavaScriptURI(frame) {
-  let src = getAttribute(frame, 'src') || '';
-  const [scheme, js] = split(src, ':');
-  if (stringToLowerCase(scheme) === 'javascript') {
-    src = 'javascript:' + makeStringHook(false, false, 'this') + js;
-    setAttribute(frame, 'src', src);
-    return true;
-  }
-  return false;
-}
-function hookSrcDoc(frame) {
-  let srcdoc = getAttribute(frame, 'srcdoc');
-  if (srcdoc) {
-    srcdoc = makeStringHook(false, true, 'this') + srcdoc;
-    const html = new Array(srcdoc);
-    handleHTML(html, true);
-    setAttribute(frame, 'srcdoc', html[0]);
-    return true;
-  }
-  return false;
-}
-function hookInlineWindow(parent) {
-  const script = document.createElement('script');
-  script.textContent = getDocumentCurrentScriptHelper + makeStringHook(false, false, 'this');
-  parent.insertBefore(script, parent.firstChild);
-  return true;
-}
-function hookInlineFrame(frame) {
-  const script = document.createElement('script');
-  script.textContent = makeStringHook(true, false, 'top.SNOW_GET_PREVIOUS_ELEMENT_SIBLING(SNOW_DOCUMENT_CURRENT_SCRIPT())');
-  frame.after(script);
-  return true;
-}
-function findMetaCSP(template) {
-  const metas = querySelectorAll.call(template, 'meta');
-  for (let i = 0; i < metas.length; i++) {
-    const meta = metas[i];
-    for (let j = 0; j < meta.attributes.length; j++) {
-      const attribute = meta.attributes[j];
-      const value = attribute.value.toLowerCase();
-      if (value === 'content-security-policy') {
-        return attribute;
-      }
-    }
-  }
-}
-function handleHTML(args, isSrcDoc) {
+function assertHTML(args) {
   for (let i = 0; i < args.length; i++) {
     const template = document.createElement('html');
     setInnerHTML(template, args[i]);
-    if (!getChildElementCount(template)) {
-      continue;
-    }
-    let modified = false;
-    if (isSrcDoc) {
-      const csp = findMetaCSP(template);
-      if (csp) {
-        if (warn(WARN_SRCDOC_WITH_CSP_BLOCKED, args[i], csp)) {
-          args[i] = '';
-          continue;
+    if (getChildElementCount(template)) {
+      if (getDeclarativeShadows(template).length > 0) {
+        throw error(ERR_DECLARATIVE_SHADOWS_BLOCKED, args[i]);
+      }
+      const frames = getFramesArray(template, false);
+      for (let j = 0; j < frames.length; j++) {
+        const frame = frames[j];
+        if (template.getAttribute.call(frame, 'srcdoc')) {
+          throw error(ERR_HTML_FRAMES_SRCDOC_BLOCKED, args[i]);
         }
       }
-      modified = hookInlineWindow(template);
-    }
-    const declarativeShadows = querySelectorAll.call(template, 'template[shadowroot]');
-    for (let j = 0; j < declarativeShadows.length; j++) {
-      const shadow = declarativeShadows[j];
-      modified = dropDeclarativeShadows(shadow, args[i]) || modified;
-    }
-    const frames = getFramesArray(template, false);
-    for (let j = 0; j < frames.length; j++) {
-      const frame = frames[j];
-      modified = isSrcDoc && hookInlineFrame(frame) || modified;
-      modified = hookOnLoadAttributes(frame) || modified;
-      modified = hookJavaScriptURI(frame) || modified;
-      modified = hookSrcDoc(frame) || modified;
-    }
-    if (modified) {
-      args[i] = getInnerHTML(template);
     }
   }
 }
 module.exports = {
-  handleHTML
+  assertHTML
 };
 
 /***/ }),
@@ -407,7 +296,7 @@ const {
 } = __webpack_require__(111);
 const {
   error,
-  ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
+  ERR_CB_MUST_BE_FUNCTION,
   ERR_MARK_NEW_WINDOW_FAILED
 } = __webpack_require__(312);
 const setSnowWindowUtil = makeWindowUtilSetter('SNOW_WINDOW', function (win) {
@@ -466,7 +355,7 @@ function onWin(win, cb, skip) {
 const callbacks = new Array();
 function snow(cb, win) {
   if (typeof cb !== 'function') {
-    const bail = error(ERR_PROVIDED_CB_IS_NOT_A_FUNCTION, cb);
+    const bail = error(ERR_CB_MUST_BE_FUNCTION, cb);
     if (bail) {
       return;
     }
@@ -485,6 +374,10 @@ module.exports = snow;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
+  error,
+  ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED
+} = __webpack_require__(312);
+const {
   protectShadows
 } = __webpack_require__(373);
 const resetOnloadAttributes = __webpack_require__(586);
@@ -500,7 +393,7 @@ const {
   Function
 } = __webpack_require__(14);
 const {
-  handleHTML
+  assertHTML
 } = __webpack_require__(328);
 const hook = __webpack_require__(228);
 const map = {
@@ -513,11 +406,11 @@ const map = {
   HTMLIFrameElement: ['srcdoc']
 };
 const protos = Object.getOwnPropertyNames(map);
-function getHook(native, isRange, isSrcDoc) {
+function getHook(native, isRange, isWrite) {
   function before(args) {
     resetOnloadAttributes(args);
     resetOnloadAttributes(shadows);
-    handleHTML(args, isSrcDoc);
+    assertHTML(args);
   }
   function after(args, element) {
     const frames = getFramesArray(element, false);
@@ -526,6 +419,9 @@ function getHook(native, isRange, isSrcDoc) {
     protectShadows(true);
   }
   return function () {
+    if (isWrite && this !== top.document) {
+      throw error(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED, this);
+    }
     const args = slice(arguments);
     const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;
     before(args);
@@ -543,7 +439,9 @@ function hookDOMInserters(win) {
       const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
       if (!desc) continue;
       const prop = desc.set ? 'set' : 'value';
-      desc[prop] = getHook(desc[prop], proto === 'Range', func === 'srcdoc');
+      const isRange = proto === 'Range',
+        isWrite = func === 'write' || func === 'writeln';
+      desc[prop] = getHook(desc[prop], isRange, isWrite);
       desc.configurable = true;
       if (prop === 'value') {
         desc.writable = true;
@@ -623,91 +521,78 @@ module.exports = hookEventListenersSetters;
 /***/ ((module) => {
 
 const ERR_MARK_NEW_WINDOW_FAILED = 1;
-const WARN_OPEN_API_LIMITED = 2;
-const WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME = 3;
-const ERR_PROVIDED_CB_IS_NOT_A_FUNCTION = 4;
-const WARN_DECLARATIVE_SHADOWS = 5;
+const ERR_CB_MUST_BE_FUNCTION = 2;
+const ERR_OPEN_JS_SCHEME_BLOCKED = 3;
+const ERR_OPENED_PROP_ACCESS_BLOCKED = 4;
+const ERR_DECLARATIVE_SHADOWS_BLOCKED = 5;
 const ERR_EXTENDING_FRAMABLES_BLOCKED = 6;
-const ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN = 7;
-const WARN_SRCDOC_WITH_CSP_BLOCKED = 8;
+const ERR_BLOB_TYPE_BLOCKED = 7;
+const ERR_HTML_FRAMES_SRCDOC_BLOCKED = 8;
+const ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED = 9;
 const {
-  warn,
-  error
-} = window.console;
-function w(msg, a, b) {
-  let bail;
-  switch (msg) {
-    case WARN_DECLARATIVE_SHADOWS:
-      const html = a;
-      bail = false;
-      warn('SNOW:', 'removing html string representing a declarative shadow:', '\n', `"${html}"`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
-      break;
-    case WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME:
-      const url2 = a,
-        win2 = b;
-      bail = true;
-      warn('SNOW:', bail ? '' : 'NOT', 'blocking open attempt to "javascript:" url:', url2, 'by window: ', win2, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/44#issuecomment-1369687802', '.');
-      break;
-    case WARN_OPEN_API_LIMITED:
-      const property = a,
-        win3 = b;
-      bail = true;
-      warn('SNOW:', 'blocking access to property:', `"${property}"`, 'of opened window: ', win3, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
-      break;
-    case WARN_SRCDOC_WITH_CSP_BLOCKED:
-      const srcdoc = a,
-        csp = b;
-      bail = true;
-      warn('SNOW:', 'blocking srcdoc (below) for trying to inject a static meta csp tag: ', csp, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.', '\n', `srcdoc content: `, '\n', `"${srcdoc}"`);
-      break;
-    default:
-      break;
-  }
-  return bail;
+  Error
+} = globalThis;
+const {
+  from
+} = Array;
+const error = Function.prototype.apply.bind(console.error, console);
+function err(code) {
+  const args = from(arguments);
+  error(args);
+  return new Error(code);
+}
+function generateErrorMessage(code) {
+  return `SNOW ERROR (CODE:${code}):`;
 }
 function e(msg, a, b, c) {
-  let bail;
   switch (msg) {
-    case ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN:
-      const object2 = a,
+    case ERR_BLOB_TYPE_BLOCKED:
+      const object = a,
         kind = b,
         type = c;
-      bail = true;
-      error('SNOW:', `${kind} object:`, object2, `of type "${type}" is not allowed and therefore is blocked`, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.', '\n');
-      break;
+      return err(generateErrorMessage(ERR_BLOB_TYPE_BLOCKED), `blocking ${kind} object:`, object, `of type "${type}" (not in allow list)`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/87#issuecomment-1586868353', '.');
     case ERR_EXTENDING_FRAMABLES_BLOCKED:
       const name = a,
         options = b;
-      bail = true;
-      error('SNOW:', `"${name}"`, 'extending attempt', 'of framable elements such as provided', options, 'is blocked to prevent bypass', '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/56#issuecomment-1374899809', '.', '\n');
-      break;
+      return err(generateErrorMessage(ERR_EXTENDING_FRAMABLES_BLOCKED), `blocking extension attempt ("${name}") of framable elements such as provided`, options, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/56#issuecomment-1374899809', '.');
     case ERR_MARK_NEW_WINDOW_FAILED:
       const win = a,
-        err = b;
-      bail = true;
-      error('SNOW:', 'failed to mark new window:', win, '.', '\n', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', '\n', 'in order to maintain a bulletproof defense mechanism, failing to mark a new window typically causes an infinite loop', '.', '\n', 'error caught:', '\n', err);
-      break;
-    case ERR_PROVIDED_CB_IS_NOT_A_FUNCTION:
+        exception = b;
+      return err(generateErrorMessage(ERR_MARK_NEW_WINDOW_FAILED), 'failed to mark new window:', win, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/33#issuecomment-1239280063', '.', 'in order to maintain a bulletproof defense mechanism, failing to mark a new window typically causes an infinite loop', '.', 'error caught:', exception);
+    case ERR_CB_MUST_BE_FUNCTION:
       const cb = a;
-      bail = true;
-      error('SNOW:', 'first argument must be of type "function", instead got:', cb, '.', '\n', 'therefore, snow bailed and is not applied to the page until this is fixed.');
-      break;
-    default:
-      break;
+      return err(generateErrorMessage(ERR_CB_MUST_BE_FUNCTION), 'first argument must be of type "function", instead got:', cb, '.', 'therefore, snow bailed and is not applied to the page until this is fixed.');
+    case ERR_OPEN_JS_SCHEME_BLOCKED:
+      const url = a,
+        win2 = b;
+      return err(generateErrorMessage(ERR_OPEN_JS_SCHEME_BLOCKED), 'blocking open attempt to "javascript:" url:', url, 'by window: ', win2, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/44#issuecomment-1369687802', '.');
+    case ERR_OPENED_PROP_ACCESS_BLOCKED:
+      const property = a,
+        win3 = b;
+      return err(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED), 'blocking access to property:', `"${property}"`, 'of opened window: ', win3, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/2#issuecomment-1239264255', '.');
+    case ERR_DECLARATIVE_SHADOWS_BLOCKED:
+      const html = a;
+      return err(generateErrorMessage(ERR_DECLARATIVE_SHADOWS_BLOCKED), 'blocking html string that includes a representation of a declarative shadow:', `"${html}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/32#issuecomment-1239273328', '.');
+    case ERR_HTML_FRAMES_SRCDOC_BLOCKED:
+      const html2 = a;
+      return err(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED), 'blocking html string that includes a representation of a framable element with the "srcdoc" attribute:', `"${html2}"`, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
+    case ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED:
+      const document = a;
+      return err(generateErrorMessage(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED), 'blocking document.write\\ln action on a document that is not the top most document:', document, '.', 'if this prevents your application from running correctly, please visit/report at', 'https://github.com/LavaMoat/snow/issues/???', '.');
   }
-  return bail;
 }
 module.exports = {
-  warn: w,
   error: e,
+  generateErrorMessage,
   ERR_MARK_NEW_WINDOW_FAILED,
-  WARN_OPEN_API_LIMITED,
-  WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME,
-  ERR_PROVIDED_CB_IS_NOT_A_FUNCTION,
-  WARN_DECLARATIVE_SHADOWS,
+  ERR_OPENED_PROP_ACCESS_BLOCKED,
+  ERR_OPEN_JS_SCHEME_BLOCKED,
+  ERR_CB_MUST_BE_FUNCTION,
+  ERR_DECLARATIVE_SHADOWS_BLOCKED,
   ERR_EXTENDING_FRAMABLES_BLOCKED,
-  ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN,
-  WARN_SRCDOC_WITH_CSP_BLOCKED
+  ERR_BLOB_TYPE_BLOCKED,
+  ERR_HTML_FRAMES_SRCDOC_BLOCKED,
+  ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED
 };
 
 /***/ }),
@@ -819,7 +704,6 @@ function setup(win) {
   const bag = natives(win);
   const {
     document,
-    URL,
     Proxy,
     Function,
     String,
@@ -1032,8 +916,8 @@ const {
   Object
 } = __webpack_require__(14);
 const {
-  warn,
-  WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME
+  error,
+  ERR_OPEN_JS_SCHEME_BLOCKED
 } = __webpack_require__(312);
 const {
   proxy,
@@ -1054,10 +938,7 @@ function hook(win, native, cb, isWindowProxy) {
     const args = slice(arguments);
     const url = args[0];
     if (stringStartsWith(stringToLowerCase(url + ''), 'javascript')) {
-      const blocked = warn(WARN_OPEN_API_URL_ARG_JAVASCRIPT_SCHEME, url + '', win);
-      if (blocked) {
-        return null;
-      }
+      throw error(ERR_OPEN_JS_SCHEME_BLOCKED, url + '', win);
     }
     const opened = Function.prototype.apply.call(native, this, args);
     if (!opened) {
@@ -1087,8 +968,8 @@ const {
   Map
 } = __webpack_require__(14);
 const {
-  warn,
-  WARN_OPEN_API_LIMITED
+  error,
+  ERR_OPENED_PROP_ACCESS_BLOCKED
 } = __webpack_require__(312);
 const openeds = new Map();
 function getProxyByOpened(opened) {
@@ -1130,10 +1011,7 @@ function proxy(opened) {
           return ret;
         }
         if (Reflect.has(opened, property)) {
-          const blocked = warn(WARN_OPEN_API_LIMITED, property, opened);
-          if (!blocked) {
-            ret = Reflect.get(opened, property);
-          }
+          throw error(ERR_OPENED_PROP_ACCESS_BLOCKED, property, opened);
         }
         return ret;
       },
@@ -1272,16 +1150,13 @@ module.exports = hookTrustedHTMLs;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
-  BLOCKED_BLOB_URL
-} = __webpack_require__(407);
-const {
   Object,
   Array,
   getBlobFileType
 } = __webpack_require__(14);
 const {
   error,
-  ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN
+  ERR_BLOB_TYPE_BLOCKED
 } = __webpack_require__(312);
 const KIND = 'KIND',
   TYPE = 'TYPE';
@@ -1349,22 +1224,20 @@ function hookMediaSource(win) {
 function isBlobArtificial(object) {
   return artificialBlobs.includes(object);
 }
-function isTypeForbidden(object) {
+function assertTypeIsForbidden(object) {
   const kind = object[KIND];
-  if (kind !== BLOB && kind !== FILE) {
-    return false;
+  if (kind === BLOB || kind === FILE) {
+    const type = object[TYPE];
+    if (!allowedTypes.includes(type)) {
+      throw error(ERR_BLOB_TYPE_BLOCKED, object, kind, type);
+    }
   }
-  const type = object[TYPE];
-  if (allowedTypes.includes(type)) {
-    return false;
-  }
-  return error(ERR_BLOB_FILE_URL_OBJECT_TYPE_FORBIDDEN, object, kind, type);
 }
 function hook(win) {
   const native = win.URL.createObjectURL;
   function createObjectURL(object) {
-    if (isBlobArtificial(object) && isTypeForbidden(object)) {
-      return BLOCKED_BLOB_URL;
+    if (isBlobArtificial(object)) {
+      assertTypeIsForbidden(object);
     }
     return native(object);
   }
@@ -1472,6 +1345,10 @@ function canNodeRunQuerySelector(node) {
   const type = nodeType(node);
   return type === Element.prototype.ELEMENT_NODE || type === Element.prototype.DOCUMENT_FRAGMENT_NODE || type === Element.prototype.DOCUMENT_NODE;
 }
+function getDeclarativeShadows(element) {
+  const querySelectorAll = getPrototype(element).prototype.querySelectorAll;
+  return querySelectorAll.call(element, 'template[shadowroot]');
+}
 function getFramesArray(element, includingParent) {
   const frames = new Array();
   if (null === element || typeof element !== 'object') {
@@ -1499,6 +1376,7 @@ function fillArrayUniques(arr, items) {
   return isArrUpdated;
 }
 module.exports = {
+  getDeclarativeShadows,
   makeWindowUtilSetter,
   toArray,
   isTagFramable,
@@ -1516,8 +1394,6 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const {
-  BLOCKED_BLOB_URL,
-  BLOCKED_BLOB_MSG,
   runInNewRealm
 } = __webpack_require__(407);
 const {
@@ -1531,6 +1407,11 @@ const {
   createObjectURL,
   revokeObjectURL
 } = URL;
+const BLOCKED_BLOB_MSG = `
+BLOCKED BY SNOW:
+Creating URL objects is not allowed under Snow protection within Web Workers.
+If this prevents your application from running correctly, please visit/report at https://github.com/LavaMoat/snow/pull/89#issuecomment-1589359673.
+Learn more at https://github.com/LavaMoat/snow/pull/89`;
 function syncGet(url) {
   return runInNewRealm(function (win) {
     let content;
@@ -1548,14 +1429,8 @@ function syncGet(url) {
 function swap(url) {
   if (!blobs.has(url)) {
     const content = syncGet(url);
-    const js = `(function() {
-                Object.defineProperty(URL, 'createObjectURL', {value:() => {
-                    console.log(\`${BLOCKED_BLOB_MSG}\`);
-                    return '${BLOCKED_BLOB_URL}';
-                }})
-            }());
-            
-            ` + content;
+    const prefix = `(function() { Object.defineProperty(URL, 'createObjectURL', { value: () => { throw new Error(\`${BLOCKED_BLOB_MSG}\`) }}) }())`;
+    const js = prefix + '\n\n' + content;
     blobs.set(url, createObjectURL(new Blob([js], {
       type: 'text/javascript'
     })));

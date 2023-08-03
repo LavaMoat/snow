@@ -1,8 +1,9 @@
+const {error, ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED} = require('./log');
 const {protectShadows} = require('./shadow');
 const resetOnloadAttributes = require('./attributes');
 const {getFramesArray, shadows} = require('./utils');
 const {getParentElement, getCommonAncestorContainer, slice, Object, Function} = require('./natives');
-const {handleHTML} = require('./html');
+const {assertHTML} = require('./html');
 const hook = require('./hook');
 
 const map = {
@@ -14,13 +15,14 @@ const map = {
     ShadowRoot: ['innerHTML'],
     HTMLIFrameElement: ['srcdoc'],
 };
+
 const protos = Object.getOwnPropertyNames(map);
 
-function getHook(native, isRange, isSrcDoc) {
+function getHook(native, isRange, isWrite) {
     function before(args) {
         resetOnloadAttributes(args);
         resetOnloadAttributes(shadows);
-        handleHTML(args, isSrcDoc);
+        assertHTML(args);
     }
 
     function after(args, element) {
@@ -31,6 +33,9 @@ function getHook(native, isRange, isSrcDoc) {
     }
 
     return function() {
+        if (isWrite && this !== top.document) {
+            throw error(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED, this);
+        }
         const args = slice(arguments);
         const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;
         before(args);
@@ -49,7 +54,10 @@ function hookDOMInserters(win) {
             const desc = Object.getOwnPropertyDescriptor(win[proto].prototype, func);
             if (!desc) continue;
             const prop = desc.set ? 'set' : 'value';
-            desc[prop] = getHook(desc[prop], proto === 'Range', func === 'srcdoc');
+            const
+                isRange = proto === 'Range',
+                isWrite = func === 'write' || func === 'writeln';
+            desc[prop] = getHook(desc[prop], isRange, isWrite);
             desc.configurable = true;
             if (prop === 'value') {
                 desc.writable = true;

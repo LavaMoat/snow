@@ -1,4 +1,5 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_HTML_FRAMES_SRCDOC_BLOCKED} = require('../src/log');
 
 describe('test numeric indexes overrides', async function () {
     beforeEach(setup);
@@ -7,7 +8,8 @@ describe('test numeric indexes overrides', async function () {
 
     it('should fail to use atob of an iframe that was under sabotage attempt via Object.prototype property n override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 Object.defineProperty(Object.prototype, '0', {
                     get() {
@@ -29,12 +31,13 @@ describe('test numeric indexes overrides', async function () {
                 bypass([fr.contentWindow]);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V');
     });
 
     it('should crash snow via property n override attempt', async function () {
         const result = await browser.executeAsync(function(done) {
-            top.bypass = (wins) => top.TEST_UTILS.bypass(wins, done);
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
             (function(){
                 for (let i = 0; i < 10000; i++) {
                     Object.defineProperty(Object.prototype, i + '', {
@@ -65,6 +68,6 @@ describe('test numeric indexes overrides', async function () {
                 bypass([fr.contentWindow]);
             }());
         });
-        expect(['V']).toContain(result);
+        expect(result).toBe('V');
     });
 });

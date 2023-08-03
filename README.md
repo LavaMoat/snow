@@ -41,7 +41,7 @@ to **non extension javascript with the same privileges as the web app**.
     
 > _Read more about Snow and the motivation behind it [here](https://github.com/lavamoat/snow/wiki/Introducing-Snow)_
 
-## 🚨 IMPORTANT UPDATE 🚨
+## 🚨 IMPORTANT UPDATE 🚨 
 
 Starting Version [2.0.0](https://github.com/LavaMoat/snow/pull/76) Snow officially doesn't support vulnerabilities that
 can be protected against by disallowing `unsafe-inline` completely and by correctly using the `object-src` directive to not allow `self`.

@@ -137,7 +137,7 @@ describe('test shadow DOM', async function () {
                 bypass([{atob: top.myatob || atob, alert: top.myalert || alert}]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe that is attached via declarative shadow DOM through srcdoc and javascript URI', async function () {

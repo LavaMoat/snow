@@ -301,7 +301,7 @@ describe('special cases', () => {
                 setTimeout(top.bypass, 100, [window]);
             }());
         });
-        expect(result).toBe(generateErrorMessage(ERR_HTML_FRAMES_SRCDOC_BLOCKED));
+        expect(result).toBe('V');
     });
 
     it('should fail to use atob of an iframe of javascript: URI created with srcdoc with innerHTML', async function () {

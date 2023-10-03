@@ -4,6 +4,23 @@ const {generateErrorMessage, ERR_HTML_FRAMES_SRCDOC_BLOCKED, ERR_NON_TOP_DOCUMEN
 describe('test HTML injections', async function () {
     beforeEach(setup);
 
+    it('should fail to use atob of an created by srcdoc assignment', async function () {
+        if (global.CONFIG.SKIP_CSP_UNSAFE_INLINE_CHECKS) {
+            this.skip();
+        }
+        const result = await browser.executeAsync(function(done) {
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                let i = document.createElement('iframe');
+                i.srcdoc="<iframe>";
+                document.body.append(i)
+                setTimeout(bypass, 100, [ifr.contentWindow[0], ifr.contentWindow])
+            }());
+        });
+        expect(result).toBe('V,V');
+    });
+
     it('should fail to use atob of an iframe created by srcdoc (before)', async function () {
         if (global.CONFIG.SKIP_CSP_UNSAFE_INLINE_CHECKS) {
             this.skip();

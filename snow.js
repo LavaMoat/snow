@@ -375,7 +375,8 @@ module.exports = snow;
 
 const {
   error,
-  ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED
+  ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED,
+  ERR_HTML_FRAMES_SRCDOC_BLOCKED
 } = __webpack_require__(312);
 const {
   protectShadows
@@ -430,6 +431,11 @@ function getHook(native, isRange, isWrite) {
     return ret;
   };
 }
+function getThrowingHook(errorCode) {
+  return function () {
+    throw error(errorCode, this);
+  };
+}
 function hookDOMInserters(win) {
   for (let i = 0; i < protos.length; i++) {
     const proto = protos[i];
@@ -441,7 +447,11 @@ function hookDOMInserters(win) {
       const prop = desc.set ? 'set' : 'value';
       const isRange = proto === 'Range',
         isWrite = func === 'write' || func === 'writeln';
-      desc[prop] = getHook(desc[prop], isRange, isWrite);
+      if (func === 'srcdoc' && proto === 'HTMLIFrameElement') {
+        desc[prop] = getThrowingHook(ERR_HTML_FRAMES_SRCDOC_BLOCKED);
+      } else {
+        desc[prop] = getHook(desc[prop], isRange, isWrite);
+      }
       desc.configurable = true;
       if (prop === 'value') {
         desc.writable = true;

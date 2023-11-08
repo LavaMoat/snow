@@ -209,4 +209,20 @@ describe('test overrides of native functions', async function () {
         });
         expect(result).toBe('V');
     });
+
+    it('should fail to use atob of an iframe after proto polluting getPrototypeOf', async function () {
+        // reference: https://github.com/LavaMoat/snow/pull/146
+        const result = await browser.executeAsync(function(done) {
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                var proxy = open('#asd', '_top');
+                proxy.constructor.getPrototypeOf.call = () => null;
+                var iframe = document.createElement('iframe');
+                document.body.appendChild(iframe);
+                bypass([iframe.contentWindow]);
+            }());
+        });
+        expect(result).toBe('V');
+    });
 });

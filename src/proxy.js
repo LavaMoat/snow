@@ -14,7 +14,7 @@ function forEachOpened(cb, arg1) {
 }
 
 function proxy(opened) {
-    const target = new Object(null);
+    const target = Object.create(null);
 
     Object.defineProperty(target, 'closed', {
         get: function () {

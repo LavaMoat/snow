@@ -1,4 +1,5 @@
 const {setup} = require('./index');
+const {generateErrorMessage, ERR_OPENED_PROP_ACCESS_BLOCKED} = require("../src/log");
 
 describe('test overrides of native functions', async function () {
     beforeEach(setup);
@@ -223,6 +224,6 @@ describe('test overrides of native functions', async function () {
                 bypass([iframe.contentWindow]);
             }());
         });
-        expect(result).toBe('V');
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
     });
 });

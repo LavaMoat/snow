@@ -9,13 +9,13 @@ const hookWorker = require('./worker');
 const hookTrustedHTMLs = require('./trusteds');
 const {hookShadowDOM} = require('./shadow');
 const {Array, push, addEventListener, getFrameElement} = require('./natives');
-const {makeWindowUtilSetter} = require('./utils');
+const {makeDescriptorSetter} = require('./utils');
 const {isMarked, mark} = require('./mark');
 const {error, ERR_CB_MUST_BE_FUNCTION, ERR_MARK_NEW_WINDOW_FAILED} = require('./log');
 
-const setSnowWindowUtil = makeWindowUtilSetter('SNOW_WINDOW', function(win) { onWin(win) });
-const setSnowFrameUtil = makeWindowUtilSetter('SNOW_FRAME', function(frame) { hook(frame); });
-const setSnowUtil = makeWindowUtilSetter('SNOW', snow);
+const setSnowWindowUtil = makeDescriptorSetter('SNOW_WINDOW', function(win) { onWin(win) });
+const setSnowFrameUtil = makeDescriptorSetter('SNOW_FRAME', function(frame) { hook(frame); });
+const setSnowUtil = makeDescriptorSetter('SNOW', snow);
 
 function shouldHook(win) {
     try {

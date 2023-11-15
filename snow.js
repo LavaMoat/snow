@@ -288,7 +288,7 @@ const {
   getFrameElement
 } = __webpack_require__(14);
 const {
-  makeWindowUtilSetter
+  makeDescriptorSetter
 } = __webpack_require__(648);
 const {
   isMarked,
@@ -299,13 +299,13 @@ const {
   ERR_CB_MUST_BE_FUNCTION,
   ERR_MARK_NEW_WINDOW_FAILED
 } = __webpack_require__(312);
-const setSnowWindowUtil = makeWindowUtilSetter('SNOW_WINDOW', function (win) {
+const setSnowWindowUtil = makeDescriptorSetter('SNOW_WINDOW', function (win) {
   onWin(win);
 });
-const setSnowFrameUtil = makeWindowUtilSetter('SNOW_FRAME', function (frame) {
+const setSnowFrameUtil = makeDescriptorSetter('SNOW_FRAME', function (frame) {
   hook(frame);
 });
-const setSnowUtil = makeWindowUtilSetter('SNOW', snow);
+const setSnowUtil = makeDescriptorSetter('SNOW', snow);
 function shouldHook(win) {
   try {
     const run = !isMarked(win);
@@ -1284,12 +1284,12 @@ function isShadow(node) {
 function isTrustedHTML(node) {
   return trustedHTMLs.includes(node);
 }
-function makeWindowUtilSetter(prop, val) {
+function makeDescriptorSetter(prop, val) {
   const desc = Object.create(null);
   desc.value = val;
-  return function (win) {
-    if (!Object.getOwnPropertyDescriptor(win, prop)) {
-      Object.defineProperty(win, prop, desc);
+  return function (obj) {
+    if (!Object.getOwnPropertyDescriptor(obj, prop)) {
+      Object.defineProperty(obj, prop, desc);
     }
   };
 }
@@ -1377,7 +1377,7 @@ function fillArrayUniques(arr, items) {
 }
 module.exports = {
   getDeclarativeShadows,
-  makeWindowUtilSetter,
+  makeDescriptorSetter,
   toArray,
   isTagFramable,
   getOwnerWindowOfNode,

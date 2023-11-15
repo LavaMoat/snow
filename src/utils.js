@@ -13,12 +13,12 @@ function isTrustedHTML(node) {
     return trustedHTMLs.includes(node);
 }
 
-function makeWindowUtilSetter(prop, val) {
+function makeDescriptorSetter(prop, val) {
     const desc = Object.create(null);
     desc.value = val;
-    return function(win) {
-        if (!Object.getOwnPropertyDescriptor(win, prop)) {
-            Object.defineProperty(win, prop, desc)
+    return function(obj) {
+        if (!Object.getOwnPropertyDescriptor(obj, prop)) {
+            Object.defineProperty(obj, prop, desc)
         }
     };
 }
@@ -131,4 +131,4 @@ function fillArrayUniques(arr, items) {
     return isArrUpdated;
 }
 
-module.exports = {getDeclarativeShadows, makeWindowUtilSetter, toArray, isTagFramable, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows, trustedHTMLs};
+module.exports = {getDeclarativeShadows, makeDescriptorSetter, toArray, isTagFramable, getOwnerWindowOfNode, getContentWindowOfFrame, getFramesArray, getFrameTag, shadows, trustedHTMLs};

@@ -951,8 +951,12 @@ function hook(win, native, cb, isWindowProxy) {
   };
 }
 function hookOpen(win) {
-  win.open = hook(win, win.open, hookMessageEvent, true);
-  win.document.open = hook(win, win.document.open, hookMessageEvent, false);
+  Object.defineProperty(win, 'open', {
+    value: hook(win, win.open, hookMessageEvent, true)
+  });
+  Object.defineProperty(win.Document.prototype, 'open', {
+    value: hook(win, win.document.open, hookMessageEvent, false)
+  });
 }
 module.exports = hookOpen;
 

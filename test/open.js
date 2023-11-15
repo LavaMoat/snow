@@ -122,6 +122,18 @@ describe('window.open API (same origin)', () => {
 describe('document.open API', () => {
     beforeEach(setup);
 
+    it('should fail to use atob of a window that was created via Document.prototype.open API', async function () {
+        const result = await browser.executeAsync(function(done) {
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                const win = Document.prototype.open.call(document, '', '', '');
+                bypass([win]);
+            }());
+        });
+        expect(result).toBe(generateErrorMessage(ERR_OPENED_PROP_ACCESS_BLOCKED));
+    });
+
     it('should fail to use atob of a window that was created via document.open API', async function () {
         const result = await browser.executeAsync(function(done) {
             top.done = done;

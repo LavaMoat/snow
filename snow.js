@@ -1207,6 +1207,7 @@ function hookFile(win) {
   }
   // to pass 'File.prototype.isPrototypeOf(f)' test (https://github.com/LavaMoat/snow/issues/87#issue-1751534810)
   Object.setPrototypeOf(native.prototype, File.prototype);
+  Object.setPrototypeOf(File.prototype, win[BLOB].prototype);
   win[FILE] = File;
   Object.defineProperty(native.prototype, 'constructor', {
     value: File
@@ -1251,8 +1252,8 @@ function hook(win) {
 }
 function hookCreateObjectURL(win) {
   hook(win);
-  hookBlob(win);
   hookFile(win);
+  hookBlob(win);
   hookMediaSource(win);
 }
 module.exports = hookCreateObjectURL;

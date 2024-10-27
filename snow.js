@@ -158,7 +158,8 @@ const {
 const {
   Object,
   getFrameElement,
-  Function
+  Function,
+  isConnected
 } = __webpack_require__(14);
 const {
   forEachOpened
@@ -182,6 +183,9 @@ function findWin(win, frameElement) {
   }
   for (let i = 0; i < shadows.length; i++) {
     const shadow = shadows[i];
+    if (!isConnected(shadow)) {
+      continue;
+    }
     const owner = getOwnerWindowOfNode(shadow);
     if (owner !== win) {
       continue;
@@ -733,6 +737,7 @@ function setup(win) {
     push: Object.getOwnPropertyDescriptor(Array.prototype, 'push').value,
     split: Object.getOwnPropertyDescriptor(String.prototype, 'split').value,
     nodeType: Object.getOwnPropertyDescriptor(Node.prototype, 'nodeType').get,
+    isConnected: Object.getOwnPropertyDescriptor(Node.prototype, 'isConnected').get,
     tagName: Object.getOwnPropertyDescriptor(Element.prototype, 'tagName').get,
     getInnerHTML: Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML').get,
     setInnerHTML: Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML').set,
@@ -777,6 +782,7 @@ function setup(win) {
     push,
     split,
     nodeType,
+    isConnected,
     tagName,
     toString,
     getOnload,
@@ -836,6 +842,9 @@ function setup(win) {
   }
   function nodeType(node) {
     return bag.nodeType.call(node);
+  }
+  function isConnected(node) {
+    return bag.isConnected.call(node);
   }
   function tagName(element) {
     return bag.tagName.call(element);
@@ -1084,12 +1093,13 @@ const {
 } = __webpack_require__(648);
 const {
   Object,
-  Function
+  Function,
+  isConnected
 } = __webpack_require__(14);
 function protectShadows(connectedOnly) {
   for (let i = 0; i < shadows.length; i++) {
     const shadow = shadows[i];
-    if (connectedOnly && !shadow.isConnected) {
+    if (connectedOnly && !isConnected(shadow)) {
       continue;
     }
     const frames = getFramesArray(shadow, false);

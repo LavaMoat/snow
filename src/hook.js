@@ -32,6 +32,9 @@ function findWin(win, frameElement) {
         for (let j = 0; j < frames.length; j++) {
             const frame = frames[j];
             const win = getContentWindowOfFrame(frame);
+            if (win === null) {
+                continue;
+            }
             if (frame === frameElement) {
                 return win;
             }

@@ -1,7 +1,7 @@
 const workaroundChromiumBug = require('./chromium_bug_workaround');
 const {getLength} = require('./common');
 const {shadows, toArray, getFramesArray, getContentWindowOfFrame, getOwnerWindowOfNode} = require('./utils');
-const {Object, getFrameElement, Function} = require('./natives');
+const {Object, getFrameElement, Function, isConnected} = require('./natives');
 const {forEachOpened} = require('./proxy');
 
 function isCrossOrigin(dst, src) {
@@ -24,6 +24,9 @@ function findWin(win, frameElement) {
     }
     for (let i = 0; i < shadows.length; i++) {
         const shadow = shadows[i];
+        if (!isConnected(shadow)) {
+            continue;
+        }
         const owner = getOwnerWindowOfNode(shadow);
         if (owner !== win) {
             continue;
@@ -32,9 +35,6 @@ function findWin(win, frameElement) {
         for (let j = 0; j < frames.length; j++) {
             const frame = frames[j];
             const win = getContentWindowOfFrame(frame);
-            if (win === null) {
-                continue;
-            }
             if (frame === frameElement) {
                 return win;
             }

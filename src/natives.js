@@ -92,6 +92,7 @@ function setup(win) {
         push: Object.getOwnPropertyDescriptor(Array.prototype, 'push').value,
         split: Object.getOwnPropertyDescriptor(String.prototype, 'split').value,
         nodeType: Object.getOwnPropertyDescriptor(Node.prototype, 'nodeType').get,
+        isConnected: Object.getOwnPropertyDescriptor(Node.prototype, 'isConnected').get,
         tagName: Object.getOwnPropertyDescriptor(Element.prototype, 'tagName').get,
         getInnerHTML: Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML').get,
         setInnerHTML: Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML').set,
@@ -137,6 +138,7 @@ function setup(win) {
         push,
         split,
         nodeType,
+        isConnected,
         tagName,
         toString,
         getOnload,
@@ -205,6 +207,10 @@ function setup(win) {
 
     function nodeType(node) {
         return bag.nodeType.call(node);
+    }
+
+    function isConnected(node) {
+        return bag.isConnected.call(node);
     }
 
     function tagName(element) {

@@ -1,11 +1,11 @@
 const hook = require('./hook');
 const {getFramesArray, shadows} = require('./utils');
-const {Object, Function} = require('./natives');
+const {Object, Function, isConnected} = require('./natives');
 
 function protectShadows(connectedOnly) {
     for (let i = 0; i < shadows.length; i++) {
         const shadow = shadows[i];
-        if (connectedOnly && !shadow.isConnected) {
+        if (connectedOnly && !isConnected(shadow)) {
             continue;
         }
         const frames = getFramesArray(shadow, false);

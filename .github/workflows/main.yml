@@ -4,7 +4,7 @@ on: [pull_request]
 jobs:
   test:
     name: CSP=${{ matrix.csp }}
-    runs-on: macos-latest
+    runs-on: macos-14
     strategy:
       matrix:
         csp: ['0', '1']

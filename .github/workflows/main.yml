@@ -6,9 +6,9 @@ jobs:
     name: CSP=${{ matrix.csp }}
     runs-on: macos-14
     strategy:
+      fail-fast: false
       matrix:
-        csp: ['1']
-        # csp: ['0', '1']
+        csp: ['0', '1']
     env:
       CSP: ${{ matrix.csp }}
     steps:

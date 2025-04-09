@@ -66,6 +66,7 @@ exports.config = {
                 '--headless',
                 'disable-gpu'
             ],
+            binary: '/Applications/Firefox.app/Contents/MacOS/firefox'
         },
         acceptInsecureCerts: true
         // If outputDir is provided WebdriverIO can capture driver session logs

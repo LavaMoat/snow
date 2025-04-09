@@ -2,46 +2,23 @@ name: Tests
 on: [pull_request]
 
 jobs:
-  test-with-csp:
-    env:
-      CSP: '1'
-    name: +CSP
+  test:
+    name: CSP=${{ matrix.csp }}
     runs-on: macos-latest
     strategy:
       matrix:
-        node-version: [18.x]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e #v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install Dependencies
-        run: |
-          yarn
-          yarn setup
-      - name: Test Chrome
-        run: yarn build-test-chrome
-      - name: Test FireFox
-        run: yarn build-test-firefox
-      - name: Test Safari
-        run: yarn build-test-safari
-  test-without-csp:
+        csp: ['0', '1']
     env:
-      CSP: '0'
-    name: -CSP
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        node-version: [18.x]
+      CSP: ${{ matrix.csp }}
     steps:
+      - name: log env var used
+        run: echo $CSP
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 20.x
         uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e #v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20.x
       - name: Install Dependencies
         run: |
           yarn

@@ -13,6 +13,14 @@ jobs:
     steps:
       - name: log env var used
         run: echo $CSP
+      - name: Check Firefox installation
+        id: check-firefox
+        run: |
+          which firefox || echo "Firefox not found" && echo "firefox_missing=true" >> $GITHUB_OUTPUT
+      - name: Install Firefox
+        if: steps.check-firefox.outputs.firefox_missing == 'true'
+        run: |
+          brew install --cask firefox
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4
       - name: Use Node.js 20.x

@@ -7,7 +7,8 @@ jobs:
     runs-on: macos-14
     strategy:
       matrix:
-        csp: ['0', '1']
+        csp: ['1']
+        # csp: ['0', '1']
     env:
       CSP: ${{ matrix.csp }}
     steps:

@@ -9,7 +9,7 @@ const hook = require('./hook');
 const map = {
     Range: ['insertNode'],
     DocumentFragment: ['replaceChildren', 'append', 'prepend'],
-    Document: ['replaceChildren', 'append', 'prepend', 'write', 'writeln'],
+    Document: ['replaceChildren', 'append', 'prepend', 'write', 'writeln', 'execCommand'],
     Node: ['appendChild', 'insertBefore', 'replaceChild'],
     Element: ['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'replaceWith', 'insertAdjacentElement', 'append', 'before', 'prepend', 'after', 'replaceChildren'],
     ShadowRoot: ['innerHTML'],

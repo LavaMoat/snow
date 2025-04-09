@@ -41,7 +41,12 @@
     "type": "git",
     "url": "git+https://github.com/lavamoat/snow.git"
   },
-  "keywords": [],
+  "keywords": ["browser", "security", "sameorigin"],
+  "files": [
+    "src",
+    "snow.js",
+    "snow.prod.js"
+  ],
   "author": "",
   "license": "MIT",
   "bugs": {

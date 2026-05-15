@@ -4,20 +4,20 @@ if (typeof SNOW === "function") return;
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 586:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 185
+(module, __unused_webpack_exports, __webpack_require__) {
 
-const hook = __webpack_require__(228);
+const hook = __webpack_require__(179);
 const {
   getFramesArray,
   getFrameTag
-} = __webpack_require__(648);
+} = __webpack_require__(347);
 const {
   getOnload,
   setOnload,
   removeAttribute,
   addEventListener
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 function resetOnloadAttribute(frame) {
   if (!getFrameTag(frame)) {
     return;
@@ -44,10 +44,10 @@ function resetOnloadAttributes(args) {
 }
 module.exports = resetOnloadAttributes;
 
-/***/ }),
+/***/ },
 
-/***/ 750:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 632
+(module, __unused_webpack_exports, __webpack_require__) {
 
 /*
 
@@ -73,16 +73,16 @@ vulnerable and less direct manipulation (see https://github.com/LavaMoat/snow/is
 
 const {
   Object
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 function workaroundChromiumBug(frame) {
   frame && Object.getOwnPropertyDescriptor(frame, '');
 }
 module.exports = workaroundChromiumBug;
 
-/***/ }),
+/***/ },
 
-/***/ 407:
-/***/ ((module) => {
+/***/ 85
+(module) {
 
 const getLength = Object.getOwnPropertyDescriptor(window, 'length').get;
 const getLengthTop = getLength.bind(window);
@@ -102,22 +102,22 @@ module.exports = {
   runInNewRealm
 };
 
-/***/ }),
+/***/ },
 
-/***/ 832:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 210
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   Object,
   Function
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const {
   isTagFramable
-} = __webpack_require__(648);
+} = __webpack_require__(347);
 const {
   error,
   ERR_EXTENDING_FRAMABLES_BLOCKED
-} = __webpack_require__(312);
+} = __webpack_require__(144);
 function getHook(win, native) {
   return function (name, constructor, options) {
     let opts = options;
@@ -139,31 +139,31 @@ function hookCustoms(win) {
 }
 module.exports = hookCustoms;
 
-/***/ }),
+/***/ },
 
-/***/ 228:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 179
+(module, __unused_webpack_exports, __webpack_require__) {
 
-const workaroundChromiumBug = __webpack_require__(750);
+const workaroundChromiumBug = __webpack_require__(632);
 const {
   getLength
-} = __webpack_require__(407);
+} = __webpack_require__(85);
 const {
   shadows,
   toArray,
   getFramesArray,
   getContentWindowOfFrame,
   getOwnerWindowOfNode
-} = __webpack_require__(648);
+} = __webpack_require__(347);
 const {
   Object,
   getFrameElement,
   Function,
   isConnected
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const {
   forEachOpened
-} = __webpack_require__(134);
+} = __webpack_require__(926);
 function isCrossOrigin(dst, src) {
   return Object.getPrototypeOf.call(src, dst) === null;
 }
@@ -227,25 +227,25 @@ function hook(frames) {
 }
 module.exports = hook;
 
-/***/ }),
+/***/ },
 
-/***/ 328:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 49
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   getFramesArray,
   getDeclarativeShadows
-} = __webpack_require__(648);
+} = __webpack_require__(347);
 const {
   document,
   getChildElementCount,
   setInnerHTML
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const {
   error,
   ERR_DECLARATIVE_SHADOWS_BLOCKED,
   ERR_HTML_FRAMES_SRCDOC_BLOCKED
-} = __webpack_require__(312);
+} = __webpack_require__(144);
 function assertHTML(args) {
   for (let i = 0; i < args.length; i++) {
     const template = document.createElement('html');
@@ -268,41 +268,41 @@ module.exports = {
   assertHTML
 };
 
-/***/ }),
+/***/ },
 
-/***/ 352:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 954
+(module, __unused_webpack_exports, __webpack_require__) {
 
-const hook = __webpack_require__(228);
-const hookCreateObjectURL = __webpack_require__(716);
-const hookCustoms = __webpack_require__(832);
-const hookOpen = __webpack_require__(583);
-const hookRequest = __webpack_require__(278);
-const hookEventListenersSetters = __webpack_require__(459);
-const hookDOMInserters = __webpack_require__(58);
-const hookWorker = __webpack_require__(744);
-const hookTrustedHTMLs = __webpack_require__(294);
+const hook = __webpack_require__(179);
+const hookCreateObjectURL = __webpack_require__(851);
+const hookCustoms = __webpack_require__(210);
+const hookOpen = __webpack_require__(988);
+const hookRequest = __webpack_require__(595);
+const hookEventListenersSetters = __webpack_require__(743);
+const hookDOMInserters = __webpack_require__(997);
+const hookWorker = __webpack_require__(354);
+const hookTrustedHTMLs = __webpack_require__(412);
 const {
   hookShadowDOM
-} = __webpack_require__(373);
+} = __webpack_require__(192);
 const {
   Array,
   push,
   addEventListener,
   getFrameElement
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const {
   makeDescriptorSetter
-} = __webpack_require__(648);
+} = __webpack_require__(347);
 const {
   isMarked,
   mark
-} = __webpack_require__(111);
+} = __webpack_require__(601);
 const {
   error,
   ERR_CB_MUST_BE_FUNCTION,
   ERR_MARK_NEW_WINDOW_FAILED
-} = __webpack_require__(312);
+} = __webpack_require__(144);
 const setSnowWindowUtil = makeDescriptorSetter('SNOW_WINDOW', function (win) {
   onWin(win);
 });
@@ -372,34 +372,34 @@ function snow(cb, win) {
 }
 module.exports = snow;
 
-/***/ }),
+/***/ },
 
-/***/ 58:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 997
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   error,
   ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED
-} = __webpack_require__(312);
+} = __webpack_require__(144);
 const {
   protectShadows
-} = __webpack_require__(373);
-const resetOnloadAttributes = __webpack_require__(586);
+} = __webpack_require__(192);
+const resetOnloadAttributes = __webpack_require__(185);
 const {
   getFramesArray,
   shadows
-} = __webpack_require__(648);
+} = __webpack_require__(347);
 const {
   getParentElement,
   getCommonAncestorContainer,
   slice,
   Object,
   Function
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const {
   assertHTML
-} = __webpack_require__(328);
-const hook = __webpack_require__(228);
+} = __webpack_require__(49);
+const hook = __webpack_require__(179);
 const map = {
   Range: ['insertNode'],
   DocumentFragment: ['replaceChildren', 'append', 'prepend'],
@@ -456,20 +456,23 @@ function hookDOMInserters(win) {
 }
 module.exports = hookDOMInserters;
 
-/***/ }),
+/***/ },
 
-/***/ 459:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 743
+(module, __unused_webpack_exports, __webpack_require__) {
 
-const hook = __webpack_require__(228);
+const hook = __webpack_require__(179);
 const {
   removeEventListener,
   addEventListener,
   slice,
-  Map,
+  WeakMap,
   Object
-} = __webpack_require__(14);
-const handlers = new Map();
+} = __webpack_require__(922);
+const handlers = new WeakMap();
+function isValidWeakMapKey(value) {
+  return value && (typeof value === 'object' || typeof value === 'function');
+}
 function fire(that, listener, args) {
   if (listener) {
     if (listener.handleEvent) {
@@ -482,7 +485,7 @@ function fire(that, listener, args) {
 function getAddEventListener(win, event) {
   return function (type, handler, options) {
     let listener = handler;
-    if (type === event) {
+    if (type === event && isValidWeakMapKey(handler)) {
       if (!handlers.has(handler)) {
         handlers.set(handler, function () {
           hook(this);
@@ -498,7 +501,7 @@ function getAddEventListener(win, event) {
 function getRemoveEventListener(win, event) {
   return function (type, handler, options) {
     let listener = handler;
-    if (type === event) {
+    if (type === event && isValidWeakMapKey(handler)) {
       listener = handlers.get(handler);
       handlers.delete(handler);
     }
@@ -519,10 +522,10 @@ function hookEventListenersSetters(win, event) {
 }
 module.exports = hookEventListenersSetters;
 
-/***/ }),
+/***/ },
 
-/***/ 312:
-/***/ ((module) => {
+/***/ 144
+(module) {
 
 const ERR_MARK_NEW_WINDOW_FAILED = 1;
 const ERR_CB_MUST_BE_FUNCTION = 2;
@@ -599,16 +602,16 @@ module.exports = {
   ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED
 };
 
-/***/ }),
+/***/ },
 
-/***/ 111:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 601
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   Map,
   Object,
   Array
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const secret = new Array();
 const wins = new Map();
 function isMarked(win) {
@@ -638,14 +641,14 @@ module.exports = {
   mark
 };
 
-/***/ }),
+/***/ },
 
-/***/ 14:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 922
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   runInNewRealm
-} = __webpack_require__(407);
+} = __webpack_require__(85);
 function natives(win) {
   const {
     EventTarget
@@ -659,6 +662,7 @@ function natives(win) {
       String,
       Function,
       Map,
+      WeakMap,
       Node,
       Document,
       DocumentFragment,
@@ -682,6 +686,7 @@ function natives(win) {
       String,
       Function,
       Map,
+      WeakMap,
       Node,
       Document,
       DocumentFragment,
@@ -712,6 +717,7 @@ function setup(win) {
     Function,
     String,
     Map,
+    WeakMap,
     Node,
     Document,
     DocumentFragment,
@@ -773,6 +779,7 @@ function setup(win) {
     ShadowRoot,
     Array,
     Map,
+    WeakMap,
     getContentWindow,
     stringToLowerCase,
     stringStartsWith,
@@ -912,10 +919,10 @@ function setup(win) {
 }
 module.exports = setup(top);
 
-/***/ }),
+/***/ },
 
-/***/ 583:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 988
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   stringToLowerCase,
@@ -923,15 +930,15 @@ const {
   slice,
   Function,
   Object
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const {
   error,
   ERR_OPEN_JS_SCHEME_BLOCKED
-} = __webpack_require__(312);
+} = __webpack_require__(144);
 const {
   proxy,
   getProxyByOpened
-} = __webpack_require__(134);
+} = __webpack_require__(926);
 function hookMessageEvent(win) {
   const desc = Object.getOwnPropertyDescriptor(win.MessageEvent.prototype, 'source');
   const get = desc.get;
@@ -969,21 +976,21 @@ function hookOpen(win) {
 }
 module.exports = hookOpen;
 
-/***/ }),
+/***/ },
 
-/***/ 134:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 926
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   Object,
   Proxy,
   Reflect,
   Map
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const {
   error,
   ERR_OPENED_PROP_ACCESS_BLOCKED
-} = __webpack_require__(312);
+} = __webpack_require__(144);
 const openeds = new Map();
 function getProxyByOpened(opened) {
   return openeds.get(opened);
@@ -1040,19 +1047,19 @@ module.exports = {
   forEachOpened
 };
 
-/***/ }),
+/***/ },
 
-/***/ 278:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 595
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   Object,
   slice,
   Function
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const {
   proxy
-} = __webpack_require__(134);
+} = __webpack_require__(926);
 function hookDocumentPictureInPicture(win, prop) {
   const desc = Object.getOwnPropertyDescriptor(win[prop].prototype, 'window');
   const get = desc.get;
@@ -1081,21 +1088,21 @@ function hookRequest(win) {
 }
 module.exports = hookRequest;
 
-/***/ }),
+/***/ },
 
-/***/ 373:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 192
+(module, __unused_webpack_exports, __webpack_require__) {
 
-const hook = __webpack_require__(228);
+const hook = __webpack_require__(179);
 const {
   getFramesArray,
   shadows
-} = __webpack_require__(648);
+} = __webpack_require__(347);
 const {
   Object,
   Function,
   isConnected
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 function protectShadows(connectedOnly) {
   for (let i = 0; i < shadows.length; i++) {
     const shadow = shadows[i];
@@ -1126,18 +1133,18 @@ module.exports = {
   protectShadows
 };
 
-/***/ }),
+/***/ },
 
-/***/ 294:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 412
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   trustedHTMLs
-} = __webpack_require__(648);
+} = __webpack_require__(347);
 const {
   Object,
   Function
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 function getHook(win, native) {
   trustedHTMLs.push(win.trustedTypes.emptyHTML);
   return function (a, b) {
@@ -1158,20 +1165,20 @@ function hookTrustedHTMLs(win) {
 }
 module.exports = hookTrustedHTMLs;
 
-/***/ }),
+/***/ },
 
-/***/ 716:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 851
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   Object,
   Array,
   getBlobFileType
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const {
   error,
   ERR_BLOB_TYPE_BLOCKED
-} = __webpack_require__(312);
+} = __webpack_require__(144);
 const KIND = 'KIND',
   TYPE = 'TYPE';
 const BLOB = 'Blob',
@@ -1268,10 +1275,10 @@ function hookCreateObjectURL(win) {
 }
 module.exports = hookCreateObjectURL;
 
-/***/ }),
+/***/ },
 
-/***/ 648:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 347
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   tagName,
@@ -1290,7 +1297,7 @@ const {
   getOwnerDocument,
   stringToLowerCase,
   Object
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const shadows = new Array(),
   trustedHTMLs = new Array();
 function isShadow(node) {
@@ -1403,20 +1410,20 @@ module.exports = {
   trustedHTMLs
 };
 
-/***/ }),
+/***/ },
 
-/***/ 744:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 354
+(module, __unused_webpack_exports, __webpack_require__) {
 
 const {
   runInNewRealm
-} = __webpack_require__(407);
+} = __webpack_require__(85);
 const {
   Map,
   toString,
   stringStartsWith,
   Blob
-} = __webpack_require__(14);
+} = __webpack_require__(922);
 const blobs = new Map();
 const {
   createObjectURL,
@@ -1478,7 +1485,7 @@ function hookWorker(win) {
 }
 module.exports = hookWorker;
 
-/***/ })
+/***/ }
 
 /******/ 	});
 /************************************************************************/
@@ -1537,11 +1544,10 @@ module.exports = hookWorker;
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+// This entry needs to be wrapped in an IIFE because it needs to be in strict mode.
 (() => {
 "use strict";
-/* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(352);
+/* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(954);
 /* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_src_index__WEBPACK_IMPORTED_MODULE_0__);
 
 (function (win) {

@@ -1,7 +1,11 @@
 const hook = require('./hook');
-const {removeEventListener, addEventListener, slice, Map, Object} = require('./natives');
+const {removeEventListener, addEventListener, slice, WeakMap, Object} = require('./natives');
 
-const handlers = new Map();
+const handlers = new WeakMap();
+
+function isValidWeakMapKey(value) {
+    return value && (typeof value === 'object' || typeof value === 'function');
+}
 
 function fire(that, listener, args) {
     if (listener) {
@@ -17,7 +21,7 @@ function fire(that, listener, args) {
 function getAddEventListener(win, event) {
     return function(type, handler, options) {
         let listener = handler;
-        if (type === event) {
+        if (type === event && isValidWeakMapKey(handler)) {
             if (!handlers.has(handler)) {
                 handlers.set(handler, function () {
                     hook(this);
@@ -34,7 +38,7 @@ function getAddEventListener(win, event) {
 function getRemoveEventListener(win, event) {
     return function(type, handler, options) {
         let listener = handler;
-        if (type === event) {
+        if (type === event && isValidWeakMapKey(handler)) {
             listener = handlers.get(handler);
             handlers.delete(handler);
         }

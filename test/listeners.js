@@ -62,6 +62,39 @@ describe('test listeners', async function () {
         expect(result).toBe('load event not called');
     });
 
+    it('should support object load event listeners', async function () {
+        const result = await browser.executeAsync(function(done) {
+            top.done = done;
+            top.bypass = (wins) => done(wins.map(win => (win && win.atob ? win : top).atob('WA==')).join(','));
+            (function(){
+                const ifr = document.createElement('iframe');
+                let count = 0;
+                const cb = {
+                    handleEvent: function () {
+                        count += this === cb ? 1 : 100;
+                    },
+                };
+                ifr.addEventListener('load', cb);
+                testdiv.appendChild(ifr);
+                setTimeout(() => done(count));
+            }());
+        });
+        expect(result).toBe(global.BROWSER === 'FIREFOX' ? 0 : 1);
+    });
+
+    it('should pass through null load event listeners', async function () {
+        const result = await browser.executeAsync(function(done) {
+            top.done = done;
+            (function(){
+                const ifr = document.createElement('iframe');
+                ifr.addEventListener('load', null);
+                ifr.removeEventListener('load', null);
+                done('null listener did not throw');
+            }());
+        });
+        expect(result).toBe('null listener did not throw');
+    });
+
     it('should successfully add a load event listener more than once when options are different', async function () {
         const result = await browser.executeAsync(function(done) {
             top.done = done;

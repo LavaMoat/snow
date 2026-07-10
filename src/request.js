@@ -26,10 +26,18 @@ function hook(win, native, cb) {
 }
 
 function hookRequest(win) {
-    if (!win?.documentPictureInPicture?.requestWindow) {
+    // Reach requestWindow through the interface object's prototype rather
+    // than win.documentPictureInPicture: the attribute getter lazily
+    // instantiates a per-window DocumentPictureInPicture, and on Firefox
+    // (which shipped the API in 151) the instance's preserved wrapper pins
+    // the entire window realm after the window closes, leaking every
+    // protected window's document. Prototype access does not instantiate,
+    // and instance method lookup falls through to the patched prototype.
+    const proto = win?.DocumentPictureInPicture?.prototype;
+    if (!proto?.requestWindow) {
         return;
     }
-    win.documentPictureInPicture.requestWindow = hook(win, win.documentPictureInPicture.requestWindow, hookDocumentPictureInPicture);
+    proto.requestWindow = hook(win, proto.requestWindow, hookDocumentPictureInPicture);
 }
 
 module.exports = hookRequest;

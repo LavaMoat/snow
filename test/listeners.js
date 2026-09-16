@@ -90,4 +90,109 @@ describe('test listeners', async function () {
         });
         expect(result).toBe(global.BROWSER === 'FIREFOX' ? 0 : 2);
     });
+
+    it('preserves the receiver and event for function listeners', async function () {
+        const result = await browser.execute(function() {
+            const target = document.createElement('img');
+            const event = new Event('load');
+            let correct = false;
+            target.addEventListener('load', function(received) {
+                correct = this === target && received === event;
+            });
+            target.dispatchEvent(event);
+            return correct;
+        });
+        expect(result).toBe(true);
+    });
+
+    it('supports object listeners with the object as handleEvent receiver', async function () {
+        const result = await browser.execute(function() {
+            const target = document.createElement('img');
+            let calls = 0;
+            const handler = {
+                handleEvent() {
+                    calls += this === handler ? 1 : 100;
+                },
+            };
+            target.addEventListener('load', handler);
+            target.addEventListener('load', handler);
+            target.dispatchEvent(new Event('load'));
+            target.removeEventListener('load', handler);
+            target.dispatchEvent(new Event('load'));
+            return calls;
+        });
+        expect(result).toBe(1);
+    });
+
+    it('passes null and undefined listeners through without throwing', async function () {
+        const result = await browser.execute(function() {
+            const target = document.createElement('img');
+            for (const handler of [null, undefined]) {
+                target.addEventListener('load', handler);
+                target.removeEventListener('load', handler);
+            }
+            return true;
+        });
+        expect(result).toBe(true);
+    });
+
+    it('preserves native rejection of primitive listeners', async function () {
+        const result = await browser.execute(function() {
+            const target = document.createElement('img');
+            return [false, 0, 'listener', 0n, Symbol(), Symbol.for('listener')].every(handler =>
+                ['addEventListener', 'removeEventListener'].every(method => {
+                    try {
+                        target[method]('load', handler);
+                        return false;
+                    } catch (error) {
+                        return error instanceof TypeError;
+                    }
+                })
+            );
+        });
+        expect(result).toBe(true);
+    });
+
+    it('preserves once and AbortSignal behavior', async function () {
+        const result = await browser.execute(function() {
+            const target = document.createElement('img');
+            const controller = new AbortController();
+            let onceCalls = 0;
+            let signalCalls = 0;
+            target.addEventListener('load', () => onceCalls++, {once: true});
+            target.addEventListener('load', () => signalCalls++, {signal: controller.signal});
+            target.dispatchEvent(new Event('load'));
+            controller.abort();
+            target.dispatchEvent(new Event('load'));
+            return [onceCalls, signalCalls];
+        });
+        expect(result).toEqual([1, 1]);
+    });
+
+
+    it('does not retain detached targets through their bound load listeners', async function () {
+        // Forced collection is only exposed through ChromeDriver's CDP bridge.
+        if (global.BROWSER !== 'CHROME') {
+            this.skip();
+        }
+        await browser.execute(function() {
+            window.listenerCacheRefs = [];
+            for (let i = 0; i < 30; i++) {
+                const target = document.createElement('img');
+                const handler = function() { return this.tagName; }.bind(target);
+                target.addEventListener('load', handler);
+                testdiv.appendChild(target);
+                target.remove();
+                window.listenerCacheRefs.push(new WeakRef(target), new WeakRef(handler));
+            }
+        });
+        // Separate protocol calls ensure the WeakRefs' creation job has ended.
+        await browser.sendCommand('HeapProfiler.collectGarbage', {});
+        await browser.sendCommand('HeapProfiler.collectGarbage', {});
+        const remaining = await browser.execute(function() {
+            return window.listenerCacheRefs.filter(ref => ref.deref() !== undefined).length;
+        });
+        expect(remaining).toBe(0);
+    });
+
 });

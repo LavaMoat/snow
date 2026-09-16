@@ -195,4 +195,53 @@ describe('test listeners', async function () {
         expect(remaining).toBe(0);
     });
 
+
+    it('removes a shared listener from multiple targets', async function () {
+        const result = await browser.execute(function() {
+            const first = document.createElement('img');
+            const second = document.createElement('img');
+            let calls = 0;
+            const handler = () => calls++;
+            first.addEventListener('load', handler);
+            second.addEventListener('load', handler);
+            first.removeEventListener('load', handler);
+            second.removeEventListener('load', handler);
+            first.dispatchEvent(new Event('load'));
+            second.dispatchEvent(new Event('load'));
+            return calls;
+        });
+        expect(result).toBe(0);
+    });
+
+    it('removes both capture registrations of a shared listener', async function () {
+        const result = await browser.execute(function() {
+            const target = document.createElement('img');
+            let calls = 0;
+            const handler = () => calls++;
+            target.addEventListener('load', handler, true);
+            target.addEventListener('load', handler, false);
+            target.removeEventListener('load', handler, true);
+            target.removeEventListener('load', handler, false);
+            target.dispatchEvent(new Event('load'));
+            return calls;
+        });
+        expect(result).toBe(0);
+    });
+
+    it('preserves wrapper identity after a removal that matches no registration', async function () {
+        const result = await browser.execute(function() {
+            const target = document.createElement('img');
+            let calls = 0;
+            const handler = () => calls++;
+            target.addEventListener('load', handler, true);
+            target.removeEventListener('load', handler, false);
+            target.addEventListener('load', handler, true);
+            target.dispatchEvent(new Event('load'));
+            target.removeEventListener('load', handler, true);
+            target.dispatchEvent(new Event('load'));
+            return calls;
+        });
+        expect(result).toBe(1);
+    });
+
 });

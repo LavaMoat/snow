@@ -55,7 +55,11 @@ function getRemoveEventListener(win, event) {
         // invalid primitives.
         if (type === event && isListenerObject(handler)) {
             listener = handlers.get(handler);
-            handlers.delete(handler);
+            // The same handler function/object can be registered on multiple
+            // elements, or with different capture values, so we don't delete its
+            // cached wrapper, as we may need it to remove another registration
+            // later. The WeakMap entry for it will be garbage-collected once the
+            // handler is no longer reachable anyway.
         }
         return removeEventListener(this || win, type, listener, options);
     }

@@ -1,7 +1,20 @@
 const hook = require('./hook');
-const {removeEventListener, addEventListener, slice, Map, Object} = require('./natives');
+const {removeEventListener, addEventListener, slice, WeakMap, Object} = require('./natives');
 
-const handlers = new Map();
+// A listener can hold references to DOM nodes. Use weak keys so this cache
+// does not keep the listener and those nodes alive after they are no longer used.
+const handlers = new WeakMap();
+
+function isListenerObject(listener) {
+    // The pristine Object constructor returns objects unchanged, including
+    // functions, bound functions, proxies, and objects from other windows.
+    // It also handles document.all, which is an object even though typeof
+    // reports 'undefined'. Null, undefined, and other primitives produce a
+    // different object, so they pass through to the browser unchanged.
+    // Symbols must pass through too: some are valid WeakMap keys, but none
+    // are valid listener arguments.
+    return Object(listener) === listener;
+}
 
 function fire(that, listener, args) {
     if (listener) {
@@ -17,7 +30,10 @@ function fire(that, listener, args) {
 function getAddEventListener(win, event) {
     return function(type, handler, options) {
         let listener = handler;
-        if (type === event) {
+        // Only functions and objects can be listener keys in this WeakMap. Pass
+        // null, undefined, and primitives through so the browser handles them:
+        // null/undefined are ignored; invalid primitives throw a TypeError.
+        if (type === event && isListenerObject(handler)) {
             if (!handlers.has(handler)) {
                 handlers.set(handler, function () {
                     hook(this);
@@ -34,9 +50,16 @@ function getAddEventListener(win, event) {
 function getRemoveEventListener(win, event) {
     return function(type, handler, options) {
         let listener = handler;
-        if (type === event) {
+        // Pass non-object handlers through unchanged. Looking them up would
+        // replace them with undefined and hide the browser's TypeError for
+        // invalid primitives.
+        if (type === event && isListenerObject(handler)) {
             listener = handlers.get(handler);
-            handlers.delete(handler);
+            // The same handler function/object can be registered on multiple
+            // elements, or with different capture values, so we don't delete its
+            // cached wrapper, as we may need it to remove another registration
+            // later. The WeakMap entry for it will be garbage-collected once the
+            // handler is no longer reachable anyway.
         }
         return removeEventListener(this || win, type, listener, options);
     }

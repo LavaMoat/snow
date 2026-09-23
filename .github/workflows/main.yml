@@ -13,6 +13,10 @@ jobs:
   test-csp1:
     name: CSP ENABLED ${{ matrix.browser }}${{ matrix.required && ' (required)' || ' (informative)' }}
     runs-on: macos-15
+    # cancel any in-progress run of this job for the same branch/PR when a new one starts
+    concurrency:
+      group: ${{ github.workflow }}-test-csp1-${{ github.ref }}
+      cancel-in-progress: true
     continue-on-error: ${{ !matrix.required }}
     strategy:
       fail-fast: false

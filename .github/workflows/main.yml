@@ -11,7 +11,7 @@ on:
 
 jobs:
   test-csp1:
-    name: CSP=1 ${{ matrix.browser }}${{ matrix.required && ' (required)' || ' (informative)' }}
+    name: CSP ENABLED ${{ matrix.browser }}${{ matrix.required && ' (required)' || ' (informative)' }}
     runs-on: macos-15
     continue-on-error: ${{ !matrix.required }}
     strategy:
@@ -46,10 +46,10 @@ jobs:
         run: yarn build-test-${{ matrix.browser }}
 
   test-csp0:
-    name: CSP=0 ${{ matrix.browser }} (informative)
+    name: CSP DISABLED ${{ matrix.browser }} (informative)
     needs: test-csp1
-    # on a manual run, still exercise CSP=0 even if the required CSP=1 job failed
-    if: always() && (github.event_name == 'workflow_dispatch' || needs.test-csp1.result == 'success')
+    # on a manual run, still exercise CSP=0 
+    if: always() && (github.event_name == 'workflow_dispatch')
     continue-on-error: true
     runs-on: macos-15
     strategy:

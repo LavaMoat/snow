@@ -1,6 +1,11 @@
 name: Tests
 on: [pull_request]
 
+## TODO
+# make only CSP=1 test required, CSP=0 is informative, don't run it if CSP=1 failed
+# update runs-on macos version
+
+
 jobs:
   test:
     name: CSP=${{ matrix.csp }}

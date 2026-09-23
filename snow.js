@@ -395,6 +395,7 @@ const {
   getParentElement,
   getCommonAncestorContainer,
   slice,
+  stringToLowerCase,
   Object,
   Function
 } = __webpack_require__(922);
@@ -407,12 +408,18 @@ const map = {
   DocumentFragment: ['replaceChildren', 'append', 'prepend'],
   Document: ['replaceChildren', 'append', 'prepend', 'write', 'writeln', 'execCommand'],
   Node: ['appendChild', 'insertBefore', 'replaceChild'],
-  Element: ['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'replaceWith', 'insertAdjacentElement', 'append', 'before', 'prepend', 'after', 'replaceChildren'],
+  Element: ['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'replaceWith', 'insertAdjacentElement', 'append', 'before', 'prepend', 'after', 'replaceChildren', 'setAttribute'],
   ShadowRoot: ['innerHTML'],
   HTMLIFrameElement: ['srcdoc']
 };
 const protos = Object.getOwnPropertyNames(map);
-function getHook(native, isRange, isWrite) {
+
+// a frame already connected/marked gets a brand-new global object on re-navigation (e.g. re-assigning
+// srcdoc), which drops SNOW's marking; the `load` event fires only after the new document's own
+// scripts already ran, so re-marking after the fact is always too late. instead, this is prepended to
+// srcdoc content so the browser's own HTML parser guarantees it runs before any of that content's scripts.
+const SRCDOC_BOOTSTRAP = '<script>top.SNOW_WINDOW(window)</script>';
+function getHook(native, isRange, isWrite, isSrcdoc, isSrcdocAttr) {
   function before(args) {
     resetOnloadAttributes(args);
     resetOnloadAttributes(shadows);
@@ -429,10 +436,18 @@ function getHook(native, isRange, isWrite) {
       throw error(ERR_NON_TOP_DOCUMENT_WRITE_BLOCKED, this);
     }
     const args = slice(arguments);
+    if (isSrcdocAttr && stringToLowerCase(args[0] + '') !== 'srcdoc') {
+      return Function.prototype.apply.call(native, this, args);
+    }
+    const htmlArgIndex = isSrcdocAttr ? 1 : 0;
+    if ((isSrcdoc || isSrcdocAttr) && typeof args[htmlArgIndex] === 'string') {
+      args[htmlArgIndex] = SRCDOC_BOOTSTRAP + args[htmlArgIndex];
+    }
+    const htmlArgs = isSrcdocAttr ? [args[htmlArgIndex]] : args;
     const element = isRange ? getCommonAncestorContainer(this) : getParentElement(this) || this;
-    before(args);
+    before(htmlArgs);
     const ret = Function.prototype.apply.call(native, this, args);
-    after(args, element);
+    after(htmlArgs, element);
     return ret;
   };
 }
@@ -446,8 +461,10 @@ function hookDOMInserters(win) {
       if (!desc) continue;
       const prop = desc.set ? 'set' : 'value';
       const isRange = proto === 'Range',
-        isWrite = func === 'write' || func === 'writeln';
-      desc[prop] = getHook(desc[prop], isRange, isWrite);
+        isWrite = func === 'write' || func === 'writeln',
+        isSrcdoc = proto === 'HTMLIFrameElement' && func === 'srcdoc',
+        isSrcdocAttr = func === 'setAttribute';
+      desc[prop] = getHook(desc[prop], isRange, isWrite, isSrcdoc, isSrcdocAttr);
       desc.configurable = true;
       if (prop === 'value') {
         desc.writable = true;

@@ -1,40 +1,78 @@
 name: Tests
-on: [pull_request]
+on:
+  pull_request:
+  workflow_dispatch:
+
+# Only browsers marked `required: true` in the test-csp1 matrix below are required checks.
+# Every other matrix entry in both jobs sets continue-on-error, which makes GitHub report its
+# outcome as "success" for branch-protection purposes even if its steps actually fail — so a red
+# Firefox/Safari or CSP=0 run never blocks merging, while a red required CSP=1 run genuinely fails
+# the check. To make another browser mandatory, flip its `required` flag in the matrix below.
 
 jobs:
-  test:
-    name: CSP=${{ matrix.csp }}
-    runs-on: macos-14
+  test-csp1:
+    name: CSP=1 ${{ matrix.browser }}${{ matrix.required && ' (required)' || ' (informative)' }}
+    runs-on: macos-15
+    continue-on-error: ${{ !matrix.required }}
     strategy:
       fail-fast: false
       matrix:
-        csp: ['0', '1']
+        include:
+          - browser: chrome
+            required: true
+          - browser: firefox
+            required: false
+          - browser: safari
+            required: false
     env:
-      CSP: ${{ matrix.csp }}
+      CSP: '1'
     steps:
       - name: log env var used
         run: echo $CSP
-      - name: Check Firefox installation
-        id: check-firefox
-        run: |
-          which firefox || echo "Firefox not found" && echo "firefox_missing=true" >> $GITHUB_OUTPUT
-      - name: Install Firefox
-        if: steps.check-firefox.outputs.firefox_missing == 'true'
-        run: |
-          brew install --cask firefox
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4
-      - name: Use Node.js 20.x
+      - name: Install Firefox
+        if: matrix.browser == 'firefox'
+        uses: ./.github/actions/install-firefox
+      - name: Use Node.js 24.x
         uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e #v4
         with:
-          node-version: 20.x
+          node-version: 24.x
       - name: Install Dependencies
         run: |
           yarn
           yarn setup
-      - name: Test Chrome
-        run: yarn build-test-chrome
-      - name: Test FireFox
-        run: yarn build-test-firefox
-      - name: Test Safari
-        run: yarn build-test-safari
+      - name: Test ${{ matrix.browser }}
+        run: yarn build-test-${{ matrix.browser }}
+
+  test-csp0:
+    name: CSP=0 ${{ matrix.browser }} (informative)
+    needs: test-csp1
+    # on a manual run, still exercise CSP=0 even if the required CSP=1 job failed
+    if: always() && (github.event_name == 'workflow_dispatch' || needs.test-csp1.result == 'success')
+    continue-on-error: true
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox, safari]
+    env:
+      CSP: '0'
+    steps:
+      - name: log env var used
+        run: echo $CSP
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4
+      - name: Install Firefox
+        if: matrix.browser == 'firefox'
+        uses: ./.github/actions/install-firefox
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e #v4
+        with:
+          node-version: 24.x
+      - name: Install Dependencies
+        run: |
+          yarn
+          yarn setup
+      - name: Test ${{ matrix.browser }}
+        run: yarn build-test-${{ matrix.browser }}

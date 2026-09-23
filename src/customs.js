@@ -16,11 +16,15 @@ function getHook(win, native) {
 }
 
 function hookCustoms(win) {
-    const desc = Object.getOwnPropertyDescriptor(win.CustomElementRegistry.prototype, 'define');
+    // some engines expose "define" as an own property of customElements instead of on the prototype
+    const target = Object.getOwnPropertyDescriptor(win.customElements, 'define')
+        ? win.customElements
+        : win.CustomElementRegistry.prototype;
+    const desc = Object.getOwnPropertyDescriptor(target, 'define');
     desc.configurable = desc.writable = true;
     const val = desc.value;
     desc.value = getHook(win, val);
-    Object.defineProperty(win.CustomElementRegistry.prototype, 'define', desc);
+    Object.defineProperty(target, 'define', desc);
 }
 
 module.exports = hookCustoms;

@@ -11,11 +11,16 @@ function isCrossOrigin(dst, src) {
 function findWin(win, frameElement) {
     const length = Function.prototype.call.call(getLength, win);
     for (let i = 0; i < length; i++) {
-        if (isCrossOrigin(win[i], win)) {
-            continue;
-        }
+        // match the frame element first, before the cross-origin check: this is spec-safe
+        // regardless of origin (it just returns null for genuinely cross-origin frames, it
+        // doesn't throw), and it avoids skipping frames that isCrossOrigin misclassifies as
+        // cross-origin (observed on Firefox for blob:/file: URL iframes, which are really
+        // same-origin but the prototype-null heuristic below flags them as cross-origin).
         if (getFrameElement(win[i]) === frameElement) {
             return win[i];
+        }
+        if (isCrossOrigin(win[i], win)) {
+            continue;
         }
         const found = findWin(win[i], frameElement);
         if (found) {

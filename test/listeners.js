@@ -37,7 +37,11 @@ describe('test listeners', async function () {
                 setTimeout(() => done(count));
             }());
         });
-        expect(result).toBe(global.BROWSER === 'FIREFOX' ? 0 : 1);
+        // old Firefox versions used to fire the zero-delay setTimeout before the blank iframe's
+        // 'load' event, yielding 0 here; confirmed (2026-09-23) that current Firefox now matches
+        // Chrome/Safari exactly, so the FIREFOX-specific branch below is obsolete.
+        // expect(result).toBe(global.BROWSER === 'FIREFOX' ? 0 : 1);
+        expect(result).toBe(1);
     });
 
     it('should successfully remove a load event listener', async function () {
@@ -88,6 +92,10 @@ describe('test listeners', async function () {
                 setTimeout(() => done(count));
             }());
         });
-        expect(result).toBe(global.BROWSER === 'FIREFOX' ? 0 : 2);
+        // old Firefox versions used to fire the zero-delay setTimeout before the blank iframe's
+        // 'load' event, yielding 0 here; confirmed (2026-09-23) that current Firefox now matches
+        // Chrome/Safari exactly, so the FIREFOX-specific branch below is obsolete.
+        // expect(result).toBe(global.BROWSER === 'FIREFOX' ? 0 : 2);
+        expect(result).toBe(2);
     });
 });

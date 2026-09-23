@@ -1,0 +1,15 @@
+name: 'Install Firefox if missing'
+description: 'Checks whether Firefox is already installed and installs it via Homebrew if not'
+runs:
+  using: composite
+  steps:
+    - name: Check Firefox installation
+      id: check-firefox
+      shell: bash
+      run: |
+        which firefox || echo "Firefox not found" && echo "firefox_missing=true" >> $GITHUB_OUTPUT
+    - name: Install Firefox
+      if: steps.check-firefox.outputs.firefox_missing == 'true'
+      shell: bash
+      run: |
+        brew install --cask firefox

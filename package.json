@@ -55,7 +55,10 @@
   "homepage": "https://lavamoat.github.io/snow/",
   "lavamoat": {
     "allowScripts": {
-      "@lavamoat/preinstall-always-fail": false
+      "@lavamoat/preinstall-always-fail": false,
+      "@wdio/cli>@wdio/utils>edgedriver": false,
+      "@wdio/cli>@wdio/utils>geckodriver": true,
+      "@wdio/cli>tsx>esbuild": false
     }
   }
 }

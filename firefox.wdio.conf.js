@@ -1,3 +1,15 @@
+const fs = require('fs');
+
+// Prefer an existing system Firefox install over WebdriverIO's auto-download,
+// since the downloaded nightly build can be missing system libraries (e.g. libgtk-3)
+// in minimal/containerized environments.
+function findFirefoxBinary() {
+    const candidates = process.platform === 'darwin'
+        ? ['/Applications/Firefox.app/Contents/MacOS/firefox']
+        : ['/usr/bin/firefox', '/usr/bin/firefox-esr'];
+    return candidates.find(path => fs.existsSync(path));
+}
+
 global.BROWSER = 'FIREFOX';
 exports.config = {
     //
@@ -66,7 +78,8 @@ exports.config = {
                 '--headless',
                 'disable-gpu'
             ],
-            binary: '/Applications/Firefox.app/Contents/MacOS/firefox'
+            // undefined when no known install is found, falls back to WebdriverIO's auto-download
+            binary: findFirefoxBinary()
         },
         acceptInsecureCerts: true
         // If outputDir is provided WebdriverIO can capture driver session logs
@@ -121,9 +134,9 @@ exports.config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    services: [
-        ['geckodriver']
-    ],
+    // As of WebdriverIO v8.14+ the matching geckodriver binary is downloaded
+    // and started automatically, so no service/driver package pinning is needed.
+    services: [],
     
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
